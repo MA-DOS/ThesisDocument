@@ -1,0 +1,43 @@
+name: Release
+
+on:
+  push:
+    branches:
+    - main
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run semantic-release
+      id: semantic_release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: npx semantic-release
+
+    - name: Upload thesis PDF as release asset
+      if: success() && steps.semantic_release.outputs.nextRelease.version != ''
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.semantic_release.outputs.nextRelease.upload_url }}
+        asset_path: ./thesis.pdf
+        asset_name: thesis.pdf
+        asset_content_type: application/pdf
