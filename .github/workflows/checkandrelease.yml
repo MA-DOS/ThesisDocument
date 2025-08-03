@@ -32,14 +32,3 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: npx semantic-release
-
-    - name: Upload thesis PDF as release asset
-      if: success() && steps.semantic_release.outputs.nextRelease.version != ''
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.semantic_release.outputs.nextRelease.upload_url }}
-        asset_path: ./thesis.pdf
-        asset_name: thesis.pdf
-        asset_content_type: application/pdf
