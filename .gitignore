@@ -1,5 +1,89 @@
-.vscode/
-node_modules/
+# System
+.DS_Store
+.dropbox
+~$*
+Icon?
+
+# ACM
+comment.cut
+
+# macOS
+
+# General
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Icon must end with two \r
+Icon
+
+# Thumbnails
+._*
+
+# Files that might appear in the root of a volume
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Windows
+
+# Windows thumbnail cache files
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+
+# Dump file
+*.stackdump
+
+# Folder config file
+[Dd]esktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# Windows Installer files
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+
+# Windows shortcuts
+*.lnk
+
+# Microsoft Office
+*.tmp
+
+# Word temporary
+~$*.doc*
+
+# Word Auto Backup File
+Backup of *.doc*
+
+# Excel temporary
+~$*.xls*
+
+# Excel Backup File
+*.xlk
+
+# PowerPoint temporary
+~$*.ppt*
+
+# Visio autosave temporary files
+*.~vsd*
+
 ## Core latex/pdflatex auxiliary files:
 *.aux
 *.lof
@@ -41,8 +125,6 @@ node_modules/
 *.synctex.gz
 *.synctex.gz(busy)
 *.pdfsync
-*.rubbercache
-rubber.cache
 
 ## Build tool directories for auxiliary files
 # latexrun
@@ -141,9 +223,6 @@ acs-*.bib
 *.lg
 *.trc
 *.xref
-
-# hypdoc
-*.hd
 
 # hyperref
 *.brf
@@ -306,3 +385,6 @@ TSWLatexianTemp*
 # option is specified. Footnotes are the stored in a file with suffix Notes.bib.
 # Uncomment the next line to have this generated file ignored.
 #*Notes.bib
+
+node_modules
+.vscode

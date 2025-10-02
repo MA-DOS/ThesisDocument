@@ -1,50 +1,122 @@
-\documentclass[a4paper]{article}
+% This thesis template is based on the personal template of Felix Moebius. Thanks, Felix!
+% It has been extended and modified by Tobias Pfandzelter at the Scalable Software Systems group of TU Berlin.
+% It is licensed under the terms of the MIT license, meaning you are free to use it however you see fit but we accept no liability.
+% Good luck writing your thesis!
 
-\usepackage{url}
+\documentclass[a4paper, 11pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{fix-cm}
+
+\usepackage[a4paper, margin=3cm]{geometry}
+\usepackage[titletoc, title]{appendix}
+
+\usepackage{color}
+\usepackage{booktabs}
 \usepackage[all]{nowidow}
+\usepackage[dvipsnames]{xcolor}
+\usepackage[hidelinks]{hyperref}
+\usepackage{acronym}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{titlesec}
+\usepackage{csquotes}
 
-\usepackage{xcolor}
-\usepackage[colorlinks=true,colorlinks,
-linkcolor=purple,
-citecolor=purple,
-urlcolor=blue,
-filecolor=blue]{hyperref}
-\usepackage[capitalise]{cleveref}
+\usepackage{transparent}
+\usepackage{eso-pic}
+\usepackage[section]{placeins}
+\usepackage{setspace}
+\usepackage{parskip}
+\usepackage{subcaption}
 
-\usepackage[maxbibnames=99, defernumbers=true, backend=bibtex, citestyle=numeric-comp, url=true, doi=false, isbn=false, giveninits=true, sortcites=true]{biblatex}
+\renewcommand\thefigure{%
+\thesection.\arabic{figure}}
+\renewcommand\thesubfigure{%
+\thesection.\arabic{figure}.\arabic{subfigure}}
+\renewcommand\thetable{%
+\thesection.\arabic{table}}
 
-\bibliography{references}
+\usepackage[main=english, ngerman]{babel}
 
-\usepackage{authblk}
+% we use the cleveref package to refer to figures, sections, etc.
+% instead of "Figure~\ref{fig:example}", write only "\cref{fig:example}" and the word "Figure" (or table, etc) will be inserted normally
+\usepackage[noabbrev,capitalise]{cleveref}
+
+\usepackage[
+    maxbibnames=99,
+    style=alphabetic,
+    url=false,
+    backend=bibtex8,
+    sortcites=true,
+]{biblatex}
+\bibliography{refs}
+\DeclareFieldFormat[online]{urldate}{Last accessed: #1}
+\DeclareFieldFormat{eprint}{arXiv: \href{https://arxiv.org/abs/#1}{#1}}
+\DeclareFieldFormat[report]{title}{``#1''}
 
 
-\title{Energy-aware Co-location of Scientific Workflow Tasks}
+\newcommand{\projectTitle}{Energy-aware Co-location of Scientific Workflow Tasks}
+\newcommand{\thesisType}{Master's Thesis}
+\newcommand{\authors}{Niklas Fomin}
+\newcommand{\matrikel}{464308}
+\newcommand{\authorEmail}{\href{mailto:niklas.fomin@campus.tu-berlin.de}{niklas.fomin@campus.tu-berlin.de}}
+\newcommand{\examinera}{Prof.~Dr.~habil.~Odej Kao}
+\newcommand{\examinerb}{Prof.~Dr. Volker Markl}
+\newcommand{\supervisor}{Jonathan Bader}
 
-\author{Niklas Fomin}
-
-
-\affil{Distributed and Operating Systems\\Technische Universit\"at Berlin\\Berlin, Germany\\\texttt{niklas.fomin@campus.tu-berlin.de}}
-
+\newcommand{\projectYear}{2025}
+\newcommand{\facultyName}{Fakultät Elektrotechnik und Informatik}
+\newcommand{\departmentName}{Fachgebiet Distributed and Operating Systems}
 
 \begin{document}
-\maketitle
-\begin{abstract}
-    Writing a computer science thesis is a considerable challenge for students.
-    In this text, we give some tips and structure to write a great thesis.
-    We will go over the research process in general, finding a topic, writing an expos\'e, and thesis structure.
-    At the end, we include some tips on researching and writing.
-\end{abstract}
+\input{front.tex}
 
-\section{Introduction}
-\label{sec:introduction} 
+\newpage
 
-If you are reading this, you might be about to start a computer science (or \emph{Information Systems Management}, \emph{ICT Innovation}, etc.) thesis at \emph{Technische Universit\"at Berlin}, maybe even at the \emph{Scalable Software Systems} research group.
-A thesis, whether it is a bachelor's or master's thesis, is essentially a research task that you complete yourself.
-This can be daunting, but you are not alone: Since completing a thesis is necessary to complete a degree at TUB, you can learn from your previous students' experiences.
+\section*{Abstract}
 
+FaaS is a cutting-edge new service model that has developed with the current advancement of cloud computing.
+It allows software developers to deploy their applications quickly and with needed flexibility and scalability, while keeping infrastructure maintenance requirements very low.
+These benefits are very desirable in edge computing, where ever-changing technologies and requirements need to be implemented rapidly and the fluctuation and heterogeneity of service consumers is a considerable factor.
+However, edge nodes can often provide only a fraction of the performance of cloud computing infrastructure, which makes running traditional FaaS platforms infeasible.
+In this thesis, we present a new approach to FaaS that is designed from the ground up with edge computing and IoT requirements in mind.
+To keep it as lightweight as possible, we use CoAP for communication and Docker to allow for isolation between tenants while re-using containers to achieve the best performance.
+We also present a proof-of-concept implementation of our design, which we have benchmarked using a custom benchmarking tool, and we compare our results with benchmarks of Lean OpenWhisk, another FaaS platform for the edge.
+We find that our platform can outperform Lean OpenWhisk in terms of latency and throughput in all tests but that Lean OpenWhisk has higher success rates for a low number of simultaneous clients.
 
-\cite{10.1145/1341811.1341822}
+% GERMAN
+\clearpage
+\begin{otherlanguage}
+    {ngerman}
+    \section*{Kurzfassung}
+    FaaS ist ein innovatives neues Servicemodell, das sich mit dem aktuellen Vormarsch des Cloud Computing entwickelt hat.
+    Softwareentwicklende können ihre Anwendungen schneller und mit der erforderlichen Flexibilität und Skalierbarkeit bereitstellen und gleichzeitig den Wartungsaufwand für die Infrastruktur sehr gering halten.
+    Diese Vorteile sind im Edge-Computing sehr wünschenswert, da sich ständig ändernde Technologien und Anforderungen schnell umgesetzt werden müssen und die Fluktuation und Heterogenität der Service-Consumer ein wichtiger Faktor ist.
+    Edge-Nodes können jedoch häufig nur einen Bruchteil der Leistung von Cloud-Computing-Infrastruktur bereitstellen, was die Ausführung herkömmlicher FaaS-Plattformen unmöglich macht.
+    In dieser Arbeit stellen wir einen neuen Ansatz für FaaS eine Platform vor, die von Grund auf unter Berücksichtigung von Edge-Computing- und IoT-Anforderungen entwickelt wurde.
+    Um den Overhead so gering wie möglich zu halten, nutzen wir CoAP als Messaging-Protokoll und Docker, um Applikationen voneinander zu isolieren, während Container wiederverwendet werden, um die bestmögliche Leistung zu erzielen.
+    Wir präsentieren auch eine Proof-of-Concept-Implementierung unseres Designs, die wir mit einem eigenen Benchmarking-Tool getestet haben, und vergleichen unsere Ergebnisse mit Benchmarks von Lean OpenWhisk, einer weiteren FaaS-Plattform für die Edge.
+    Wir stellen fest, dass unsere Plattform Lean OpenWhisk in Bezug auf Latenz und Durchsatz in allen Tests übertreffen kann, Lean OpenWhisk jedoch höhere Erfolgsraten bei einer geringen Anzahl gleichzeitiger Clients aufweist.
+    \cite{10.1007/978-3-030-30143-9_15}
+\end{otherlanguage}
 
+\clearpage
+
+\tableofcontents
+
+\include{chapters/01_introduction}
+\clearpage
+\include{chapters/02_background}
+\clearpage
+\include{chapters/03_systemdesign}
+\clearpage
+\include{chapters/04_evaluation}
+\clearpage
+\include{chapters/05_relatedwork}
+\clearpage
+\include{chapters/06_conclusion}
+
+\newpage
 \printbibliography
-
 \end{document}
