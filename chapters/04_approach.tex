@@ -1,0 +1,70 @@
+\section{Approach}
+\label{cha:approach}
+% TODO: Add references to the sections and prior chapters.
+The following section systematically outlines the methodological approach of this thesis. While concrete implementation details and technology-specific decisions are discussed in the subsequent chapter, this section focuses on establishing the theoretical foundation that builds upon the concepts introduced in the background. The proposed research problem is addressed through a threefold decomposition. First, a data collection phase captures detailed execution metrics from scientific workflow runs, as described in Chapter 2. Second, this collected data undergoes in-depth analysis to identify relevant performance characteristics and relationships. Finally, the insights derived from this analysis are employed in the simulation and algorithmic modeling phase, where various co-location strategies are evaluated to study their effects on performance and energy efficiency.
+
+Based on this threefold design, the structure of this chapter is organized as follows. After formally defining the problem statement, a general overview of the methodological approach adopted in this work is presented. Subsequently, a set of assumptions is introduced to clearly delimit the scope, applicability, and limitations of the proposed approach. The chapter then begins with the discussion of online scientific workflow task monitoring, detailing how execution data is collected and structured for further analysis. This is followed by an in-depth explanation of the data analysis phase, focusing on matching task entities from different monitoring sources and leveraging this unified data for statistical exploration. The analysis section begins with embedding methodologies and supervised learning, encompassing data preprocessing and predictive modeling techniques. Thereafter, the focus shifts to unsupervised learning, specifically addressing task clustering as applied in this work. The chapter concludes with a detailed presentation of the theoretical approach to the simulation environment, outlining the main conceptual framework, heuristic design principles for scientific workflow scheduling, the definition of baseline algorithms, and the algorithms devised to implement the novel online co-location strategies developed in this thesis.
+
+\subsection{Problem Statement}
+\label{sec:problem_statement}
+The central objective of this work is inspired by the design proposed in \cite{5644899}, where task co-location is formulated as a consolidation and clustering problem within a virtualized computing environment. The goal is to consolidate workflow tasks—subject to the structural constraints imposed by the workflow’s Directed Acyclic Graph (DAG)—onto virtualized machines in such a way that their resource usage profiles complement each other, thereby achieving energy-aware execution. While \cite{5644899} approaches this problem statically, determining task clusters and node assignments prior to workflow execution, this thesis extends the problem to a dynamic, online setting. Here, co-location decisions are made during workflow execution, allowing the system to adapt to evolving runtime conditions.
+
+In contrast to the static mapping-based approach, this work integrates co-location directly into the task mapping and scheduling process, arguing that co-location and scheduling are inherently interdependent and should be addressed within a unified framework rather than as separate optimization problems. Consequently, the formulated problem becomes an online co-location problem, where workflow tasks must be characterized before execution in order to enable contention-aware co-location decisions at runtime. The co-location in this context operates at the virtual container level, specifically focusing on virtual machines hosted on physical servers, while contention effects between virtual machines themselves are considered beyond the scope of this thesis.
+
+\subsection{Overview}
+\label{sec:overview}
+% TODO: Add a general figure, maybe with numbers showing the steps of the overall approach.
+
+
+\subsubsection{Assumptions}
+\label{sec:assumptions}
+To clearly outline the scope, boundaries, and methodological constraints of this work, the following guiding assumptions were defined to facilitate this first iteration of research on dynamic scientific workflow co-location:
+
+\begin{enumerate}
+    \item Monitoring Configuration Limits: A maximum of 50 monitoring features per workflow task is imposed to ensure manageable execution times and allow for statistical evaluation across varying monitoring configurations. This restriction also underscores the need for future work to investigate the influence of monitoring data quality and dimensionality on predictive performance.
+    \item Monitoring Data Quality and Coverage: Not all low-level monitoring capabilities are fully exploited. Instead, existing monitoring data sources are leveraged with minimal modifications to improve compatibility with the monitoring client. Short-lived tasks (typically under one second) are only partially captured or occasionally missed due to system load and sampling intervals exceeding one second.
+    \item Offline Data Analysis: All data preprocessing, model training, hyperparameter tuning, and fitting are performed offline after workflow execution. The resulting trained models are then transformed into a suitable format for integration into the simulation environment.
+    \item Simulation Environment and Platform Equivalence: The simulated platform is assumed to approximate the physical execution environment despite potentially having more nodes of identical configuration. It is expected that the overall behavior observed in simulation aligns with real-world execution trends.
+    \item Simulation Capabilities and Contention Modeling: The WRENCH framework, built on SimGrid, currently supports simulation of memory contention by limiting per-VM memory consumption, where exceeding the limit results in extended task execution times. Similarly, CPU contention is modeled through proportional increases in task runtime. Other low-level contention effects (e.g., cache, interconnect, or I/O contention) are not modeled in this iteration.
+    \item Energy Model Assumptions: The energy model provided by SimGrid is assumed to realistically approximate energy consumption variations when tasks with differing resource usage profiles are colocated on the same virtual machine. The strongest impact on energy efficiency is attributed to CPU utilization behavior.
+    \item Evaluation Focus: Co-location efficiency is evaluated primarily through per-host energy consumption over time, total workflow energy usage, and overall makespan reduction, which serve as the main indicators of effective virtual machine co-location.
+\end{enumerate}
+
+\subsection{Online Task Monitoring}
+\label{sec:online_task_monitoring}
+
+\subsection{Data Analysis}
+\label{sec:data_analysis}
+
+\subsubsection{Task Entity Matching}
+\label{sec:task_entity_matching}
+
+\subsection{Statistical Embedding and Supervised Learning}
+\label{sec:statistical_embedding_and_supervised_learning}
+
+\subsubsection{Data Preprocessing}
+\label{sec:data_preprocessing}
+
+\subsubsection{Predictive Modeling}
+\label{sec:predictive_modeling}
+
+\subsection{Unsupervised Learning}
+\label{sec:unsupervised_learning}
+
+\subsubsection{Task Clustering}
+\label{sec:task_clustering}
+
+\subsection{Simulation Environment}
+\label{sec:simulation_environment}
+
+\subsubsection{Design Pillars}
+\label{sec:design_pillars}
+
+\subsubsection{Heuristic Design}
+\label{sec:heuristic_design}
+
+\paragraph{Baseline Algorithms}
+\label{sec:baseline_algorithms}
+
+\paragraph{Co-location strategies}
+\label{sec:co-location_strategies}
