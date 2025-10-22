@@ -183,9 +183,4 @@ The statistical modeling component, implemented as a standalone FastAPI service,
 \label{sec:simulator_setup}
 The simulator setup further demonstrates the benefits of this decoupled design. The resource management layer of the simulator exposes generic interfaces for allocators, schedulers, and node assigners, allowing any of them to be replaced or combined dynamically at runtime. This separation allows the same simulator to execute both baseline and experimental resource allocation strategies—including oversubscription, co-location, or ShaRiff-based scheduling—without modifying the controller logic. Through this design, the simulator can execute diverse workflow types, including various nf-core pipelines, by merely switching configuration parameters or class bindings. Moreover, the integration of energy and performance tracing through independent services ensures that extending the simulator with new measurement capabilities does not interfere with the scheduling or execution logic.
 
-% XML Platform file
-\lstinputlisting[
-    language=XML,
-    caption={Example XML Configuration File},
-    label={lst:xml_config}
-]{../fig/05/siena_cluster.xml}
+% Show cpp code of base directory
