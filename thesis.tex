@@ -3,9 +3,14 @@
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{fix-cm}
-
+\usepackage{textcomp}
 \usepackage[a4paper, margin=3cm]{geometry}
 \usepackage[titletoc, title]{appendix}
+\usepackage{booktabs}   % for \toprule, \midrule, \bottomrule
+\usepackage{makecell}   % for \makecell
+\usepackage{graphicx}   % for \resizebox
+\usepackage{array}      % for >{\raggedright\arraybackslash}p{} column type
+\usepackage{float} 
 
 \usepackage{color}
 \usepackage{booktabs}
@@ -21,12 +26,46 @@
 % math and algorithms
 \usepackage{amsmath}
 \usepackage[ruled,vlined]{algorithm2e}
+% tables
+\usepackage{multirow}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{amssymb}
+
+% general formatting
+\usepackage{graphicx}
+
+% xml and code listings
+\usepackage{listings}
+\usepackage{xcolor}
+\lstdefinelanguage{XML}{
+  morestring=[b]",
+  morecomment=[s]{<!--}{-->},
+  stringstyle=\color{teal},
+  identifierstyle=\color{black},
+  keywordstyle=\color{blue},
+  morekeywords={xmlns,version,type,id,name,value}% extend as needed
+}
+
+\lstset{
+  language=XML,
+  basicstyle=\ttfamily\small,
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  frame=single,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=2,
+  captionpos=b
+}
 
 \usepackage{transparent}
 \usepackage{eso-pic}
 \usepackage[section]{placeins}
 \usepackage{setspace}
 \usepackage{parskip}
+
 \usepackage{subcaption}
 
 \renewcommand\thefigure{%
@@ -70,9 +109,10 @@
 
 \begin{document}
 \input{front.tex}
+\clearpage
+\pagestyle{plain}
 
 \newpage
-
 \section*{Abstract}
 
 FaaS is a cutting-edge new service model that has developed with the current advancement of cloud computing.
@@ -87,20 +127,21 @@ We find that our platform can outperform Lean OpenWhisk in terms of latency and 
 % GERMAN
 \clearpage
 \begin{otherlanguage}{ngerman}
-    \section*{Kurzfassung}
-    FaaS ist ein innovatives neues Servicemodell, das sich mit dem aktuellen Vormarsch des Cloud Computing entwickelt hat.
-    Softwareentwicklende können ihre Anwendungen schneller und mit der erforderlichen Flexibilität und Skalierbarkeit bereitstellen und gleichzeitig den Wartungsaufwand für die Infrastruktur sehr gering halten.
-    Diese Vorteile sind im Edge-Computing sehr wünschenswert, da sich ständig ändernde Technologien und Anforderungen schnell umgesetzt werden müssen und die Fluktuation und Heterogenität der Service-Consumer ein wichtiger Faktor ist.
-    Edge-Nodes können jedoch häufig nur einen Bruchteil der Leistung von Cloud-Computing-Infrastruktur bereitstellen, was die Ausführung herkömmlicher FaaS-Plattformen unmöglich macht.
-    In dieser Arbeit stellen wir einen neuen Ansatz für FaaS eine Platform vor, die von Grund auf unter Berücksichtigung von Edge-Computing- und IoT-Anforderungen entwickelt wurde.
-    Um den Overhead so gering wie möglich zu halten, nutzen wir CoAP als Messaging-Protokoll und Docker, um Applikationen voneinander zu isolieren, während Container wiederverwendet werden, um die bestmögliche Leistung zu erzielen.
-    Wir präsentieren auch eine Proof-of-Concept-Implementierung unseres Designs, die wir mit einem eigenen Benchmarking-Tool getestet haben, und vergleichen unsere Ergebnisse mit Benchmarks von Lean OpenWhisk, einer weiteren FaaS-Plattform für die Edge.
-    Wir stellen fest, dass unsere Plattform Lean OpenWhisk in Bezug auf Latenz und Durchsatz in allen Tests übertreffen kann, Lean OpenWhisk jedoch höhere Erfolgsraten bei einer geringen Anzahl gleichzeitiger Clients aufweist.
+  \section*{Kurzfassung}
+  FaaS ist ein innovatives neues Servicemodell, das sich mit dem aktuellen Vormarsch des Cloud Computing entwickelt hat.
+  Softwareentwicklende können ihre Anwendungen schneller und mit der erforderlichen Flexibilität und Skalierbarkeit bereitstellen und gleichzeitig den Wartungsaufwand für die Infrastruktur sehr gering halten.
+  Diese Vorteile sind im Edge-Computing sehr wünschenswert, da sich ständig ändernde Technologien und Anforderungen schnell umgesetzt werden müssen und die Fluktuation und Heterogenität der Service-Consumer ein wichtiger Faktor ist.
+  Edge-Nodes können jedoch häufig nur einen Bruchteil der Leistung von Cloud-Computing-Infrastruktur bereitstellen, was die Ausführung herkömmlicher FaaS-Plattformen unmöglich macht.
+  In dieser Arbeit stellen wir einen neuen Ansatz für FaaS eine Platform vor, die von Grund auf unter Berücksichtigung von Edge-Computing- und IoT-Anforderungen entwickelt wurde.
+  Um den Overhead so gering wie möglich zu halten, nutzen wir CoAP als Messaging-Protokoll und Docker, um Applikationen voneinander zu isolieren, während Container wiederverwendet werden, um die bestmögliche Leistung zu erzielen.
+  Wir präsentieren auch eine Proof-of-Concept-Implementierung unseres Designs, die wir mit einem eigenen Benchmarking-Tool getestet haben, und vergleichen unsere Ergebnisse mit Benchmarks von Lean OpenWhisk, einer weiteren FaaS-Plattform für die Edge.
+  Wir stellen fest, dass unsere Plattform Lean OpenWhisk in Bezug auf Latenz und Durchsatz in allen Tests übertreffen kann, Lean OpenWhisk jedoch höhere Erfolgsraten bei einer geringen Anzahl gleichzeitiger Clients aufweist.
 \end{otherlanguage}
 
 \clearpage
 
 \tableofcontents
+\clearpage
 
 \include{chapters/01_introduction}
 \clearpage
