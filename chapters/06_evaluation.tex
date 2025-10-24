@@ -44,186 +44,206 @@ To collect accurate power usage data, the node was connected to a 12-way switche
 \subsubsection{Monitoring Configuration}
 \label{sec:evaluation_monitoring_configuration}
 % Table with different combinations
-% \begin{table}[H]
-%     \centering
-%     \caption{Adaptable Monitoring Configuration Overview.}
-%     \label{tab:monitoring_config_overview}
-%     \renewcommand{\arraystretch}{1.15}
-%     \resizebox{\textwidth}{!}{
-%         \begin{tabular}{
-%             p{3.5cm}
-%             >{\centering\arraybackslash}p{2cm}
-%             p{5cm}
-%             p{6cm}
-%             }
-%             \toprule
-%             \textbf{Monitoring Target} & \textbf{Enabled} & \textbf{Supported Data Sources}                         & \textbf{Collected Metric Types / Adaptability Notes}                                                                    \\
-%             \midrule
 
-%             Task Metadata              & ✓                & slurm-job-exporter                                      & Collects job metadata (state, runtime, working directory). Can adapt to other job schedulers.                           \\
+\begin{table}[H]
+    \centering
+    \caption{Adaptable Monitoring Configuration Overview.}
+    \label{tab:monitoring_config_overview}
+    \renewcommand{\arraystretch}{1.15}
+    \resizebox{\textwidth}{!}{
+        \begin{tabular}{
+            p{3.5cm}
+            >{\centering\arraybackslash}p{2cm}
+            p{5cm}
+            p{6cm}
+            }
+            \toprule
+            \textbf{Monitoring Target} & \textbf{Enabled} & \textbf{Supported Data Sources}                         & \textbf{Collected Metric Types / Adaptability Notes}                                                                    \\
+            \midrule
 
-%             CPU                        & ✓                & cAdvisor, ebpf-mon, docker-activity                     & Captures CPU time and cycles from both container and kernel levels. Supports switching sources for varying granularity. \\
+            Task Metadata              &                  & slurm-job-exporter                                      & Collects job metadata (state, runtime, working directory). Can adapt to other job schedulers.                           \\
 
-%             Memory                     & ✓                & cAdvisor, docker-activity                               & Tracks memory utilization at container or process level. Configurable for byte- or percentage-based metrics.            \\
+            CPU                        &                  & cAdvisor, ebpf-mon, docker-activity                     & Captures CPU time and cycles from both container and kernel levels. Supports switching sources for varying granularity. \\
 
-%             Disk                       & ✓                & cAdvisor                                                & Monitors block I/O and filesystem throughput. Supports extension with storage exporters.                                \\
+            Memory                     &                  & cAdvisor, docker-activity                               & Tracks memory utilization at container or process level. Configurable for byte- or percentage-based metrics.            \\
 
-%             Network                    & ✗                & cAdvisor (optional)                                     & Disabled by default due to noise. Can be enabled for network-intensive workflows.                                       \\
+            Disk                       &                  & cAdvisor                                                & Monitors block I/O and filesystem throughput. Supports extension with storage exporters.                                \\
 
-%             Energy                     & ✓                & docker-activity, ebpf-mon, ipmi-exporter, snmp-exporter & Multi-layer energy monitoring from container to node level. Adaptable to hardware sensors and external power meters.    \\
+            Network                    &                  & cAdvisor (optional)                                     & Disabled by default due to noise. Can be enabled for network-intensive workflows.                                       \\
 
-%             \midrule
-%             \multicolumn{4}{l}{\textbf{Prometheus Configuration}}                                                                                                                                                                             \\[3pt]
-%             \multicolumn{4}{p{16.5cm}}{
-%                 The Prometheus backend collects all metrics via configurable scrape intervals and targets. Controller and worker nodes can be flexibly defined, enabling distributed monitoring setups.
-%             }                                                                                                                                                                                                                                 \\
+            Energy                     &                  & docker-activity, ebpf-mon, ipmi-exporter, snmp-exporter & Multi-layer energy monitoring from container to node level. Adaptable to hardware sensors and external power meters.    \\
 
-%             \bottomrule
-%         \end{tabular}
-%     }
-% \end{table}
+            \midrule
+            \multicolumn{4}{l}{\textbf{Prometheus Configuration}}                                                                                                                                                                             \\[3pt]
+            \multicolumn{4}{p{16.5cm}}{
+                The Prometheus backend collects all metrics via configurable scrape intervals and targets. Controller and worker nodes can be flexibly defined, enabling distributed monitoring setups.
+            }                                                                                                                                                                                                                                 \\
 
-\subsubsection{Statistical Models for Clustering and Prediction}
+            \bottomrule
+        \end{tabular}
+    }
+\end{table}
+
+\subsubsection{Implemented Models for Task Clustering and Prediction}
 \label{sec:evaluation_statistical_learning_methods}
 % TODO: Add references to the chapters.
 As described in Chapter 5, the statistical models—including the clustering and prediction components—are provided through a FastAPI implementation, allowing external simulation engines to interact with them programmatically. At the same time, the core functionality of the coloc-app FastAPI service is based on a Jupyter Notebook that contains all implementations of the clustering and predictive models discussed in Chapter 5. Both the notebook and the coloc-app were executed on the host system described in Section %\ref{sec:evaluation_infrastructure}.
 
-\subsubsection{Simulation Configuration}
-\label{sec:evaluation_simulation_configuration}
+\subsubsection{Simulation Setup}
+\label{sec:evaluation_simulation}
 
-The infrastructure described in Section %\ref{sec:evaluation_infrastructure} was replicated within the SimGrid simulation environment using its platform description tool, as shown in the following XML configuration. The hosts core performance was calibrated by executing stress-ng benchmarks to determine realistic CPU speeds, while network throughput was measured using sysbench. To determine power states (P-states), the GUDE power meter was used to record power consumption in both idle and active conditions under varying load profiles generated with stress-ng. This procedure ensured that the simulated environment accurately reflected the performance and energy characteristics of the physical test system.
+\paragraph{Simulated Platform Configuration}
+The infrastructure described in Section \ref{sec:evaluation_infrastructure} was replicated within the SimGrid simulation environment using its platform description tool, as shown in the following XML configuration. The hosts core performance was calibrated by executing stress-ng benchmarks to determine realistic CPU speeds, while network throughput was measured using sysbench. To determine power states (P-states), the GUDE power meter was used to record power consumption in both idle and active conditions under varying load profiles generated with stress-ng. This procedure ensured that the simulated environment accurately reflected the performance and energy characteristics of the physical test system.
 
 % Platform XML file 
-% \lstinputlisting[
-%     language=XML,
-%     caption={Example XML Configuration File},
-%     label={lst:xml_config}
-% ]{../fig/05/siena_cluster.xml}
+\lstinputlisting[
+    language=XML,
+    caption={Example XML Configuration File},
+    label={lst:xml_config}
+]{/home/nfomin3/dev/ThesisDocument/fig/06/siena_cluster.xml}
+
+\paragraph{Baseline Scheduling Algorithms}
+
+% Overview table over all baselines
+\begin{table}[H]
+    \centering
+    \caption{Overview of Baseline Scheduling Algorithms.}
+    \label{tab:baseline_overview}
+    \begin{tabularx}{\textwidth}{l l X}
+        \toprule
+        \textbf{Algorithm} & \textbf{Type}                                & \textbf{Description}                                                                                                          \\
+        \midrule
+        Baseline 1         & FIFO + Round-Robin                           & Executes tasks in FIFO order and assigns them to hosts in a round-robin fashion without co-location or backfilling.           \\
+
+        Baseline 2         & FIFO + Backfilling                           & Assigns tasks in FIFO order to the first available host, allowing idle hosts to be backfilled opportunistically.              \\
+
+        Baseline 3         & FIFO + VM Co-location                        & Groups multiple ready tasks on the same host within a single VM if sufficient resources are available.                        \\
+
+        Baseline 3.1       & Max-Core VM Co-location                      & Prefers the host with the largest number of idle cores for task co-location to maximize utilization.                          \\
+
+        Baseline 3.2       & Max-Parallel VM Co-location                  & Distributes ready tasks across all available hosts in parallel, promoting high concurrency across nodes.                      \\
+
+        Baseline 4         & VM Co-location + Over-Subscription           & Extends co-location by allowing controlled CPU over-subscription on selected hosts using an oversubscription factor $\alpha$. \\
+
+        Baseline 4.1       & Max-Parallel Co-location + Over-Subscription & Combines parallel host utilization with co-location and controlled CPU over-subscription for improved throughput.             \\
+        \bottomrule
+    \end{tabularx}
+\end{table}
+
+% W/O Co-location
+% Baseline 1
+The baseline scheduling algorithm implements a simple, sequential execution model designed to simulate isolated task processing within a virtualized cluster. The scheduling process is divided into three abstract components that operate in a fixed order: task scheduling, node assignment, and resource allocation. The scheduler applies a first-in, first-out (FIFO) policy, maintaining a queue of workflow tasks sorted by their readiness. Tasks are retrieved from this queue strictly in order of arrival, preserving dependency constraints and ensuring a fully deterministic execution sequence without reordering or prioritization.
+Once a task is selected for execution, the node assignment component distributes it across available compute hosts using a round-robin policy. This mechanism cycles through hosts in sequence, ensuring an even and systematic distribution of tasks across the cluster. No host is assigned more than one active task at a time, enforcing exclusive execution and preventing contention for shared resources.
+% Baseline 2
+The next variant keeps the same FIFO scheduler and VM-based allocator as Baseline 1, but replaces exclusive node assignment with a greedy backfilling policy. Tasks are still dequeued strictly in arrival order by the FIFO scheduler. For each ready task, the node assignment component queries the cluster for the current number of idle cores per host and performs a first-fit scan: it selects the first host that reports at least one idle core, without requiring the host to be completely idle. The allocator then provisions a VM on the chosen host, binds the tasks inputs/outputs, submits the job to that VM, and on completion shuts the VM down and destroys it.
+Conceptually, this turns the placement step into gap filling rather than strict exclusivity. Multiple tasks can be co-located on the same host up to its core capacity, increasing instantaneous parallelism and utilization.
+% With co-location
+% Baseline 3
+Baseline 3 does not differ in the scheduling behavior but replaces the standard allocator and node assignment with components that allow for co-location. When the node assignment component queries the cluster for idle-core availability, it again selects the first host with available cores. However, instead of launching one VM per task, all ready tasks that fit within the hosts idle-core capacity are grouped into a single batch. These tasks are then co-located inside one shared VM instance that is dimensioned according to the aggregate resource requirements of the batch—its vCPU count and memory size are computed as the sum of the respective task demands.
+Conceptually, this baseline captures the behavior of intra-VM co-location, where multiple independent tasks share the same virtual machine instead of being distributed across separate ones.
+% Baseline 3.1
+Baseline 3 is extended by 2 variants where the first one extends thenode assignment component to query the cluster for idle-core availability and selects the host with the maximum amount of available cores. However, instead of launching one VM per task, all ready tasks that fit within the hosts idle-core capacity are grouped into a single batch. These tasks are then co-located inside one shared VM instance that is dimensioned according to the aggregate resource requirements of the batch—its vCPU count and memory size are computed as the sum of the respective task demands.
+% Baseline 3.2
+The second extension replaces the placement policy with a selection step for the host with maximum idle cores. At each dispatch, the node-assignment component queries the cluster for the current idle cores per host map and picks the host with the largest number of free cores. It then forms a batch by taking as many ready tasks from the FIFO head as the chosen host can accommodate. Compared to first-fit co-location, it tends to reduce residual fragmentation by packing work onto the most spacious node, while still honoring FIFO ordering and leaving task runtime/I/O handling unchanged.
+% Baseline 4
+The 4th baseline retains the same FIFO scheduler but introduces a node assignment and allocation policy focused on maximizing parallel host utilization. Upon each scheduling cycle, the node assignment component queries the cluster for the current number of idle cores per host, filters out fully occupied nodes, and ranks the remaining hosts in descending order of available cores. It then assigns tasks in batches, filling the host with the highest idle capacity first and grouping as many ready tasks as the hosts idle-core count allows. Once the first host is filled, the process continues with the next host until all tasks in the ready queue are mapped.
+The allocator provisions one VM per host batch, sizing it to match the aggregate requirements of all tasks assigned to that host. The resulting VMs vCPU and memory configuration reflect the total core and memory demands of the batch. Each task in the batch is submitted as an independent job to the same virtual compute service, and the VM remains active until all its co-located tasks have finished, at which point it is shut down and destroyed.
+% Baseline 4.1
+The last baseline extends the previous one by allowing controlled CPU over-subscription during co-location.
+At each scheduling cycle, the node assignment component queries per-host idle cores, sorts hosts in descending idle capacity, and fills the largest host first. Unlike the non-oversubscribed version, the per-host batch may exceed the currently idle cores by a fixed factor the batch limit is set to. The procedure continues down the ranked host list, forming one batch per host in the same cycle.
+The allocator provisions one VM per host batch, but caps the VMs vCPU count to the hosts actual idle cores at allocation time not the sum of task core demands, while sizing memory to the aggregate of the batched tasks. All tasks in the batch are then submitted to that single VM and execute concurrently on a vCPU pool intentionally smaller than their combined declared cores. The VM remains active until all co-located tasks complete, then it is shut down and destroyed.
+Crucially, the degree of contention—and thus realized speedup or slowdown—depends on the complementarity of the co-located task profiles. When CPU-, memory-, and I/O-intensive phases overlap unfavorably oversubscription amplifies interference and queueing on scarce vCPUs. When profiles are complementary, the same oversubscription admits more useful overlap with less contention, improving per-host throughput. Conceptually, this variant implements parallel, capacity-ranked co-location with controlled oversubscription.
 
 \subsection{Experiment Results}
 \label{sec:experiment_results}
 The section on experimental results is organized as follows. We begin with a brief discussion of the monitoring results obtained using the configuration described earlier. Next, we revisit the approach introduced in Chapter 4 by examining the workload experiments and the resulting measurements that form the basis for subsequent evaluation steps. We then present the outcomes of the statistical methods applied in this work, starting with an in-depth analysis of the task consolidation approach introduced in Chapter 4. Building on these results, we continue with an interpretation of the outcomes from training two predictive models on the clustering data. Finally, we integrate all components into a unified simulation framework. Using this setup, we execute all workflows introduced at the beginning of Chapter 6 with the algorithms detailed in Chapter 4 and the appendix. Several aspects of the simulation results are discussed before Chapter 7 concludes with an overall evaluation and interpretation of the findings.
-\subsubsection{Monitoring Statistics}
-\label{sec:monitoring_statistics}
 
-% Table with results for the test-runs
-% \begin{table}[H]
-%     \centering
-%     \caption{Monitored workflow coverage and task capture statistics.}
-%     \label{tab:workflow_capture}
-%     \renewcommand{\arraystretch}{1.15}
-%     \resizebox{\textwidth}{!}{
-%         \begin{tabular}{
-%             p{3.5cm}
-%             >{\centering\arraybackslash}p{3cm}
-%             >{\centering\arraybackslash}p{3cm}
-%             p{8cm}
-%             }
-%             \toprule
-%             \textbf{Workflow}     & \textbf{Total Tasks} & \textbf{Captured Tasks} & \textbf{Comments}                                                     \\
-%             \midrule
-%             \texttt{atacseq}      & 72                   & 69                      & Nearly full capture; minor loss due to transient Docker task cleanup. \\
-%             \texttt{chipseq}      & 68                   & 66                      & All major processing steps recorded; minor log rotation gap observed. \\
-%             \texttt{rnaseq}       & 54                   & 54                      & Full task coverage with clean monitoring traces.                      \\
-%             \texttt{scnanoseq}    & 83                   & 77                      & Some parallel tasks missed due to ephemeral container lifetimes.      \\
-%             \texttt{smrnaseq}     & 59                   & 57                      & Stable capture; short-lived indexing steps occasionally dropped.      \\
-%             \texttt{pixelator}    & 44                   & 44                      & All tasks captured; stable workflow execution.                        \\
-%             \texttt{methylseq}    & 65                   & 63                      & Minor variance in monitoring delay for large alignment jobs.          \\
-%             \texttt{viralrecon}   & 51                   & 50                      & Near-complete capture; few network I/O metrics missing.               \\
-%             \texttt{oncoanalyser} & 97                   & 90                      & Long runtime tasks occasionally exceeded monitoring buffer window.    \\
-%             \bottomrule
-%         \end{tabular}
-%     }
-% \end{table}
-
-\subsubsection{Resource Contention Analysis}
+\subsubsection{Measuring Interference during Benchmark Executions}
 \label{sec:resource_contention_analysis}
 % Put figures in here and discuss shortly the reasons.
 
-\subsubsection{Statistical Learning Methods}
-% \label{sec:evaluation_statistical_learning_methods}
-
-
-\paragraph{Task Consolidation}
+\subsubsection{Dissimilarity-based Task Clustering}
 \label{sec:evaluation_task_consolidation}
 % Radar plots of atacseq or other pipelines with showing the cluster from 40 samples and describing the differences in the cluster formation in accordance to the workload experiments from the previous section.
 
 % Summary Statistics table that show difference for all workflows compared random clustering with sharecomp.
-% \begin{table}[H]
-%     \centering
-%     \caption{Average inter-cluster difference comparison between ShaReComp and random clustering across workflows.}
-%     \label{tab:cluster_difference}
-%     \renewcommand{\arraystretch}{1.15}
-%     \resizebox{\textwidth}{!}{
-%         \begin{tabular}{
-%             p{3.5cm}
-%             >{\centering\arraybackslash}p{3cm}
-%             >{\centering\arraybackslash}p{4cm}
-%             >{\centering\arraybackslash}p{4cm}
-%             }
-%             \toprule
-%             \textbf{Workflow}     & \textbf{Number of Tasks} & \textbf{Avg. ShaReComp Cluster Difference} & \textbf{Avg. Random Cluster Difference} \\
-%             \midrule
-%             \texttt{atacseq}      & 72                       & 0.214                                      & 0.482                                   \\
-%             \texttt{chipseq}      & 68                       & 0.237                                      & 0.495                                   \\
-%             \texttt{rnaseq}       & 54                       & 0.201                                      & 0.468                                   \\
-%             \texttt{scnanoseq}    & 83                       & 0.225                                      & 0.510                                   \\
-%             \texttt{smrnaseq}     & 59                       & 0.208                                      & 0.490                                   \\
-%             \texttt{pixelator}    & 44                       & 0.190                                      & 0.455                                   \\
-%             \texttt{methylseq}    & 65                       & 0.232                                      & 0.503                                   \\
-%             \texttt{viralrecon}   & 51                       & 0.216                                      & 0.487                                   \\
-%             \texttt{oncoanalyser} & 97                       & 0.240                                      & 0.525                                   \\
-%             \bottomrule
-%         \end{tabular}
-%     }
-% \end{table}
 
-\paragraph{Task Cluster Runtime and Energy Prediction}
+\begin{table}[H]
+    \centering
+    \caption{Average inter-cluster difference comparison between ShaReComp and random clustering across workflows.}
+    \label{tab:cluster_difference}
+    \renewcommand{\arraystretch}{1.15}
+    \resizebox{\textwidth}{!}{
+        \begin{tabular}{
+            p{3.5cm}
+            >{\centering\arraybackslash}p{3cm}
+            >{\centering\arraybackslash}p{4cm}
+            >{\centering\arraybackslash}p{4cm}
+            }
+            \toprule
+            \textbf{Workflow}     & \textbf{Number of Tasks} & \textbf{Avg. ShaReComp Cluster Difference} & \textbf{Avg. Random Cluster Difference} \\
+            \midrule
+            \texttt{atacseq}      & 72                       & 0.214                                      & 0.482                                   \\
+            \texttt{chipseq}      & 68                       & 0.237                                      & 0.495                                   \\
+            \texttt{rnaseq}       & 54                       & 0.201                                      & 0.468                                   \\
+            \texttt{scnanoseq}    & 83                       & 0.225                                      & 0.510                                   \\
+            \texttt{smrnaseq}     & 59                       & 0.208                                      & 0.490                                   \\
+            \texttt{pixelator}    & 44                       & 0.190                                      & 0.455                                   \\
+            \texttt{methylseq}    & 65                       & 0.232                                      & 0.503                                   \\
+            \texttt{viralrecon}   & 51                       & 0.216                                      & 0.487                                   \\
+            \texttt{oncoanalyser} & 97                       & 0.240                                      & 0.525                                   \\
+            \bottomrule
+        \end{tabular}
+    }
+\end{table}
+
+\subsubsection{Predicting Runtime and Energy Consumption of Task Clusters}
 \label{sec:evaluation_task_cluster_runtime_and_energy_prediction}
 % Table with prediction results based on basic metrics
-% \begin{table}[H]
-%     \centering
-%     \caption{Summary of model configurations and performance metrics for task-level prediction.}
-%     \label{tab:model_summary}
-%     \renewcommand{\arraystretch}{1.15}
-%     \resizebox{\textwidth}{!}{
-%         \begin{tabular}{
-%             p{3.2cm}
-%             >{\centering\arraybackslash}p{2cm}
-%             >{\centering\arraybackslash}p{4cm}
-%             >{\centering\arraybackslash}p{2cm}
-%             >{\centering\arraybackslash}p{3cm}
-%             p{7cm}
-%             }
-%             \toprule
-%             \textbf{Workflow Tasks}                                                                                          & \textbf{Model Type}                     & \textbf{Hyperparameters} & \textbf{R\textsuperscript{2}} & \textbf{Cross-Validation} & \textbf{Comments} \\
-%             \midrule
-%             549                                                                                                              & \texttt{KCCA + Kernel Ridge Regression} &
-%             Kernel = laplacian, latent\_dim = 2                                                                              &
-%             0.25                                                                                                             &
-%             5-fold (KFold, shuffle=True, seed=42)                                                                            &
-%             Used canonical correlation features; selected via GridSearchCV across 7 kernels. Combined with Kernel Ridge Regression for final prediction of runtime and power. Moderate performance due to cross-domain variance.                                                  \\
 
-%             \midrule
-%             549                                                                                                              & \texttt{Random Forest (Runtime)}        &
-%             n\_estimators ∈ [200, 2000], max\_depth ∈ [10, 110], max\_features ∈ \{log2, sqrt\}, bootstrap ∈ \{True, False\} &
-%             0.50                                                                                                             &
-%             7-fold (RandomizedSearchCV)                                                                                      &
-%             Achieved best runtime prediction accuracy of 27.66\%. Mean absolute error: 12.36 units. Good balance between model complexity and generalization.                                                                                                                     \\
+\begin{table}[H]
+    \centering
+    \caption{Summary of model configurations and performance metrics for task-level prediction.}
+    \label{tab:model_summary}
+    \renewcommand{\arraystretch}{1.15}
+    \resizebox{\textwidth}{!}{
+        \begin{tabular}{
+            p{3.2cm}
+            >{\centering\arraybackslash}p{2cm}
+            >{\centering\arraybackslash}p{4cm}
+            >{\centering\arraybackslash}p{2cm}
+            >{\centering\arraybackslash}p{3cm}
+            p{7cm}
+            }
+            \toprule
+            \textbf{Workflow Tasks}                                                                                      & \textbf{Model Type}                     & \textbf{Hyperparameters} & \textbf{R\textsuperscript{2}} & \textbf{Cross-Validation} & \textbf{Comments} \\
+            \midrule
+            549                                                                                                          & \texttt{KCCA + Kernel Ridge Regression} &
+            Kernel = laplacian, latent\_dim = 2                                                                          &
+            0.25                                                                                                         &
+            5-fold (KFold, shuffle=True, seed=42)                                                                        &
+            Used canonical correlation features; selected via GridSearchCV across 7 kernels. Combined with Kernel Ridge Regression for final prediction of runtime and power. Moderate performance due to cross-domain variance.                                              \\
 
-%             \midrule
-%             549                                                                                                              & \texttt{Random Forest (Power)}          &
-%             n\_estimators ∈ [200, 2000], same grid as runtime model                                                          &
-%             0.14                                                                                                             &
-%             7-fold (RandomizedSearchCV)                                                                                      &
-%             Lower fit due to higher variance in power traces. Mean absolute error (baseline): 124.65 units. Captures coarse-grained power patterns but limited fine-grained accuracy.                                                                                             \\
+            \midrule
+            549                                                                                                          & \texttt{Random Forest (Runtime)}        &
+            n\_estimators  [200, 2000], max\_depth  [10, 110], max\_features  \{log2, sqrt\}, bootstrap  \{True, False\} &
+            0.50                                                                                                         &
+            7-fold (RandomizedSearchCV)                                                                                  &
+            Achieved best runtime prediction accuracy of 27.66\%. Mean absolute error: 12.36 units. Good balance between model complexity and generalization.                                                                                                                 \\
 
-%             \bottomrule
-%         \end{tabular}
-%     }
-% \end{table}
+            \midrule
+            549                                                                                                          & \texttt{Random Forest (Power)}          &
+            n\_estimators  [200, 2000], same grid as runtime model                                                       &
+            0.14                                                                                                         &
+            7-fold (RandomizedSearchCV)                                                                                  &
+            Lower fit due to higher variance in power traces. Mean absolute error (baseline): 124.65 units. Captures coarse-grained power patterns but limited fine-grained accuracy.                                                                                         \\
 
-\subsubsection{Workflow Makespan and Energy Consumption}
+            \bottomrule
+        \end{tabular}
+    }
+\end{table}
+
+\subsubsection{Simulation of Scheduling Algorithms with Co-location}
 \label{sec:workflow_makespan_and_energy_consumption}
 % Grouped Bar Plots runtime & energy consumption for 3 selected Workflows while the rest goes to appendix.
 
