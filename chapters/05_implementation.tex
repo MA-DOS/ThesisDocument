@@ -1,7 +1,7 @@
 \section{Implementation}
 \label{cha:implementation}
 % TODO: Insert previous chapter references
-This chapter details the technical implementation of the concepts introduced in the previous section. While the Approach chapter established the conceptual and algorithmic foundations of the proposed scheduling framework, the following sections focus on how these ideas were realized in practice. The implementation emphasizes architectural modularity, clear component interfaces, and the integration of machine learning–based decision layers within a simulation-driven environment. Each subsystem—from the monitoring client and statistical modeling backend to the simulation environment—was designed to remain functionally independent while communicating through well-defined data and control flows. This decoupled design not only facilitates reproducibility and maintainability but also enables future extensions, such as the replacement of predictive models or the addition of new scheduling policies, without major structural changes. The remainder of this chapter outlines the overall system architecture, justifies the chosen technologies and design principles, and describes the concrete implementation of the monitoring client, the statistical learning components, and the simulator setup that collectively form the experimental framework.
+This chapter details the technical implementation of the concepts introduced in the previous section. While the Approach chapter established the conceptual and algorithmic foundations of the proposed scheduling framework, the following sections focus on how these ideas were realized in practice. The implementation emphasizes architectural modularity, clear component interfaces, and the integration of machine learning-based decision layers within a simulation-driven environment. Each subsystem—from the monitoring client and statistical modeling backend to the simulation environment—was designed to remain functionally independent while communicating through well-defined data and control flows. This decoupled design not only facilitates reproducibility and maintainability but also enables future extensions, such as the replacement of predictive models or the addition of new scheduling policies, without major structural changes. The remainder of this chapter outlines the overall system architecture, justifies the chosen technologies and design principles, and describes the concrete implementation of the monitoring client, the statistical learning components, and the simulator setup that collectively form the experimental framework.
 
 \subsection{System Architecture}
 \label{sec:system_architecture}
@@ -25,40 +25,40 @@ This chapter details the technical implementation of the concepts introduced in 
             p{8.2cm}
             }
             \toprule
-            \textbf{Component Category} & \textbf{Software Used}                                   & \textbf{Comments / Functionality}                                                                                              \\
+            \textbf{Component Category} & \textbf{Software Used}                                   & \textbf{Comments / Functionality}                               \\
             \midrule
 
-            \multicolumn{3}{l}{\textbf{Workflow Execution}}                                                                                                                                                                         \\[3pt]
-            Operating System            & Ubuntu 22.04.5 LTS                                       & Base system environment for all components.                                                                                    \\
-            Kernel                      & Linux 5.15.0-143-generic                                 & Provides low-level system resource management.                                                                                 \\
-            Workflow Management Engine  & Nextflow 25.06.0                                         & Controls workflow DAG execution and task dependency resolution.                                                                \\
-            Virtualization Layer        & Docker Engine 28.3.1 (Community)                         & Provides isolated VM environments for task execution.                                                                          \\
-            Resource Manager            & Slurm 24.05.2                                            & Allocates CPU and memory resources dynamically across hosts.                                                                   \\
+            \multicolumn{3}{l}{\textbf{Workflow Execution}}                                                                                                          \\[3pt]
+            Operating System            & Ubuntu 22.04.5 LTS                                       & Base system environment for all components.                     \\
+            Kernel                      & Linux 5.15.0-143-generic                                 & Provides low-level system resource management.                  \\
+            Workflow Management Engine  & Nextflow 25.06.0                                         & Controls workflow DAG execution and task dependency resolution. \\
+            Virtualization Layer        & Docker Engine 28.3.1 (Community)                         & Provides isolated VM environments for task execution.           \\
+            Resource Manager            & Slurm 24.05.2                                            & Allocates CPU and memory resources dynamically across hosts.    \\
 
             \midrule
-            \multicolumn{3}{l}{\textbf{Monitoring System}}                                                                                                                                                                          \\[3pt]
-            Time-Series Database        & Prometheus Server 3.3.1                                  & Central metric collector and time-series database.                                                                             \\
-            Monitoring Client           & Go 1.24.1                                                & Collects per-node and per-container resource metrics.                                                                          \\
+            \multicolumn{3}{l}{\textbf{Monitoring System}}                                                                                                           \\[3pt]
+            Time-Series Database        & Prometheus Server 3.3.1                                  & Central metric collector and time-series database.              \\
+            Monitoring Client           & Go 1.24.1                                                & Collects per-node and per-container resource metrics.           \\
 
             \midrule
-            \multicolumn{3}{l}{\textbf{Workload Experiments}}                                                                                                                                                                       \\[3pt]
-            Benchmark Execution         & stress-ng 0.13.12                                        & Generates controlled CPU, memory, and I/O workloads.                                                                           \\
-            Monitoring                  & Deep-Mon (custom fork) with Python 3.10.12 \& BCC 0.35.0 & Captures resource traces during workload execution.                                                                            \\
+            \multicolumn{3}{l}{\textbf{Workload Experiments}}                                                                                                        \\[3pt]
+            Benchmark Execution         & stress-ng 0.13.12                                        & Generates controlled CPU, memory, and I/O workloads.            \\
+            Monitoring                  & Deep-Mon (custom fork) with Python 3.10.12 \& BCC 0.35.0 & Captures resource traces during workload execution.             \\
 
             \midrule
-            \multicolumn{3}{l}{\textbf{Data Analysis}}                                                                                                                                                                              \\[3pt]
-            Feature Engineering         & Jupyter Kernel 6.29.5, Python 3.10.12, Poetry 2.1.2      & Derives and normalizes temporal task signatures.                                                                               \\
-            Clustering                  & scikit-learn 1.5.2                                       & Groups similar task behaviors into consolidated classes.                                                                       \\
-            KCCA                        & CCA-Zoo 2.5.0                                            & Learns correlations between performance and energy domains.                                                                    \\
-            Random Forest Regressor     & scikit-learn 1.5.2                                       & Predicts runtime and power consumption from task signatures.                                                                   \\
-            Kernel Ridge Regression     & scikit-learn 1.5.2                                       & Baseline model for non-linear regression comparison.                                                                           \\
+            \multicolumn{3}{l}{\textbf{Data Analysis}}                                                                                                               \\[3pt]
+            Feature Engineering         & Jupyter Kernel 6.29.5, Python 3.10.12, Poetry 2.1.2      & Derives and normalizes temporal task signatures.                \\
+            Clustering                  & scikit-learn 1.5.2                                       & Groups similar task behaviors into consolidated classes.        \\
+            KCCA                        & CCA-Zoo 2.5.0                                            & Learns correlations between performance and energy domains.     \\
+            Random Forest Regressor     & scikit-learn 1.5.2                                       & Predicts runtime and power consumption from task signatures.    \\
+            Kernel Ridge Regression     & scikit-learn 1.5.2                                       & Baseline model for non-linear regression comparison.            \\
 
             \midrule
-            \multicolumn{3}{l}{\textbf{Simulation Framework}}                                                                                                                                                                       \\[3pt]
-            Workflow Tracing            & Nextflow Tracer (custom fork)                            & Records execution-level metadata for simulation replay.                                                                        \\
-            Simulation Engine           & WRENCH 2.7 \& C++ 17                                     &                                                                 & Evaluates scheduling strategies under controlled conditions. \\
-            Clustering API              & FastAPI 0.1.0, Python 3.10.12                            & Provides task grouping via ShaReComp integration.                                                                              \\
-            Prediction API              & FastAPI 0.1.0, Python 3.10.12                            & Interfaces learned models for runtime and energy estimation.                                                                   \\
+            \multicolumn{3}{l}{\textbf{Simulation Framework}}                                                                                                        \\[3pt]
+            Workflow Tracing            & Nextflow Tracer (custom fork)                            & Records execution-level metadata for simulation replay.         \\
+            Simulation Engine           & WRENCH 2.7 \& C++17                                      & Evaluates scheduling strategies under controlled conditions.    \\
+            Clustering API              & FastAPI 0.1.0, Python 3.10.12                            & Provides task grouping via ShaReComp integration.               \\
+            Prediction API              & FastAPI 0.1.0, Python 3.10.12                            & Interfaces learned models for runtime and energy estimation.    \\
 
             \bottomrule
         \end{tabular}
@@ -71,57 +71,57 @@ This chapter details the technical implementation of the concepts introduced in 
 The extensibility of the overall system is achieved through a strictly decoupled design that separates monitoring, modeling, and simulation components while maintaining clear communication interfaces between them. Each part of the system can evolve independently without impacting others, enabling modular experimentation with new data sources, predictive models, or scheduling strategies. This modularity supports reproducibility and future extensibility, as new data collection layers or simulation backends can be added by extending well-defined interfaces rather than rewriting existing code.
 \subsubsection{Monitoring Client}
 \label{sec:monitoring_client}
-The monitoring client exemplifies this philosophy by relying on a flexible configuration-driven architecture. Using a YAML-based configuration file, it dynamically defines which metrics to collect from heterogeneous data sources such as Prometheus exporters, cAdvisor, eBPF probes, or SNMP-based sensors. The configuration specifies not only the metric names and queries but also the identifiers and units, allowing seamless adaptation to different environments or workflow engines. This separation of logic and configuration enables the same client to operate across diverse infrastructures without recompilation. The client’s implementation, built on the Prometheus API, abstracts away the complexity of time-range queries and concurrent metric fetching through lightweight threading and synchronization mechanisms. As a result, developers can extend the monitoring framework simply by adding new data sources or metrics to the configuration file, without altering the underlying collection logic.
+The monitoring client exemplifies this philosophy by relying on a flexible configuration-driven architecture. Using a YAML-based configuration file, it dynamically defines which metrics to collect from heterogeneous data sources such as Prometheus exporters, cAdvisor, eBPF probes, or SNMP-based sensors. The configuration specifies not only the metric names and queries but also the identifiers and units, allowing seamless adaptation to different environments or workflow engines. This separation of logic and configuration enables the same client to operate across diverse infrastructures without recompilation. The clients implementation, built on the Prometheus API, abstracts away the complexity of time-range queries and concurrent metric fetching through lightweight threading and synchronization mechanisms. As a result, developers can extend the monitoring framework simply by adding new data sources or metrics to the configuration file, without altering the underlying collection logic.
 
 % Table to show the config file of the monitoring client
-\begin{table}[H]
-    \centering
-    \caption{Adaptable Monitoring Configuration Overview.}
-    \label{tab:monitoring_config_overview}
-    \renewcommand{\arraystretch}{1.15}
-    \resizebox{\textwidth}{!}{
-        \begin{tabular}{
-            p{3.5cm}
-            >{\centering\arraybackslash}p{2cm}
-            p{5cm}
-            p{6cm}
-            }
-            \toprule
-            \textbf{Monitoring Target} & \textbf{Enabled} & \textbf{Supported Data Sources}                         & \textbf{Collected Metric Types / Adaptability Notes}                                                                    \\
-            \midrule
+% \begin{table}[H]
+%     \centering
+%     \caption{Adaptable Monitoring Configuration Overview.}
+%     \label{tab:monitoring_config_overview}
+%     \renewcommand{\arraystretch}{1.15}
+%     \resizebox{\textwidth}{!}{
+%         \begin{tabular}{
+%             p{3.5cm}
+%             >{\centering\arraybackslash}p{2cm}
+%             p{5cm}
+%             p{6cm}
+%             }
+%             \toprule
+%             \textbf{Monitoring Target} & \textbf{Enabled} & \textbf{Supported Data Sources}                         & \textbf{Collected Metric Types / Adaptability Notes}                                                                    \\
+%             \midrule
 
-            Task Metadata              & ✓                & slurm-job-exporter                                      & Collects job metadata (state, runtime, working directory). Can adapt to other job schedulers.                           \\
+%             Task Metadata              & ✓                & slurm-job-exporter                                      & Collects job metadata (state, runtime, working directory). Can adapt to other job schedulers.                           \\
 
-            CPU                        & ✓                & cAdvisor, ebpf-mon, docker-activity                     & Captures CPU time and cycles from both container and kernel levels. Supports switching sources for varying granularity. \\
+%             CPU                        & ✓                & cAdvisor, ebpf-mon, docker-activity                     & Captures CPU time and cycles from both container and kernel levels. Supports switching sources for varying granularity. \\
 
-            Memory                     & ✓                & cAdvisor, docker-activity                               & Tracks memory utilization at container or process level. Configurable for byte- or percentage-based metrics.            \\
+%             Memory                     & ✓                & cAdvisor, docker-activity                               & Tracks memory utilization at container or process level. Configurable for byte- or percentage-based metrics.            \\
 
-            Disk                       & ✓                & cAdvisor                                                & Monitors block I/O and filesystem throughput. Supports extension with storage exporters.                                \\
+%             Disk                       & ✓                & cAdvisor                                                & Monitors block I/O and filesystem throughput. Supports extension with storage exporters.                                \\
 
-            Network                    & ✗                & cAdvisor (optional)                                     & Disabled by default due to noise. Can be enabled for network-intensive workflows.                                       \\
+%             Network                    & ✗                & cAdvisor (optional)                                     & Disabled by default due to noise. Can be enabled for network-intensive workflows.                                       \\
 
-            Energy                     & ✓                & docker-activity, ebpf-mon, ipmi-exporter, snmp-exporter & Multi-layer energy monitoring from container to node level. Adaptable to hardware sensors and external power meters.    \\
+%             Energy                     & ✓                & docker-activity, ebpf-mon, ipmi-exporter, snmp-exporter & Multi-layer energy monitoring from container to node level. Adaptable to hardware sensors and external power meters.    \\
 
-            \midrule
-            \multicolumn{4}{l}{\textbf{Prometheus Configuration}}                                                                                                                                                                             \\[3pt]
-            \multicolumn{4}{p{16.5cm}}{
-                The Prometheus backend collects all metrics via configurable scrape intervals and targets. Controller and worker nodes can be flexibly defined, enabling distributed monitoring setups.
-            }                                                                                                                                                                                                                                 \\
+%             \midrule
+%             \multicolumn{4}{l}{\textbf{Prometheus Configuration}}                                                                                                                                                                             \\[3pt]
+%             \multicolumn{4}{p{16.5cm}}{
+%                 The Prometheus backend collects all metrics via configurable scrape intervals and targets. Controller and worker nodes can be flexibly defined, enabling distributed monitoring setups.
+%             }                                                                                                                                                                                                                                 \\
 
-            \bottomrule
-        \end{tabular}
-    }
-\end{table}
+%             \bottomrule
+%         \end{tabular}
+%     }
+% \end{table}
 
 % I think i dont need it here.
 % \subsubsection{Resource Contention Measurements}
 % \label{sec:resource_contention_measurements}
 % % Part of it can also be used for the System Overview because it's way too much detail here.
-% The post-processing pipeline operates on two in-memory registries populated during execution: a container-level log of isolated runs and a container-level log of co-located runs. Each record carries a stable workload label, a unique container identifier, the measured wall-clock lifetime derived from Docker start/finish timestamps, and, where available, the mean power traced by the monitoring stack. Pair membership for co-located experiments is encoded via a grouping key that is attached to both containers in a pair. After all runs complete, the aggregator performs a single pass over the co-located registry and folds entries into a pair-centric dictionary. The first container encountered for a given pair initializes the row with its workload identity and its co-located and isolated measurements resolved via a label join against the isolated registry; the second container completes the row with its counterpart’s values. This guarantees that each summary row is self-contained: it holds two isolated baselines and the two co-located measurements produced in the same experiment, keyed by the exact workloads that were paired.
-% On top of this consolidated representation, the code derives two scalar indicators that capture interference and complementarity. Slowdown is computed by contrasting, for each workload, its isolated runtime and power with the corresponding co-located values and then averaging both perspectives into a single number, so a pair’s slowdown summarizes the symmetric penalty of sharing. Affinity aggregates the same evidence in a benefit-centric way by comparing the sum of isolated runtime and power against the observed totals under co-location; values closer to one indicate that the pair behaves nearly additively, while higher values signal that the combination degrades either time-to-completion or power efficiency. The implementation only emits these aggregates when a pair row is complete and all numeric fields are present; otherwise the row is left unscored so that downstream statistics and learning are trained on consistent, gap-free observations.
-% Runtime and power measurements are anchored directly in the container engine to avoid clock skew and sampling artifacts. For every container, the start and finish timestamps are parsed from Docker’s RFC-3339 strings with microsecond precision and converted into lifetimes by subtraction. Power is attached after the run by scanning the monitoring output directory tree, pruning unrelated subfolders, and computing the per-container mean over the retained time series. Because the registries store both the container identifiers and the stable workload labels, the join between isolated baselines and co-located outcomes is deterministic even when multiple instances of the same workload are present.
-% To characterize contention mechanisms more precisely, the harness also runs host-level and cross-resource microbenchmarks and captures their native outputs. CPU pressure is exercised with stress-ng using matrix multiplication workers; memory pressure is generated via stress-ng’s virtual memory allocators; storage pressure is created with fio in direct-I/O mode, including io_uring engines and tuned queue depths. Each benchmark is launched as a Docker container with explicit CPU pinning through cpuset masks, and privileged mode is enabled where kernel features (e.g., io_uring) require it. For these runs, the wrapper blocks until completion, reloads container metadata, computes lifetimes from start/finish timestamps, and then retrieves and stores the raw benchmark logs. This yields both a normalized lifetime metric used by the aggregator and the original tool readouts for auditing and drill-down.
-% The co-location experiments cover complementary and competing pairings by binding containers either to the same physical core’s sibling threads or to disjoint CPU ranges representing different NUMA domains. CPU–memory, memory–I/O, and CPU–I/O pairs are executed in both directions, as well as homogeneous pairs, to expose asymmetries in interference. Because every container record carries its pairing key, the summarizer can reconstruct per-pair outcomes regardless of execution order and without relying on wall-clock correlation. The result is a technically minimal but robust measurement stack: lifetimes are computed from engine timestamps, power is reduced from per-container traces, logs are persisted for verification, and all metrics are funneled into pair-centric rows from which slowdown and affinity are derived consistently.
+% The post-processing pipeline operates on two in-memory registries populated during execution: a container-level log of isolated runs and a container-level log of co-located runs. Each record carries a stable workload label, a unique container identifier, the measured wall-clock lifetime derived from Docker start/finish timestamps, and, where available, the mean power traced by the monitoring stack. Pair membership for co-located experiments is encoded via a grouping key that is attached to both containers in a pair. After all runs complete, the aggregator performs a single pass over the co-located registry and folds entries into a pair-centric dictionary. The first container encountered for a given pair initializes the row with its workload identity and its co-located and isolated measurements resolved via a label join against the isolated registry; the second container completes the row with its counterpart's values. This guarantees that each summary row is self-contained: it holds two isolated baselines and the two co-located measurements produced in the same experiment, keyed by the exact workloads that were paired.
+% On top of this consolidated representation, the code derives two scalar indicators that capture interference and complementarity. Slowdown is computed by contrasting, for each workload, its isolated runtime and power with the corresponding co-located values and then averaging both perspectives into a single number, so a pair's slowdown summarizes the symmetric penalty of sharing. Affinity aggregates the same evidence in a benefit-centric way by comparing the sum of isolated runtime and power against the observed totals under co-location; values closer to one indicate that the pair behaves nearly additively, while higher values signal that the combination degrades either time-to-completion or power efficiency. The implementation only emits these aggregates when a pair row is complete and all numeric fields are present; otherwise the row is left unscored so that downstream statistics and learning are trained on consistent, gap-free observations.
+% Runtime and power measurements are anchored directly in the container engine to avoid clock skew and sampling artifacts. For every container, the start and finish timestamps are parsed from Docker's RFC-3339 strings with microsecond precision and converted into lifetimes by subtraction. Power is attached after the run by scanning the monitoring output directory tree, pruning unrelated subfolders, and computing the per-container mean over the retained time series. Because the registries store both the container identifiers and the stable workload labels, the join between isolated baselines and co-located outcomes is deterministic even when multiple instances of the same workload are present.
+% To characterize contention mechanisms more precisely, the harness also runs host-level and cross-resource microbenchmarks and captures their native outputs. CPU pressure is exercised with stress-ng using matrix multiplication workers; memory pressure is generated via stress-ng's virtual memory allocators; storage pressure is created with fio in direct-I/O mode, including io_uring engines and tuned queue depths. Each benchmark is launched as a Docker container with explicit CPU pinning through cpuset masks, and privileged mode is enabled where kernel features (e.g., io_uring) require it. For these runs, the wrapper blocks until completion, reloads container metadata, computes lifetimes from start/finish timestamps, and then retrieves and stores the raw benchmark logs. This yields both a normalized lifetime metric used by the aggregator and the original tool readouts for auditing and drill-down.
+% The co-location experiments cover complementary and competing pairings by binding containers either to the same physical core's sibling threads or to disjoint CPU ranges representing different NUMA domains. CPU-memory, memory-I/O, and CPU-I/O pairs are executed in both directions, as well as homogeneous pairs, to expose asymmetries in interference. Because every container record carries its pairing key, the summarizer can reconstruct per-pair outcomes regardless of execution order and without relying on wall-clock correlation. The result is a technically minimal but robust measurement stack: lifetimes are computed from engine timestamps, power is reduced from per-container traces, logs are persisted for verification, and all metrics are funneled into pair-centric rows from which slowdown and affinity are derived consistently.
 
 \subsubsection{Bridged Gap between Simulation and Statistical Models}
 \label{sec:statistical_modeling}

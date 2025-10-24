@@ -13,7 +13,7 @@ To collect accurate power usage data, the node was connected to a 12-way switche
 % Table with different workflows and their characteristics
 \begin{table}[H]
     \centering
-    \caption{Overview of evaluated nf-core workflows and their input–output characteristics.}
+    \caption{Overview of evaluated nf-core workflows and their inputoutput characteristics.}
     \label{tab:workflow_overview}
     \renewcommand{\arraystretch}{1.15}
     \resizebox{\textwidth}{!}{
@@ -44,61 +44,61 @@ To collect accurate power usage data, the node was connected to a 12-way switche
 \subsubsection{Monitoring Configuration}
 \label{sec:evaluation_monitoring_configuration}
 % Table with different combinations
-\begin{table}[H]
-    \centering
-    \caption{Adaptable Monitoring Configuration Overview.}
-    \label{tab:monitoring_config_overview}
-    \renewcommand{\arraystretch}{1.15}
-    \resizebox{\textwidth}{!}{
-        \begin{tabular}{
-            p{3.5cm}
-            >{\centering\arraybackslash}p{2cm}
-            p{5cm}
-            p{6cm}
-            }
-            \toprule
-            \textbf{Monitoring Target} & \textbf{Enabled} & \textbf{Supported Data Sources}                         & \textbf{Collected Metric Types / Adaptability Notes}                                                                    \\
-            \midrule
+% \begin{table}[H]
+%     \centering
+%     \caption{Adaptable Monitoring Configuration Overview.}
+%     \label{tab:monitoring_config_overview}
+%     \renewcommand{\arraystretch}{1.15}
+%     \resizebox{\textwidth}{!}{
+%         \begin{tabular}{
+%             p{3.5cm}
+%             >{\centering\arraybackslash}p{2cm}
+%             p{5cm}
+%             p{6cm}
+%             }
+%             \toprule
+%             \textbf{Monitoring Target} & \textbf{Enabled} & \textbf{Supported Data Sources}                         & \textbf{Collected Metric Types / Adaptability Notes}                                                                    \\
+%             \midrule
 
-            Task Metadata              & ✓                & slurm-job-exporter                                      & Collects job metadata (state, runtime, working directory). Can adapt to other job schedulers.                           \\
+%             Task Metadata              & ✓                & slurm-job-exporter                                      & Collects job metadata (state, runtime, working directory). Can adapt to other job schedulers.                           \\
 
-            CPU                        & ✓                & cAdvisor, ebpf-mon, docker-activity                     & Captures CPU time and cycles from both container and kernel levels. Supports switching sources for varying granularity. \\
+%             CPU                        & ✓                & cAdvisor, ebpf-mon, docker-activity                     & Captures CPU time and cycles from both container and kernel levels. Supports switching sources for varying granularity. \\
 
-            Memory                     & ✓                & cAdvisor, docker-activity                               & Tracks memory utilization at container or process level. Configurable for byte- or percentage-based metrics.            \\
+%             Memory                     & ✓                & cAdvisor, docker-activity                               & Tracks memory utilization at container or process level. Configurable for byte- or percentage-based metrics.            \\
 
-            Disk                       & ✓                & cAdvisor                                                & Monitors block I/O and filesystem throughput. Supports extension with storage exporters.                                \\
+%             Disk                       & ✓                & cAdvisor                                                & Monitors block I/O and filesystem throughput. Supports extension with storage exporters.                                \\
 
-            Network                    & ✗                & cAdvisor (optional)                                     & Disabled by default due to noise. Can be enabled for network-intensive workflows.                                       \\
+%             Network                    & ✗                & cAdvisor (optional)                                     & Disabled by default due to noise. Can be enabled for network-intensive workflows.                                       \\
 
-            Energy                     & ✓                & docker-activity, ebpf-mon, ipmi-exporter, snmp-exporter & Multi-layer energy monitoring from container to node level. Adaptable to hardware sensors and external power meters.    \\
+%             Energy                     & ✓                & docker-activity, ebpf-mon, ipmi-exporter, snmp-exporter & Multi-layer energy monitoring from container to node level. Adaptable to hardware sensors and external power meters.    \\
 
-            \midrule
-            \multicolumn{4}{l}{\textbf{Prometheus Configuration}}                                                                                                                                                                             \\[3pt]
-            \multicolumn{4}{p{16.5cm}}{
-                The Prometheus backend collects all metrics via configurable scrape intervals and targets. Controller and worker nodes can be flexibly defined, enabling distributed monitoring setups.
-            }                                                                                                                                                                                                                                 \\
+%             \midrule
+%             \multicolumn{4}{l}{\textbf{Prometheus Configuration}}                                                                                                                                                                             \\[3pt]
+%             \multicolumn{4}{p{16.5cm}}{
+%                 The Prometheus backend collects all metrics via configurable scrape intervals and targets. Controller and worker nodes can be flexibly defined, enabling distributed monitoring setups.
+%             }                                                                                                                                                                                                                                 \\
 
-            \bottomrule
-        \end{tabular}
-    }
-\end{table}
+%             \bottomrule
+%         \end{tabular}
+%     }
+% \end{table}
 
 \subsubsection{Statistical Models for Clustering and Prediction}
 \label{sec:evaluation_statistical_learning_methods}
 % TODO: Add references to the chapters.
-As described in Chapter 5, the statistical models—including the clustering and prediction components—are provided through a FastAPI implementation, allowing external simulation engines to interact with them programmatically. At the same time, the core functionality of the coloc-app FastAPI service is based on a Jupyter Notebook that contains all implementations of the clustering and predictive models discussed in Chapter 5. Both the notebook and the coloc-app were executed on the host system described in Section \ref{sec:evaluation_infrastructure}.
+As described in Chapter 5, the statistical models—including the clustering and prediction components—are provided through a FastAPI implementation, allowing external simulation engines to interact with them programmatically. At the same time, the core functionality of the coloc-app FastAPI service is based on a Jupyter Notebook that contains all implementations of the clustering and predictive models discussed in Chapter 5. Both the notebook and the coloc-app were executed on the host system described in Section %\ref{sec:evaluation_infrastructure}.
 
 \subsubsection{Simulation Configuration}
 \label{sec:evaluation_simulation_configuration}
 
-The infrastructure described in Section \ref{sec:evaluation_infrastructure} was replicated within the SimGrid simulation environment using its platform description tool, as shown in the following XML configuration. The host’s core performance was calibrated by executing stress-ng benchmarks to determine realistic CPU speeds, while network throughput was measured using sysbench. To determine power states (P-states), the GUDE power meter was used to record power consumption in both idle and active conditions under varying load profiles generated with stress-ng. This procedure ensured that the simulated environment accurately reflected the performance and energy characteristics of the physical test system.
+The infrastructure described in Section %\ref{sec:evaluation_infrastructure} was replicated within the SimGrid simulation environment using its platform description tool, as shown in the following XML configuration. The hosts core performance was calibrated by executing stress-ng benchmarks to determine realistic CPU speeds, while network throughput was measured using sysbench. To determine power states (P-states), the GUDE power meter was used to record power consumption in both idle and active conditions under varying load profiles generated with stress-ng. This procedure ensured that the simulated environment accurately reflected the performance and energy characteristics of the physical test system.
 
 % Platform XML file 
-\lstinputlisting[
-    language=XML,
-    caption={Example XML Configuration File},
-    label={lst:xml_config}
-]{../fig/05/siena_cluster.xml}
+% \lstinputlisting[
+%     language=XML,
+%     caption={Example XML Configuration File},
+%     label={lst:xml_config}
+% ]{../fig/05/siena_cluster.xml}
 
 \subsection{Experiment Results}
 \label{sec:experiment_results}
@@ -107,41 +107,41 @@ The section on experimental results is organized as follows. We begin with a bri
 \label{sec:monitoring_statistics}
 
 % Table with results for the test-runs
-\begin{table}[H]
-    \centering
-    \caption{Monitored workflow coverage and task capture statistics.}
-    \label{tab:workflow_capture}
-    \renewcommand{\arraystretch}{1.15}
-    \resizebox{\textwidth}{!}{
-        \begin{tabular}{
-            p{3.5cm}
-            >{\centering\arraybackslash}p{3cm}
-            >{\centering\arraybackslash}p{3cm}
-            p{8cm}
-            }
-            \toprule
-            \textbf{Workflow}     & \textbf{Total Tasks} & \textbf{Captured Tasks} & \textbf{Comments}                                                     \\
-            \midrule
-            \texttt{atacseq}      & 72                   & 69                      & Nearly full capture; minor loss due to transient Docker task cleanup. \\
-            \texttt{chipseq}      & 68                   & 66                      & All major processing steps recorded; minor log rotation gap observed. \\
-            \texttt{rnaseq}       & 54                   & 54                      & Full task coverage with clean monitoring traces.                      \\
-            \texttt{scnanoseq}    & 83                   & 77                      & Some parallel tasks missed due to ephemeral container lifetimes.      \\
-            \texttt{smrnaseq}     & 59                   & 57                      & Stable capture; short-lived indexing steps occasionally dropped.      \\
-            \texttt{pixelator}    & 44                   & 44                      & All tasks captured; stable workflow execution.                        \\
-            \texttt{methylseq}    & 65                   & 63                      & Minor variance in monitoring delay for large alignment jobs.          \\
-            \texttt{viralrecon}   & 51                   & 50                      & Near-complete capture; few network I/O metrics missing.               \\
-            \texttt{oncoanalyser} & 97                   & 90                      & Long runtime tasks occasionally exceeded monitoring buffer window.    \\
-            \bottomrule
-        \end{tabular}
-    }
-\end{table}
+% \begin{table}[H]
+%     \centering
+%     \caption{Monitored workflow coverage and task capture statistics.}
+%     \label{tab:workflow_capture}
+%     \renewcommand{\arraystretch}{1.15}
+%     \resizebox{\textwidth}{!}{
+%         \begin{tabular}{
+%             p{3.5cm}
+%             >{\centering\arraybackslash}p{3cm}
+%             >{\centering\arraybackslash}p{3cm}
+%             p{8cm}
+%             }
+%             \toprule
+%             \textbf{Workflow}     & \textbf{Total Tasks} & \textbf{Captured Tasks} & \textbf{Comments}                                                     \\
+%             \midrule
+%             \texttt{atacseq}      & 72                   & 69                      & Nearly full capture; minor loss due to transient Docker task cleanup. \\
+%             \texttt{chipseq}      & 68                   & 66                      & All major processing steps recorded; minor log rotation gap observed. \\
+%             \texttt{rnaseq}       & 54                   & 54                      & Full task coverage with clean monitoring traces.                      \\
+%             \texttt{scnanoseq}    & 83                   & 77                      & Some parallel tasks missed due to ephemeral container lifetimes.      \\
+%             \texttt{smrnaseq}     & 59                   & 57                      & Stable capture; short-lived indexing steps occasionally dropped.      \\
+%             \texttt{pixelator}    & 44                   & 44                      & All tasks captured; stable workflow execution.                        \\
+%             \texttt{methylseq}    & 65                   & 63                      & Minor variance in monitoring delay for large alignment jobs.          \\
+%             \texttt{viralrecon}   & 51                   & 50                      & Near-complete capture; few network I/O metrics missing.               \\
+%             \texttt{oncoanalyser} & 97                   & 90                      & Long runtime tasks occasionally exceeded monitoring buffer window.    \\
+%             \bottomrule
+%         \end{tabular}
+%     }
+% \end{table}
 
 \subsubsection{Resource Contention Analysis}
 \label{sec:resource_contention_analysis}
 % Put figures in here and discuss shortly the reasons.
 
 \subsubsection{Statistical Learning Methods}
-\label{sec:evaluation_statistical_learning_methods}
+% \label{sec:evaluation_statistical_learning_methods}
 
 
 \paragraph{Task Consolidation}
@@ -149,79 +149,79 @@ The section on experimental results is organized as follows. We begin with a bri
 % Radar plots of atacseq or other pipelines with showing the cluster from 40 samples and describing the differences in the cluster formation in accordance to the workload experiments from the previous section.
 
 % Summary Statistics table that show difference for all workflows compared random clustering with sharecomp.
-\begin{table}[H]
-    \centering
-    \caption{Average inter-cluster difference comparison between ShaReComp and random clustering across workflows.}
-    \label{tab:cluster_difference}
-    \renewcommand{\arraystretch}{1.15}
-    \resizebox{\textwidth}{!}{
-        \begin{tabular}{
-            p{3.5cm}
-            >{\centering\arraybackslash}p{3cm}
-            >{\centering\arraybackslash}p{4cm}
-            >{\centering\arraybackslash}p{4cm}
-            }
-            \toprule
-            \textbf{Workflow}     & \textbf{Number of Tasks} & \textbf{Avg. ShaReComp Cluster Difference} & \textbf{Avg. Random Cluster Difference} \\
-            \midrule
-            \texttt{atacseq}      & 72                       & 0.214                                      & 0.482                                   \\
-            \texttt{chipseq}      & 68                       & 0.237                                      & 0.495                                   \\
-            \texttt{rnaseq}       & 54                       & 0.201                                      & 0.468                                   \\
-            \texttt{scnanoseq}    & 83                       & 0.225                                      & 0.510                                   \\
-            \texttt{smrnaseq}     & 59                       & 0.208                                      & 0.490                                   \\
-            \texttt{pixelator}    & 44                       & 0.190                                      & 0.455                                   \\
-            \texttt{methylseq}    & 65                       & 0.232                                      & 0.503                                   \\
-            \texttt{viralrecon}   & 51                       & 0.216                                      & 0.487                                   \\
-            \texttt{oncoanalyser} & 97                       & 0.240                                      & 0.525                                   \\
-            \bottomrule
-        \end{tabular}
-    }
-\end{table}
+% \begin{table}[H]
+%     \centering
+%     \caption{Average inter-cluster difference comparison between ShaReComp and random clustering across workflows.}
+%     \label{tab:cluster_difference}
+%     \renewcommand{\arraystretch}{1.15}
+%     \resizebox{\textwidth}{!}{
+%         \begin{tabular}{
+%             p{3.5cm}
+%             >{\centering\arraybackslash}p{3cm}
+%             >{\centering\arraybackslash}p{4cm}
+%             >{\centering\arraybackslash}p{4cm}
+%             }
+%             \toprule
+%             \textbf{Workflow}     & \textbf{Number of Tasks} & \textbf{Avg. ShaReComp Cluster Difference} & \textbf{Avg. Random Cluster Difference} \\
+%             \midrule
+%             \texttt{atacseq}      & 72                       & 0.214                                      & 0.482                                   \\
+%             \texttt{chipseq}      & 68                       & 0.237                                      & 0.495                                   \\
+%             \texttt{rnaseq}       & 54                       & 0.201                                      & 0.468                                   \\
+%             \texttt{scnanoseq}    & 83                       & 0.225                                      & 0.510                                   \\
+%             \texttt{smrnaseq}     & 59                       & 0.208                                      & 0.490                                   \\
+%             \texttt{pixelator}    & 44                       & 0.190                                      & 0.455                                   \\
+%             \texttt{methylseq}    & 65                       & 0.232                                      & 0.503                                   \\
+%             \texttt{viralrecon}   & 51                       & 0.216                                      & 0.487                                   \\
+%             \texttt{oncoanalyser} & 97                       & 0.240                                      & 0.525                                   \\
+%             \bottomrule
+%         \end{tabular}
+%     }
+% \end{table}
 
 \paragraph{Task Cluster Runtime and Energy Prediction}
 \label{sec:evaluation_task_cluster_runtime_and_energy_prediction}
 % Table with prediction results based on basic metrics
-\begin{table}[H]
-    \centering
-    \caption{Summary of model configurations and performance metrics for task-level prediction.}
-    \label{tab:model_summary}
-    \renewcommand{\arraystretch}{1.15}
-    \resizebox{\textwidth}{!}{
-        \begin{tabular}{
-            p{3.2cm}
-            >{\centering\arraybackslash}p{2cm}
-            >{\centering\arraybackslash}p{4cm}
-            >{\centering\arraybackslash}p{2cm}
-            >{\centering\arraybackslash}p{3cm}
-            p{7cm}
-            }
-            \toprule
-            \textbf{Workflow Tasks}                                                                                          & \textbf{Model Type}                     & \textbf{Hyperparameters} & \textbf{R\textsuperscript{2}} & \textbf{Cross-Validation} & \textbf{Comments} \\
-            \midrule
-            549                                                                                                              & \texttt{KCCA + Kernel Ridge Regression} &
-            Kernel = laplacian, latent\_dim = 2                                                                              &
-            0.25                                                                                                             &
-            5-fold (KFold, shuffle=True, seed=42)                                                                            &
-            Used canonical correlation features; selected via GridSearchCV across 7 kernels. Combined with Kernel Ridge Regression for final prediction of runtime and power. Moderate performance due to cross-domain variance.                                                  \\
+% \begin{table}[H]
+%     \centering
+%     \caption{Summary of model configurations and performance metrics for task-level prediction.}
+%     \label{tab:model_summary}
+%     \renewcommand{\arraystretch}{1.15}
+%     \resizebox{\textwidth}{!}{
+%         \begin{tabular}{
+%             p{3.2cm}
+%             >{\centering\arraybackslash}p{2cm}
+%             >{\centering\arraybackslash}p{4cm}
+%             >{\centering\arraybackslash}p{2cm}
+%             >{\centering\arraybackslash}p{3cm}
+%             p{7cm}
+%             }
+%             \toprule
+%             \textbf{Workflow Tasks}                                                                                          & \textbf{Model Type}                     & \textbf{Hyperparameters} & \textbf{R\textsuperscript{2}} & \textbf{Cross-Validation} & \textbf{Comments} \\
+%             \midrule
+%             549                                                                                                              & \texttt{KCCA + Kernel Ridge Regression} &
+%             Kernel = laplacian, latent\_dim = 2                                                                              &
+%             0.25                                                                                                             &
+%             5-fold (KFold, shuffle=True, seed=42)                                                                            &
+%             Used canonical correlation features; selected via GridSearchCV across 7 kernels. Combined with Kernel Ridge Regression for final prediction of runtime and power. Moderate performance due to cross-domain variance.                                                  \\
 
-            \midrule
-            549                                                                                                              & \texttt{Random Forest (Runtime)}        &
-            n\_estimators ∈ [200, 2000], max\_depth ∈ [10, 110], max\_features ∈ \{log2, sqrt\}, bootstrap ∈ \{True, False\} &
-            0.50                                                                                                             &
-            7-fold (RandomizedSearchCV)                                                                                      &
-            Achieved best runtime prediction accuracy of 27.66\%. Mean absolute error: 12.36 units. Good balance between model complexity and generalization.                                                                                                                     \\
+%             \midrule
+%             549                                                                                                              & \texttt{Random Forest (Runtime)}        &
+%             n\_estimators ∈ [200, 2000], max\_depth ∈ [10, 110], max\_features ∈ \{log2, sqrt\}, bootstrap ∈ \{True, False\} &
+%             0.50                                                                                                             &
+%             7-fold (RandomizedSearchCV)                                                                                      &
+%             Achieved best runtime prediction accuracy of 27.66\%. Mean absolute error: 12.36 units. Good balance between model complexity and generalization.                                                                                                                     \\
 
-            \midrule
-            549                                                                                                              & \texttt{Random Forest (Power)}          &
-            n\_estimators ∈ [200, 2000], same grid as runtime model                                                          &
-            0.14                                                                                                             &
-            7-fold (RandomizedSearchCV)                                                                                      &
-            Lower fit due to higher variance in power traces. Mean absolute error (baseline): 124.65 units. Captures coarse-grained power patterns but limited fine-grained accuracy.                                                                                             \\
+%             \midrule
+%             549                                                                                                              & \texttt{Random Forest (Power)}          &
+%             n\_estimators ∈ [200, 2000], same grid as runtime model                                                          &
+%             0.14                                                                                                             &
+%             7-fold (RandomizedSearchCV)                                                                                      &
+%             Lower fit due to higher variance in power traces. Mean absolute error (baseline): 124.65 units. Captures coarse-grained power patterns but limited fine-grained accuracy.                                                                                             \\
 
-            \bottomrule
-        \end{tabular}
-    }
-\end{table}
+%             \bottomrule
+%         \end{tabular}
+%     }
+% \end{table}
 
 \subsubsection{Workflow Makespan and Energy Consumption}
 \label{sec:workflow_makespan_and_energy_consumption}
