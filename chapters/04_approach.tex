@@ -2,15 +2,16 @@
 \label{cha:approach}
 % TODO: Add references to the sections and prior chapters.
 % Section: OK
-The following section systematically outlines the methodological approach of this thesis. While concrete implementation details and technology-specific decisions are discussed in the subsequent chapter, this section focuses on establishing the theoretical foundation that builds upon the concepts introduced in the background. The proposed research problem is addressed through a threefold decomposition. First, a data collection phase captures detailed execution metrics from scientific workflow runs. Second, this collected data undergoes in-depth analysis to identify relevant performance characteristics and relationships. Finally, the insights derived from this analysis are employed in the simulation and algorithmic modeling phase, where various co-location strategies are evaluated to study their effects on performance and energy efficiency.
+The following section outlines the methodological approach of this thesis. While concrete implementation details are discussed in the subsequent chapter, this section focuses on establishing the theoretical foundation that builds upon the concepts introduced in the background.
+The structure of this chapter is organized according to the steps in \ref{fig:approach_overview} and begins with outlining the central objective of the thesis. There follows a set of assumptions to delimit the scope, applicability, and limitations of the proposed approach before the different steps are explained in detail.
 
-The structure of this chapter is organized as follows. After defining the problem statement, a general overview of the methodological approach adopted in this work is presented. Subsequently, a set of assumptions is introduced to clearly delimit the scope, applicability, and limitations of the proposed approach. The chapter then begins with the discussion of online scientific workflow task monitoring, detailing how execution data is collected and structured for further analysis. This is followed by an in-depth explanation of the data analysis phase, focusing on matching task entities from different monitoring sources and leveraging this unified data for statistical exploration. The analysis section begins with embedding methodologies and supervised learning, encompassing data preprocessing and predictive modeling techniques. Thereafter, the focus shifts to unsupervised learning, specifically addressing task clustering as applied in this work. The chapter concludes with a detailed presentation of the theoretical approach to the simulation environment, outlining the main conceptual framework, heuristic design principles for scientific workflow scheduling, the definition of baseline algorithms, and the algorithms devised to implement the novel online co-location strategies developed in this thesis.
-
-\subsection{Central Objective}
+\subsection{Central Objective - Modelling of Task Co-location}
 \label{sec:problem_statement}
 % Section: OK
-The central objective of this work is inspired by the design proposed in \cite{5644899}, where task co-location is formulated as a consolidation and clustering problem within a virtualized computing environment. The goal is to consolidate workflow tasks—subject to the structural constraints imposed by the workflows Directed Acyclic Graph (DAG)—onto virtualized machines in such a way that their resource usage profiles complement each other, thereby achieving energy-aware execution. While \cite{5644899} approaches this problem statically, determining task clusters and node assignments prior to workflow execution, this thesis extends the problem to a dynamic, online setting.
-In contrast to the static mapping-based approach, this work integrates co-location directly into the task mapping and scheduling process, arguing that co-location and scheduling are inherently interdependent and should be addressed in a unified way rather than separate optimization problems. Consequently, the formulated problem becomes an online co-location problem, where workflow tasks must be characterized before execution in order to enable contention-aware co-location decisions at runtime. The co-location in this context operates at the virtual container level, specifically focusing on virtual machines hosted on physical servers, while contention effects between virtual machines themselves are considered beyond the scope of this thesis.
+The central objective of this work is to formally model the co-location of workflow tasks and further determine how this information can be applied during workflow execution, thereby achieving improved energy efficiency.
+While this work builds upon the fundamental approach to co-locaiton of \cite{5644899} we want to specifically examine how co-location can be directly integrated into the dynamic scheduling and task mapping process, arguing that co-location and scheduling are inherently interdependent and should be addressed in a unified way. Consequently, we characterize workflow tasks before execution in order to enable contention-aware co-location decisions at runtime. The co-location in this context operates at the virtual container level, specifically focusing on virtual machines hosted on physical servers. Furthermore, we extend the question of which tasks to co-locate by the need of knowing how the performance behavior of co-located tasks can be learned and show possible means of making this knowledge accessible to resource managers.
+
+The proposed research problem as introduced in \ref{subse:problem_motivation_description} is decomposed into six steps, seen in \ref{fig:approach_overview}. First, a data collection phase captures detailed execution metrics from scientific workflow runs. Second, this collected data undergoes structural treatment and formatting to identify relevant performance characteristics. Thirdly, the data is used to represent temporal behavior of a workflow task. This representation allows for comparison between a set of tasks to capture differences in their resource usage profiles over time and thus cluster tasks if they differ in their behavior. Step 4 arranges the collected data from step 1 in a slightly different way suitable for learning the relationship between task behavior and the resulting runtime and energy consumption. Finally, step 5 and 6 discover how the theoretical approach of step 3 can be brought into action during workflow execution and how the potential benefits of this approach can be evaluated.
 
 % Approach Overview Figure
 \begin{figure}[htbp]
@@ -23,27 +24,25 @@ In contrast to the static mapping-based approach, this work integrates co-locati
 \subsubsection{Assumptions}
 \label{sec:assumptions}
 % Section: OK
-To clearly outline the scope, boundaries, and methodological constraints of this work, the following guiding assumptions were defined:
+To outline the scope, boundaries, and methodological constraints of this work, the following guiding assumptions were defined:
 
 \begin{enumerate}
-    \item \textbf{Monitoring Configuration Limits}: A maximum of 80 monitoring features per workflow task is imposed to ensure manageable execution times and allow for statistical evaluation across varying monitoring configurations. This restriction underscores the need for future work to investigate the influence of monitoring data quality and dimensionality on predictive performance.
-    \item \textbf{Monitoring Data Coverage}: Short-lived tasks (typically under one second) are only partially captured or occasionally missed due to system load and sampling intervals exceeding one second.
-    \item \textbf{Offline Data Analysis}: All data preprocessing, model training, hyperparameter tuning, and fitting are performed offline after workflow execution. The resulting trained models are then transformed into a suitable format for integration into the simulation environment. Nevertheless remains the co-locaiton approach online during simulation accessing the data gathered during prior execution.
-    \item Simulation Environment and Platform Equivalence: The simulated platform is assumed to approximate the physical execution environment. It is expected that the overall behavior observed in simulation aligns with real-world execution trends.
-    \item Simulation Capabilities and Contention Modeling: The WRENCH framework currently supports simulation of memory contention by limiting per-Host memory consumption, where exceeding the limit results in extended task execution times. Similarly, CPU contention is modeled through proportional increases in task runtime. Other low-level contention effects like cache interference, interconnect bottlenecks, or I/O contention are not modeled in this iteration.
-    \item Energy Model Assumptions: The energy model provided by SimGrid is assumed to realistically approximate energy consumption variations when tasks with differing resource usage profiles are colocated on the same virtual machine. The impact on energy efficiency is attributed to CPU utilization behavior and derived from the platform description where different load levels map to consumed energy amount.
-    \item Evaluation Focus: Co-location efficiency is evaluated primarily through per-host energy consumption over time, total workflow energy usage, and overall makespan, which serve as the main indicators of effective virtual machine co-location.
+    \item \textbf{Monitoring Configuration Limits}:  Workflow tasks are described by 80 monitoring features. This work does not investigate the influence of monitoring data dimensionality on clustering and predictive performance.
+    \item \textbf{Monitoring Data Coverage}: Short-lived tasks under one second are only partially captured or occasionally missed due to high system load and sampling intervals exceeding one second during workflow execution.
+    \item \textbf{Offline Data Analysis}: The data preprocessing and predictive model fitting are performed offline after workflow execution. The co-location clustering algorithm is evaluated offline but also transformed into a suitable format for integration into the simulation environment.
+    \item \textbf{Simulation Environment and Platform Equivalence}: The simulated platform is assumed to approximate the physical execution environment. It is expected that the overall behavior observed in simulation aligns with real-world execution trends.
+    \item \textbf{Simulation Capabilities and Contention Modelling}: The WRENCH framework currently supports simulation of memory contention by limiting per-Host memory consumption, where exceeding the limit results in extended task execution times. Similarly, CPU contention is modeled through proportional increases in task runtime. Other low-level contention effects like cache interference, interconnect bottlenecks, or I/O contention are not modeled in this iteration. The energy model provided by SimGrid is assumed to realistically approximate energy consumption variations when tasks with differing resource usage profiles are co-located on the same virtual machine. The impact on energy efficiency is attributed to CPU utilization behavior and derived from the platform description where different load levels map to consumed energy amount.
 \end{enumerate}
 
 \subsection{Online Task Monitoring}
 \label{sec:online_task_monitoring}
 
-The online task monitoring approach builds on a hierarchical monitoring architecture that tries to captures a wide spectrum of metrics relevant to the execution of scientific workflows. The design is inspired by \cite{Bader_2022} targeting a four-layered structure consisting of the Resource Manager, Workflow, Machine, and Task layers. Each layer represents a distinct abstraction level in the workflow execution environment and provides valuable insights into different aspects of performance and resource utilization.
+The online task monitoring approach builds on a hierarchical architecture that tries to capture a wide spectrum of metrics relevant to the execution of scientific workflows. The design is inspired by \cite{Bader_2022} targeting a four-layered structure consisting of the Resource Manager, Workflow, Machine, and Task layers. Each layer represents a distinct abstraction level in the workflow execution environment and provides valuable insights into different aspects of performance and resource utilization.
 
 Starting with the Resource Manager layer a coarse-grained view related to cluster or partition status, resource allocation, and job management is provided. The Workflow layer operates on the logical workflow representation, maintaining execution progress, task dependencies, and overall runtime statistics. Below, the Machine layer captures system-level performance data such as CPU, memory, and storage utilization, as well as hardware-specific configurations. At the lowest level, the Task layer delivers fine-grained, time-resolved monitoring data, including per-task resource consumption, low-level kernel metrics, and execution traces.
 \cite{Bader_2022}.
 
-The following section provides a brief overview of the data sources and monitoring technologies that were ultimately assigned to the four layers of interest and thus selected for the approach. While the accompanying table presents a broader view of the different tools and data collection options that were tested the text below focuses only on the specific data sources that proved to be most reliable and effective within the implemented monitoring framework.
+The following section provides a brief overview of the data sources and monitoring technologies that were ultimately assigned to the four layers of interest and thus selected for the approach. While the accompanying table \ref{tab:monitoring-features} presents a broader view of the different tools and data collection options that were tested we will focus only on the specific data sources that proved to be most reliable and effective within the implemented monitoring framework.
 
 % TODO: Refine contents of the table here.
 \begin{table}[htbp]
@@ -96,20 +95,14 @@ The following section provides a brief overview of the data sources and monitori
     \label{tab:monitoring-features}
 \end{table}
 
-Although monitoring plays a central role in enabling the presented methodology, the main objective of this thesis is not to evaluate the performance of monitoring tools or to develop new low-level monitoring frameworks for scientific workflows. Therefore, a detailed technical assessment of these tools is not provided here and will not be revisited in Chapter 6. Instead, a concise justification for the distinction between the tools that were experimentally explored and are shown in \ref{tab:monitoring-features} and those that were finally chosen and used for actual data collection within the evaluation setup.
+To enable access to detailed performance metric in time-series format we chose to use Prometheus as the central time-series database. As shown in the \ref{tab:monitoring-features}, we consequently focused on tools that are interoperable with Prometheus as data exporters and examine their level of operation in layered monitoring framework.
+Due to different reasons certain exporters that are listed in \ref{tab:monitoring-features} were excluded from further use. The Slurm exporter, a custom implementation, was originally intended to retrieve job-to-process mappings from the resource manager. However, equivalent information could also be obtained directly from the workflow engines tracing mechanism, and because the programmatic interaciton with Slurm's daemons introduced considerable overhead, the exporter was not used in later stages. The process exporter was also omitted due to difficulties in collecting and aggregating all process IDs associated with a single container. In many cases, only the initial shell process of a workflow task was captured, while its spawned subprocesses remained untracked.
+Scaphandre, despite appearing promising at first, showed limited compatibility with different hardware architectures. The tool also struggled to capture short-lived workflow tasks leading to incomplete datasets. Docker-Activity imposed the same limitations as scaphandre.
 
-As shown in the \ref{tab:monitoring-features}, the monitoring approach in this work was built around Prometheus as the chosen time-series database. Consequently, all monitoring tools were evaluated based on their interoperability with Prometheus, specifically their ability to function as exporters. The table lists the technologies that were examined for this purpose.
-
-Since the main objective was to gain insight into workflow tasks executed as containers, the focus was on capturing detailed information at the container level and above. However, container-level data can sometimes result in non-identifiable entities, as container names may represent metadata that cannot be directly linked to specific workflow tasks or workflow instances. Therefore, the SMWS's built-in tracing capabilities remained valuable, as they provide a reliable mapping between workflow logic and system-level execution data.
-
-Before describing the specific tools that were ultimately used for monitoring, it is important to briefly outline why certain exporters were excluded from further use. The Slurm exporter, a custom implementation, was originally intended to retrieve job-to-process mappings from the resource manager. However, equivalent information could also be obtained directly from the workflow engines tracing mechanism, and because Slurm's daemons introduced considerable overhead, the exporter was not used in later stages. The process exporter was also omitted due to difficulties in collecting and aggregating all process IDs associated with a single container. In many cases, only the initial shell process of a workflow task was captured, while its spawned subprocesses remained untracked.
-
-Scaphandre, despite appearing promising at first, showed limited compatibility with AMD hardware, which was used in this work. It also struggled to capture short-lived tasks from the workflow management system, leading to incomplete datasets. Docker Activity, another RAPL-based exporter, performed reasonably well but was still constrained by its dependence on Intel power counters, which are only partially supported on AMD CPUs.
-
-In the end, the most consistent and comprehensive results were achieved using cAdvisor and a custom eBPF-based exporter named ebpf-monitor, a modified fork of DEEP-mon \cite{8425477}. These two tools demonstrated the best stability and coverage across different task durations and resource types and were therefore selected for the final monitoring setup.
+The most consistent and comprehensive results were achieved using cAdvisor and a custom fork of the DEEP-mon system, presented in \cite{8425477}. These two tools demonstrated the best stability and coverage across different task durations and resource types and were therefore selected for the final monitoring setup.
 
 The following table presents the final selection of data sources that were retained for the monitoring setup, along with the specific metrics enabled for each source.
-% TODO: Throw out the exporters that i did not end up using from the table.
+
 % Table with Tool Overview and metrics
 \begin{table}[htbp]
     \centering
@@ -142,12 +135,10 @@ The following table presents the final selection of data sources that were retai
 % Description of cadvisor, ebpf-energy-monitor
 cAdvisor is an open-source daemon for monitoring resource usage and performance of containers. It continuously discovers containers via Linux cgroups under the path /sys/fs/cgroup. Once started, cAdvisor subscribes to create/delete events in the cgroup filesystem, converts them to internal add/remove events, and configures per-container handlers. Metrics originate from machine-level facts parsed from /proc and /sys directories and most prominently container and process usage collected at cgroup boundaries. In practice, cAdvisor provides low-overhead, per-container telemetry.%\cite{Tol}.
 
-The ebpf-monitor is based on the DEEP-Mon system, which is per-thread power attribution method to translate coarse-grained hardware power measurements into fine-grained, thread-level energy estimates by exploiting hardware performance counters. The Intel RAPL interface provides power readings per processor package or core, but it cannot distinguish how much of that energy was consumed by each thread. DEEP-Mon bridges this gap by observing how actively each thread uses the processor during each sampling interval. It does so by monitoring the number of unhalted core cycles—a counter that measures how long a core spends executing instructions rather than idling. Since power consumption correlates almost linearly with unhalted core cycles, the fraction of total cycles attributed to each thread provides a reasonable proxy for its share of energy usage.
-In essence, DEEP-mon first computes the weighted cycles for each thread—combining its active cycles when alone with its proportionally reduced cycles when co-running. These weighted cycles determine how much of the total core-level RAPL energy should be assigned to that thread. The final per-thread power estimate is then derived by distributing the total measured power of each socket proportionally to the weighted cycle counts of all threads running on that socket. This approach allows DEEP-mon to infer realistic thread-level power usage even in systems with simultaneous multithreading and time-shared workloads, without modifying the scheduler or requiring any application-specific instrumentation. The DEEP-mon tool was modified in this work to export container-level metrics directly to Prometheus.
+DEEP-Mon is a per-thread power attribution method to translate coarse-grained hardware power measurements into fine-grained, thread-level energy estimates by exploiting hardware performance counters. The Intel RAPL interface provides power readings per processor package or core, but it cannot distinguish how much of that energy was consumed by each thread. DEEP-Mon bridges this gap by observing how actively each thread uses the processor during each sampling interval. It does so by monitoring the number of unhalted core cycles—a counter that measures how long a core spends executing instructions rather than idling. Since power consumption correlates almost linearly with unhalted core cycles, the fraction of total cycles attributed to each thread provides a reasonable proxy for its share of energy usage. DEEP-mon first computes the weighted cycles for each thread—combining its active cycles when alone with its proportionally reduced cycles when co-running. These weighted cycles determine how much of the total core-level RAPL energy should be assigned to that thread. The final per-thread power estimate is then derived by distributing the total measured power of each socket proportionally to the weighted cycle counts of all threads running on that socket. This approach allows DEEP-mon to infer realistic thread-level power usage even in systems with simultaneous multithreading and time-shared workloads, without modifying the scheduler or requiring any application-specific instrumentation. The DEEP-mon tool was modified in this work to export container-level metrics directly to Prometheus.
 
-Based on this identification of relevant metrics and the according technologies, we now introduce the monitoring algorithm built on top of the selected exporter stack and the resulting overview of the needed components for implementing a suitable monitoring client that can efficiently behave like specified in \ref{tab:monitoring_layers}. It outlines how these components were combined to realize the monitoring logic in this work, while the technical implementation details are described in \ref{cha:implementation}.
+Based on this identification of relevant metrics and the according technologies, we now introduce the monitoring algorithm built on top of the selected exporter stack and the resulting overview of the needed components. It outlines how these components were combined to realize the monitoring logic in this work, while the technical implementation details are described in \ref{cha:implementation}.
 
-First, we outline the core components that form the monitoring client and describe the strategy used to retrieve raw data from the monitored system.
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\textwidth]{/home/nfomin3/dev/ThesisDocument/fig/04/04-monitoring.pdf} % Adjust the path if needed
@@ -155,7 +146,7 @@ First, we outline the core components that form the monitoring client and descri
     \label{fig:monitoring_client}
 \end{figure}
 
-\ref{fig:monitoring_client} and \ref{alg:monitoring} show the principle behavior of the monitoring client. The event listener continuously observes container lifecycle events—such as start and termination—emitted by the runtime environment. Once an event is detected, the data query interface dynamically formulates PromQL queries based on the configuration and metadata of the affected container. These queries are sent to Prometheus to retrieve fine-grained time-series data. The retrieved raw metrics are then passed to the aggregation module, which aligns and consolidates them into a unified record per container.
+\ref{fig:monitoring_client} and \ref{alg:monitoring} show the behavior of the monitoring client. The event listener continuously observes container lifecycle events—such as start and termination—emitted by the runtime environment. Once an event is detected, the data query interface dynamically formulates PromQL queries based on the configuration and metadata of the affected container. These queries are sent to Prometheus to retrieve fine-grained time-series data. The retrieved raw metrics are then passed to the aggregation module, which aligns and consolidates them into a unified record per container.
 
 \begin{algorithm}[H]
     \caption{Event-Driven Monitoring and Metric Aggregation Framework}
@@ -185,11 +176,16 @@ First, we outline the core components that form the monitoring client and descri
 \end{algorithm}
 
 % Algorithm Description
-The design introduced in \ref{alg:monitoring} reduces monitoring overhead and ensures that only relevant data are collected when workflow tasks actually execute. When a container start event is received, the client extracts metadata such as container ID, associated workflow label, and start timestamp, then registers the process in an internal mapping to maintain correspondence between container identifiers and workflow tasks. Upon receiving a termination event, the client triggers a targeted data collection phase. The monitoring client allows for dynamic configuration of the metrics mentioned in \ref{tab:monitoring-features}, enabling data analysis specifically scoped to the user's needs.
+The design introduced in \ref{alg:monitoring} reduces monitoring overhead and ensures that only relevant data is collected when workflow tasks execute. When a container start event is received, the client extracts metadata such as container ID, associated workflow label, and start timestamp, then registers the process in an internal mapping to maintain correspondence between container identifiers and workflow tasks. Upon receiving a termination event, the client triggers a targeted data collection phase. The monitoring client allows for dynamic configuration of the metrics mentioned in \ref{tab:monitoring-features}, enabling data analysis specifically scoped to the user's needs.
 
-\subsection{Modelling Co-location of Workflow Task Behavior using Raw Time-Series Data}
+\subsection{Modelling the Co-location of Task Behavior based on Time-Series}
 \label{sec:data_analysis}
-The next section describes the approach used to analyze the data collected through the monitoring client. The focus lies on how the raw metrics retrieved from Prometheus and other exporters were preprocessed, structured, and aligned to support both supervised and unsupervised learning tasks.
+This section covers step 2, 3 and 4 seen in \ref{fig:approach_overview} and describes how the collected monitoring data is processed to derive task behavior representations suitable for co-location clustering and predictive modeling.
+
+\paragraph{General Preprocessing of Raw Time-Series Data}
+\label{sec:data_preprocessing_general}
+
+The collected monitoring data consists of raw time-series files in CSV format. Therefore, an initial step of pre-processing is necessary.
 
 % Paragraph about generic preprocessing of raw data
 \begin{enumerate}
@@ -199,62 +195,36 @@ The next section describes the approach used to analyze the data collected throu
     \item Matching Entities between execution layer and workflow layer
 \end{enumerate}
 
-% Add paragraphs for the enumeration steps?
-The first phase of the data analysis focuses on entity matching of heterogeneous monitoring data sources into a unified representation of each executed workflow task. During workflow execution, diverse monitoring tools and system components produce data at different abstraction levels.
-
-% TODO: Add visualization of the data formats
-The matching process begins with container lifecycle records, which provide information on task identifiers, container names, process hashes, and working directories. These files serve as the primary link between workflow-level entities and low-level monitoring data. Each monitoring source is traversed recursively to locate and load the associated time-series data. These data files are organized hierarchically under source-specific directories and often contain multiple interleaved measurements from different tasks. To facilitate task-level analysis, these aggregated time-series datasets need to be split into per-task CSV files.
-Each per-task dataset is enriched with contextual metadata. The first enrichment phase attaches the correct working directory to every container trace, allowing file system references.
-The next stage introduces workflow-level semantics by matching the per-task monitoring data with the workflows own metadata. Using the exported trace file by the SWMS, the analysis extracts task names and their corresponding working directories. These entries are matched against container-level records from the monitoring data to identify which monitored container corresponds to which logical task in the workflow. The resulting mapping is used to update all per-task monitoring files by appending the correct SWMS process name. This concludes the step of entity matching and preparing the collected data for further statistical analysis.
-
-\subsubsection{Preprocessing Raw Time-Series Data for Task-Clustering}
-\label{sec:data_preprocessing_predictive}
-
-\begin{enumerate}
-    \item Peak-pattern construction. For every task and monitored workload type, we first derive a peak time series: the raw per-second resource signal is resampled into three-second buckets and the maximum per bucket is retained. When two peak series must be compared, we truncate both to the shorter length so that correlation is computed on aligned vectors without padding artifacts.
-    \item Workload-type affinity. Different resource domains interfere to different degrees such as CPU vs CPU peaks are typically more contentious than CPU vs file I/O. We encode this with an empirical affinity score defined in the prior section between workload types. High affinity means higher potential interference when peaks align; low affinity reflects benign coexistence.
-\end{enumerate}
+% TODO: Maybe visualize and explain easier.
+During workflow execution, diverse monitoring tools and system components produce data at different abstraction levels.
+We use container lifecycle records, which provide information on task identifiers, container names, process hashes, and working directories of the workflow task. These files serve as the primary link between workflow-level entities and low-level cotnainer monitoring data. Each monitoring source is traversed recursively to locate and load the associated time-series data. These data files are organized hierarchically under source-specific directories. To facilitate task-level analysis, these aggregated time-series datasets need to be split into per-task CSV files.
+We attach the correct working directory to every container trace and extract task names and their corresponding working directories. These entries are matched against container-level records from the monitoring data to identify which monitored container corresponds to which task in the workflow.
 
 \subsubsection{Task Clustering for Contention-Aware Consolidation}
 \label{sec:task_clustering}
 
-Using the temporal signature feature representation of the monitored tasks, we establish the basis for energy-aware task co-location. Co-location is treated as a consolidation problem, formulated through a clustering approach. In this context, clustering groups tasks based on a defined distance measure that captures their similarity. To incorporate energy awareness into this objective we extend the distance definition to account for interference between workloads. This is achieved by conducting separate workload experiments designed to measure resource contention and interaction effects. From these experiments, affinity scores are derived to quantify how different workloads influence each other when co-located. These affinity scores are then integrated into the clustering distance function, ensuring that both performance and energy interactions guide the co-location decisions.
+After concluding the initial preprocessing of the raw time-series data we proceed with further refinement of the data according to the needs of performing task clustering.
 
-Consolidation is formulated as a clustering problem with an important modification: rather than grouping tasks that are similar, the goal is to cluster tasks with complementary resource usage patterns to minimize contention during co-location. Building on the previously established notion of affinity—which quantifies how strongly workloads interfere when sharing resources—the clustering process now incorporates this measure directly into its distance metric. The task task distance increases when two tasks exert pressure on the same resources simultaneously, indicating potential contention, and decreases when their resource usage peaks complement one another.
-Algorithm \ref{alg:task_distance_clustering} summarizes the main stages of the task consolidation procedure used in this work. The approach begins by computing pairwise similarities between task signatures, where each signature represents a multi-dimensional profile of resource usage over time. The similarity computation incorporates resource affinity weights derived from the contention experiments, ensuring that tasks are compared not only by magnitude but also by their impact on shared resources such as CPU, memory, and I/O. This yields a resource-aware similarity matrix that reflects how well tasks can coexist on the same node without interference.
-Next, a percentile-based threshold is applied to the similarity matrix. This adaptive rule determines when clustering should stop by selecting only the most suitable task pairs according to the defined percentile. In this way, the algorithm avoids arbitrary distance cutoffs and instead adapts to the underlying distribution of similarity values.
-Finally, agglomerative clustering is performed using a specified linkage criterion, such as average or complete linkage, to iteratively merge tasks into clusters. Each resulting cluster represents a potential consolidation group, meaning a set of tasks that can be executed together within a single virtual machine due to complementary or non-overlapping resource demands. The output clusters thus provide a structured view of optimal co-location candidates for subsequent scheduling and energy-aware execution strategies.
+\paragraph{Preprocessing Raw Time-Series Data for Task-Clustering}
+\label{sec:data_preprocessing_predictive}
 
-% Algorithm for Task Consolidation in ShaReComp
-\begin{algorithm}[H]
-    \caption{ShaReComp - Task Consolidation Algorithm}
-    \label{alg:task_distance_clustering}
-    \SetKwFunction{Sim}{compute\_workload\_affinity}
-    \SetKwFunction{Sim}{compute\_similarity}
-    \SetKwFunction{Thresh}{percentile\_threshold}
-    \SetKwFunction{Merge}{agglomerative\_merge}
+We apply the following two main steps prior to the clustering algorithm.
 
-    \KwIn{task signatures $\mathrm{sig}$, affinity weights $w$, percentile $\tau$, linkage}
-    \KwOut{clusters $\mathcal{C}$}
-
-    $S \gets$ \Sim($\mathrm{sig}$, $w$) \tcp*[r]{resource-aware similarity}
-    $\theta \gets$ \Thresh($S$, $\tau$) \tcp*[r]{percentile-based stopping rule}
-    $\mathcal{C} \gets$ \Merge($S$, $\theta$, linkage) \tcp*[r]{agglomerative clustering}
-
-    \textbf{return } $\mathcal{C}$
-\end{algorithm}
-
-Next, we introduce the subsequent steps necessary to fullfill \ref{alg:task_distance_clustering}, focusing on how the task data needs to be refined.
+\begin{enumerate}
+    \item \textbf{Peak-pattern construction}. For every task and monitored workload type, we first derive a peak time series: the raw per-second resource signal is resampled into three-second buckets and the maximum per bucket is retained. When two peak series must be compared, we truncate both to the shorter length so that correlation is computed on aligned vectors without padding artifacts.
+    \item \textbf{Computing Workload-type affinity}. Different resource domains interfere to different degrees such as CPU vs CPU peaks are typically more contentious than CPU vs file I/O. We encode this by computing an affinity score between workload types which is described in \ref{sec:measuring_resource_contention}. High affinity means higher potential interference when peaks align; low affinity reflects benign coexistence.
+\end{enumerate}
 
 % Workload experiments
 \paragraph{Measuring Resource Interference of Co-located Benchmarks}
 \label{sec:measuring_resource_contention}
 
-The measurement of resource contention follows a two-stage protocol that first establishes isolated baselines for each workload class and then repeats the same workloads under controlled co-location. In the baseline stage, CPU-bound, memory-bound, and file-I/O-bound containers are executed one at a time on pinned logical CPUs. Pinning fixes placement and removes scheduler noise; for I/O experiments the file set is prepared once and cleaned afterward to avoid warm-cache artifacts. Each run records a start and finish timestamp at microsecond resolution and derives the wall-clock duration. In parallel, the monitoring pipeline supplies per-container power time series. After a run finishes, only the power streams belonging to the participating container are retained, aligned to the containers lifetime, and summarized to a representative mean value.
-The co-location stage replays the same workloads in pairs to expose interference effects. Pairs are chosen to cover both homogeneous combinations, where both containers stress the same resource class, and heterogeneous combinations, where their dominant pressure differs. Placement again uses CPU pinning. Some experiments bind pairs to siblings on the same physical core to amplify shared-core effects; others place them on distinct cores to isolate memory bandwidth or storage contention. Each co-located container is measured in exactly the same way as in isolation, producing a matched set of durations and power summaries.
+The measurement of resource contention follows a two-stage protocol that first establishes isolated baselines for each workload class and then repeats the same workloads under controlled co-location. In the baseline stage, CPU-bound, memory-bound, and file-I/O-bound benchmark containers are executed one at a time on pinned logical CPUs. Each run records a start and finish timestamp at microsecond resolution. In parallel, Deep-Mon is used to record the power time series for each container. After a run finishes, the power streams of the containers are retained, aligned to the containers lifetime, and summarized to a representative mean value.
+After isolated benchmark execution we replay the same benchmarks in pairs to expose interference effects by CPU pinning. The experiment binds pairs of benchmarks to siblings on the same physical core to amplify shared-core effects. Each co-located container is measured in exactly the same way as in isolation, producing a matched set of durations and power summaries.
+
+Table \ref{tab:synthetic-benchmarks} shows the benchmarks specifications used to generate the workloads.
 
 % Table for the experiment design
-
 
 \begin{table}[htbp]
     \centering
@@ -287,6 +257,7 @@ The co-location stage replays the same workloads in pairs to expose interference
 \end{table}
 
 % Notation for the experiments.
+In order to derive a workload affinity from the contention experiments we define contention effects to occur when co-located workloads exceed their duration and power consumption compared to their isolated measurements.
 \[
     \textbf{Isolated and Co-located Metrics.}
 \]
@@ -385,9 +356,7 @@ where \(\beta > 0\) controls scaling sensitivity.
 Values of $A \approx 0$ indicate minimal interference,
 while \(A \to 1\) signifies strong co-location interference.
 
-% TODO: Write that this yields in an affinity score matrix and insert example.
-% TODO: Reference the table with some explanations.
-
+% TODO: Put into evaluation.
 \begin{table}[H]
     \centering
     \caption{Affinity scores between workload types indicating co-location compatibility.}
@@ -406,11 +375,36 @@ while \(A \to 1\) signifies strong co-location interference.
     \end{tabularx}
 \end{table}
 
-From these measurements, contention is characterized by comparing the co-located outcomes against the isolated baselines for the same workloads. For each pair, the procedure derives how much slower the workloads ran together relative to alone and how their average power changed. To avoid overfitting to any single signal, runtime and power effects are aggregated into a single scalar that captures the overall quality of the pairing. Values above a neutral threshold indicate that the pair plays well together, while values below it signal destructive interference. This single number is what the co-location policies use downstream: it serves both as the supervision signal for learning-based components and as the ground truth to validate scheduling heuristics in simulation.
+\paragraph{Algorithmic Approach to Task Consolidation}
+Consolidation is formulated as a clustering problem with an important modification: rather than grouping tasks that are similar, the goal is to cluster tasks with complementary resource usage patterns to minimize contention during co-location. Building on the previously established notion of affinity—which quantifies how strongly workloads interfere when sharing resources—the clustering process now incorporates this measure directly into its distance metric. The task task distance increases when two tasks exert pressure on the same resources simultaneously, indicating potential contention, and decreases when their resource usage peaks complement one another.
 
+Algorithm \ref{alg:task_distance_clustering} summarizes the main stages of the task consolidation procedure used in this work. The approach begins by computing pairwise similarities between task signatures, where each signature represents a multi-dimensional profile of resource usage over time. The similarity computation incorporates resource affinity weights derived from the contention experiments. This yields a resource-aware similarity matrix that reflects how well tasks can coexist on the same node without interference.
+Next, a percentile-based threshold is applied to the similarity matrix. This adaptive rule determines when clustering should stop by selecting only the most suitable task pairs according to the defined percentile. In this way, the algorithm avoids arbitrary distance cutoffs and instead adapts to the underlying distribution of similarity values.
+Finally, agglomerative clustering is performed using a specified linkage criterion, such as average or complete linkage, to iteratively merge tasks into clusters.
+
+% Algorithm for Task Consolidation in ShaReComp
+\begin{algorithm}[H]
+    \caption{ShaReComp - Task Consolidation Algorithm}
+    \label{alg:task_distance_clustering}
+    \SetKwFunction{Sim}{compute\_similarity}
+    \SetKwFunction{Thresh}{percentile\_threshold}
+    \SetKwFunction{Merge}{agglomerative\_merge}
+
+    \KwIn{task signatures $\mathrm{sig}$, affinity weights $w$, percentile $\tau$, linkage}
+    \KwOut{clusters $\mathcal{C}$}
+
+    $S \gets$ \Sim($\mathrm{sig}$, $w$) \tcp*[r]{resource-aware similarity}
+    $\theta \gets$ \Thresh($S$, $\tau$) \tcp*[r]{percentile-based stopping rule}
+    $\mathcal{C} \gets$ \Merge($S$, $\theta$, linkage) \tcp*[r]{agglomerative clustering}
+
+    \textbf{return } $\mathcal{C}$
+\end{algorithm}
+
+With \ref{alg:task_distance_clustering} we introduce the ShaReComp algorithm. ShaReComp stands for share resources for computation and summarizes the goal of the method: to group tasks that can share resources effectively when co-located.
+The key steps of the algorithm are as follows:
 
 \begin{enumerate}
-    \item Anti-similarity distance. For any pair of tasks i,j, we iterate over their workload types and compute two ingredients: (i) the affinity between the two types; (ii) the correlation between their corresponding peak series computed twice, once per type, to capture both sides of the pairing. We then aggregate these terms so that highly correlated peaks in high-affinity domains increase the distance, whereas low or negative correlations in low-affinity pairs decrease it. The result is a symmetric task distance matrix whose off-diagonal entries quantify how bad it would be to co-locate the two tasks, and whose diagonals are zero by definition.
+    \item Anti-similarity distance. For any pair of tasks i,j, we iterate over their workload types and use two factors: (i) the affinity between the two types; (ii) the correlation between their corresponding peak series computed twice, once per type, to capture both sides of the pairing. We then aggregate these terms so that highly correlated peaks in high-affinity domains increase the distance, whereas low or negative correlations in low-affinity pairs decrease it. The result is a symmetric task distance matrix whose off-diagonal entries quantify how bad it would be to co-locate the two tasks, and whose diagonals are zero by definition.
 
           % Notation for the distance formula
           \[
@@ -472,15 +466,20 @@ From these measurements, contention is characterized by comparing the co-located
           \]
           This ensures that only compatible workloads, in terms of both
           resource affinity and temporal peak correlation, are grouped together.
-    \item \textbf{Threshold selection}. Because the distance matrix is data-dependent, we estimate a merge threshold directly from its empirical distribution. A quantile for e.g., the 20th percentile on the raw distances acts as an automatic cut-level: any pair below this threshold is safe enough to consider for co-location, while pairs above it are kept apart.
+    \item \textbf{Computing the merge threshold}. Because the distance matrix is data-dependent, we estimate a merge threshold directly from its empirical distribution. In our appraoch we select the 20th percentile on the raw distances as an automatic cut-level: any pair below this threshold is safe enough to consider for co-location, while pairs above it are kept apart.
     \item \textbf{Agglomerative clustering with precomputed distances}. We run average-linkage agglomerative clustering on the precomputed distance matrix with the chosen distance threshold and no preset cluster count. This yields variable-sized clusters whose members are mutually non-contentious under our metric. Because we use a threshold rather than a fixed k, the method adapts to each workload mix, producing more or fewer groups as warranted by the observed interference structure.
-    \item\textbf{From clusters to co-location candidates}. Each cluster defines a candidate co-location set. To make these cluster-level entities usable by predictive models such as introduced in \ref{sec:statistical_embedding_and_learning}, we construct cluster feature vectors by flattening and concatenating the per-task temporal signatures of all members and summing them dimension-wise. This potentially approximates the combined load shape we would see if the clusters tasks were executed in a co-located manner.
+    \item\textbf{From clusters to co-location candidates}. Each cluster defines a candidate co-location set. To make these cluster-level entities usable by predictive models discussed in \ref{sec:prediciton_kcca_rfr}, we construct cluster feature vectors by flattening and concatenating the per-task temporal signatures of all members and summing them dimension-wise. This potentially approximates the combined load shape we would see if the clusters tasks were executed in a co-located manner.
 \end{enumerate}
 
-\subsubsection{Preprocessing Raw Time-Series Data for Predictive Modelling}
+
+\subsubsection{Predicting the Runtime and Energy Consumption of Task Clusters with KCCA and Random Forest Regression}
+\label{sec:prediciton_kcca_rfr}
+
+\paragraph{Preprocessing Raw Time-Series Data for Predictive Modelling}
 \label{sec:data_preprocessing_predictive}
-% TODO: Add formal notation of the feature matrices
-We transform the heterogeneous, time‐stamped monitoring traces into consistent task-level feature/label matrices suitable for statistical analysis. We therefore define the following preprocessing steps:
+
+Differing from the preprocessing \ref{sec:task_clustering}, we define the following actions as a preparation for step 4 in \ref{fig:approach_overview}.
+
 
 \begin{enumerate}
     \item Temporal signature construction (feature selection).
@@ -602,8 +601,7 @@ power consumption used for model learning or correlation analysis.
 
 This preprocessing yields: (i) a standardized and fixed-length feature matrix X that preserves per-metric usage distributions and (ii) a label matrix Y capturing runtime and energy
 
-\subsubsection{Modelling and Predicting the Impact of Task Behavior on Runtime and Energy Consumption with KCCA and Random Forest Regression}
-\label{sec:prediciton_kcca_rfr}
+Building upon \ref{alg:sharecomp} from \ref{sec:task_clustering}, we suggest another ShaReComp algorithm that allows to model the temporal behavior of consolidatd tasks using the extracted features per task from \ref{sec:prediciton_kcca_rfr}.
 
 % Algorithm for prediction of task clusters.
 \begin{algorithm}[H]
@@ -630,11 +628,13 @@ This preprocessing yields: (i) a standardized and fixed-length feature matrix X 
     \textbf{return } $\hat{Y} = \{ (\hat{t}_k, \hat{E}_k) \}_{k=1}^{|\mathcal{C}|}$
 \end{algorithm}
 
+The predictors used in \ref{alg:sharecomp_prediction} are described in the following.
+
 \paragraph{Kernel Canonical Correlation Analysis}
-In the next step of the analysis, the collected and preprocessed task data are prepared for statistical learning. The objective is to identify relationships between task-specific features and their corresponding performance and energy characteristics. To achieve this, the dataset is divided into two parts: approximately 70\% of the tasks are used for training the models, while the remaining 30\% are reserved for testing and validation.
+KCCA wants to identify relationships between task-specific features and their corresponding performance and energy characteristics. To achieve this, the dataset is divided into two parts: approximately 70\% of the tasks are used for training the models, while the remaining 30\% are reserved for testing and validation.
 
 Before training, both the feature data (X) and the target data (Y)—representing task runtime and energy consumption—are standardized separately. Each is transformed to have a mean of zero and a standard deviation of one. This step is essential, as the original values cover different numerical scales, which could negatively affect kernel-based learning methods. Standardization ensures that all features contribute equally to the learning process and prevents those with larger magnitudes from biasing the results.
-After normalization, a Kernel Canonical Correlation Analysis (KCCA) model is trained to identify shared patterns between the feature data and the target data. KCCA projects both datasets into a common latent space, where it can detect nonlinear relationships between resource usage patterns and their corresponding runtime and energy behavior.
+After normalization, we train the KCCA to identify shared patterns between the feature data and the target data. KCCA projects both datasets into a common latent space, where it can detect nonlinear relationships between resource usage patterns and their corresponding runtime and energy behavior.
 
 Once trained, the KCCA model is extended into a predictive framework. The latent features learned from the input data are used to fit a regression model that links these representations to runtime and energy targets. This allows the system not only to capture statistical relationships but also to predict performance and energy consumption for unseen tasks.
 
@@ -710,7 +710,9 @@ shows a distinct temporal signature characterized by
 fluctuating utilization and higher runtime.
 
 \paragraph{Random Forest Regression}
-To complement the KCCA model, we trained two non-parametric regressors based on Random Forests—one to predict mean task power and one to predict task runtime from the same preprocessed feature matrix. The power model is trained on mean per-task energy-rate labels, while the runtime model uses task durations as targets. As a sanity check, we established simple baselines by predicting the training-set mean once for power and once for runtime on the test split. These baselines quantify the minimum improvement any learned model must exceed.
+To complement the KCCA model, we trained two non-parametric regressors based on Random Forests—one to predict mean task power and one to predict task runtime from the same preprocessed feature matrix. We reuse the exact same data as we did for the KCCA model as Random Forests perform well on both multivarita input and output data. The power model is trained on mean per-task energy-rate labels, while the runtime model uses task durations as targets. As a sanity check, we established simple baselines by predicting the training-set mean once for power and once for runtime on the test split. These baselines quantify the minimum improvement any learned model must exceed.
+
+% Add little notation.
 
 % Example on how this looks
 \textbf{Example.}
@@ -729,7 +731,7 @@ Cluster features are summed:
     F_1 = t_1 + t_2 = [0.7, 1.2, 1.7, 0.9, 1.1, 1.3], \quad
     F_2 = t_3.
 \]
-Model predictions yield
+Model predictions from both KCCA or Random Forest Regressor yield
 \[
     \hat{Y} =
     \begin{bmatrix}
@@ -742,10 +744,10 @@ representing predicted runtime (s) and energy (W) per cluster.
 \subsection{Simulation of Task Co-location during Workflow Execution}
 \label{sec:simulation_environment}
 
-\subsubsection{Outline of Simulation Components}
+\paragraph{Outline of Simulation Components}
 \label{sec:design_pillars}
 
-The simulator for co-location strategies builds upon three fundamental design pillars that reflect the main optimization opportunities identified in the co-location problem: resource allocation, queue ordering, and job placement.
+To accomplish step 5 and 6 depicted in \ref{fig:approach_overview}, we build upon specific design pillars that structure the simulation environment.
 
 % Figure with Simulator Design
 \begin{figure}[htbp]
@@ -755,19 +757,22 @@ The simulator for co-location strategies builds upon three fundamental design pi
     \label{fig:monitoring_client}
 \end{figure}
 
-The design of distributed HPC systems centers on three core aspects: resource allocation, queue ordering and dispatching, and job placement. To apply the concepts introduced in \ref{sec:statistical_embedding_and_learning} and \ref{sec:unsupervised_learning}, the simulation of scientific workflow task co-location adheres to these principles, providing a framework that supports multiple strategies for realistic exploration of this objective.
-As seen in \ref{fig:monitoring_client}, we structure the concept of the simulator around these three pillars.
-The first pillar concerns resource allocation, which determines whether jobs are executed in exclusive or shared mode. Traditional HPC schedulers allocate full nodes to single jobs, task co-location naturally assumes that multiple tasks can coexist efficiently if they do not saturate the same resources simultaneously. The simulator therefore needs to model node-sharing policies where jobs may share cores or memory bandwidth.
-Since the effectiveness of co-location depends on the characteristics of jobs and directly influence the throughput of the processing engine the simulator needs to offer an interface for alternative queue management strategies, ranging from conventional FIFO ordering to heuristic reordering that prioritizes beneficial pairings.
-The third pillar, job placement, determines how tasks are assigned to available resources. The simulator needs to support random placement and heuristic strategies that intentionally group complementary tasks.
-This setup aims at making it possible to study how the integration of task co-location choices during schedulung and task mapping influence overall system performance and resource efficiency, providing a controlled environment for algorithmic investigations.
+The design of distributed HPC systems centers on three core aspects: resource allocation, queue ordering and dispatching, and job placement. In \ref{fig:monitoring_client } we adapt these core aspects and design a controller component that is responsible for invoking a central resource manager. The resource management component itself is steering the scheduling of tasks, the DAG-aware queue management, the assignment of tasks to the available compute nodes and eventually the allocation and execution on resources.
+Since we aim to gain insight into the effectiveness of task co-location the processing engine of the simulator needs to offer an interface for alternative scheduling, task mapping and allocation strategies, ranging from conventional First-in-First-out (FIFO) ordering to heuristic reordering and placement that prioritizes beneficial pairings.
 
 \subsubsection{Embedding Task Co-location into Scheduling Heuristics}
 \label{sec:heuristic_design}
 
-Our algorithmic approach to define the behavior of the components resource manager, allocator and scheduler introduced in \ref{fig:monitoring_client} is grounded in heuristic principles.
-We choose to not formulate the embedding of co-location into the scheduling process as optimization problem but through decision-making within simple, interpretable scheduling and task mapping rules. Heuristic algorithms are well suited for such settings because they rely on deterministic, rule-based traversal of the search space rather than exhaustive or stochastic exploration. They exploit domain-specific knowledge, in our case energy-awareness and structured criteria—such as task priorities, resource affinities, or workload complementarities—to produce acceptable solutions efficiently without guaranteeing global optimality. We divide the task-to-node mapping into two steps. First, a queue of ready tasks is generated according to a defined orderign strategy before the mapping to resources of these ordered tasks is performed. For the scheduling we choose to adpot list-scheduling algorithms, which form one of the most established heuristic approaches for workflow scheduling. They assign a priority or ranking to each task based on topological and performance factors (e.g., critical path length, execution cost, or communication overhead), producing a priority list; second, they iteratively select the highest-priority unscheduled task and map it to a processor. As both phases can be modeled decoupled, there opens a chance to incorporate intelligent decision-making.
-Machine learning list-scheduling approaches build on data-driven models that learn decision policies from historical workflow executions or directly during runtime. To complete the foundation of our heuristic design we formally introduce the simulation environment, consisting of the scientific workflow as the application that executes tasks and a system model that we use to represent our algorithmic approach to the co-location problem.
+% Figure with Task Placement on VMs
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{/home/nfomin3/dev/ThesisDocument/fig/04/04-monitoring.pdf} % Adjust the path if needed
+    \caption{The monitoring client alongside the needed system components.}
+    \label{fig:monitoring_client}
+\end{figure}
+
+Our algorithmic approach to define the behavior of the component's resource manager, allocator and scheduler introduced in \ref{fig:monitoring_client} is grounded in heuristic principles.
+We choose to not formulate the embedding of co-location into the scheduling process as an optimization problem but through decision-making within simple, interpretable rules. Heuristic algorithms are well suited for such settings because they rely on deterministic, rule-based traversal of the search space rather than exhaustive or stochastic exploration.  We divide the task-to-node mapping into two steps. \ref{fig:monitoring_client} illustrates this approach.  The simulation launches the controller component which invokes our resource manager. Through the queue management the resource manager retrieves a set of ready-to-run tasks without predeccessors, that they depend on. In our example task 1,2,4,8,11,12,15 are to be scheduled. For the scheduling we choose to adpot list-scheduling algorithms, which form one of the most established heuristic approaches for workflow scheduling. They assign a priority or ranking to each task based on topological and performance factors (e.g., critical path length, execution cost, or communication overhead), producing a priority list. They then iteratively select the highest-priority unscheduled task and map it to a available resources. As we are interest in mapping not singel tasks but clusters of tasks we identify to embed the infomation retrieval on beneficial task consolidation at this exact stage during the scheduling process. The co-location hints my yield in consolidating T1, (T2, T4, T7), T8, (T11, T12) and T15. Lastly, we need to decide which host can accomodate the formed task clusters the best. We again define an interface for node assignment strategies either prioritize the host with the most idle compute cores first or tries to distribute the task clusters among all the available hosts in a fair manner. Finally the allocaiton component creates virtual machines that contain the task clusters and launch them on the assigned host. By this examplified design, we create a ground to not only embed and study the co-location problem in an execution environment but also gain the possibility of implementing different means of comparison through the interfaces per component. The next section formally introduce the simulation environment, consisting of the scientific workflow as the application that executes tasks and a system model that we use to represent our algorithmic approach to the co-location problem.
 
 % System Model that was used for the heuristic design.
 \paragraph{Simulation System Model}
@@ -861,11 +866,12 @@ At runtime:
     \item The \textbf{Job Manager} executes tasks, monitors VM lifecycles, and updates resource states.
 \end{itemize}
 
+% TODO: Move to evaluation.
 To evaluate the effectiveness of the proposed approach, we compare it against a series of progressively refined baseline algorithms that address the co-location problem with increasing complexity. These baselines range from simple scheduling heuristics to more advanced strategies that gradually incorporate awareness of co-location effects. The following table summarizes all baselines considered in this study. It is important to note that while some of them already involve concurrent execution of tasks, this represents uncontrolled co-location rather than informed or optimized placement. For clarity and conciseness, detailed algorithmic designs of these baselines are provided in the appendix, while this section focuses on describing their conceptual behavior.
 
+Using the modelling introduced above, we construct an algorithm that depicts the overall behavior of our simulation approach.
+
 % Blueprint Algorithm 
-\paragraph{Baseline Algorithms}
-\label{sec:baseline_algorithms}
 
 \begin{algorithm}[H]
     \caption{ShaReComp Simulation - WRENCH Framework}
@@ -892,8 +898,13 @@ To evaluate the effectiveness of the proposed approach, we compare it against a 
     \Return{workflow complete}
 \end{algorithm}
 
+To compare the effectivness of using the ShaReComp approach we define multiple algorithms for the scheduling and node assignment phase that either employ exclusive resource assignment, assign tasks to multiple hosts in parallel or cluster random tasks into virtual machines. Generically all algorithms build on our simulation blueprint showed above \ref{alg:sharecomp_unified}. We call these algorithms baselines. In fact, we implement two baselines where each task gets executed in it's own VM, so no co-location is applied at all. Baselines 3, 3.1 and 3.2 co-locate tasks onto virtual machines and experiment with prioritizing the available compute hosts according to different strategies. Baselines 4 and 4.1 employ oversubscription, meaning that more tasks than reserved compute resources get assigned to a VM, strategically forcing resource contention. All baseline algorithms are included in the appendix of this thesis. In \ref{cha:evaluation} we include more detailed descriptions on the behavior and choice for the baseline algorithms.
+
 \paragraph{Algorithmic Examples of Task Mapping with guided Co-location}
 \label{sec:co-location_strategies}
+
+This chapter on our approach concludes with introducing our main contribution of this thesis. We use our simulation framework to implement the ShaReComp approach directly into the workflow execution process. Therefore, we design four algorithms in 4 different versions of ShaRiff. ShaRiff is an acronym for share ressource if feasible. Each ShaRiff version implements a different strategy of mapping consolidated tasks onto availabel compute hosts while the decision maing for the co-location itself is always guided by the ShaReComp approach, introdcued in \ref{sec:task_clustering}.
+Table \ref{tab:shariff_overview} provides an overview of the key differences between the ShaRiff algorithms.
 
 % Table with ShaRiff Overview stuff.
 \begin{table}[H]
@@ -915,7 +926,8 @@ To evaluate the effectiveness of the proposed approach, we compare it against a 
     \end{tabularx}
 \end{table}
 
-% Explain and visualize ShaRiff in it's variants algorihtmically and algorihtms after each paragraph.
+In the following we will in-depth describe the behavior of the ShaRiff algorithms one by one.
+
 % ShaRiff 1
 
 % Algorithm
@@ -970,9 +982,9 @@ To evaluate the effectiveness of the proposed approach, we compare it against a 
     \Return{workflow complete}
 
 \end{algorithm}
-This variant implements ShaRiff (share resources if feasible), which augments the FIFO pipeline with an external co-location adviser and a cluster-aware allocator. Tasks are still dequeued in strict arrival order. Before placement, the scheduler invokes ShaRiff with the current set of ready tasks and receives clusters of jobs that are predicted to co-locate well (i.e., complementary resource profiles / low expected interference). The node-assignment stage then ranks hosts by descending idle-core capacity and fills the largest host first: it forms a batch of up to that hosts idle cores and attaches the ShaRiff cluster map to the batch; if tasks remain, it proceeds to the next host in the ranked list. A small-queue fast path ensures dispatch even when only a few tasks are available.
-The allocator realizes the advisers plan one VM per recommended cluster on the chosen host. For each multi-task cluster, it provisions a VM whose vCPU count and memory equal the sum of the clustered tasks declared requirements, starts the VM, and submits the tasks to that same virtual compute service. Singleton clusters are grouped into a shared VM on the host (current variant) to avoid VM fragmentation; each submitted task keeps its own job identity, and the allocator tracks VM lifecycle across all tasks assigned to it, tearing the VM down only after the last co-located task completes.
-Conceptually, ShaRiff preserves FIFO ordering and capacity-ranked host filling, but replaces random batching with adviser-driven clustering. The effect is to co-locate tasks that are likely complementary (e.g., CPU-bound with I/O-bound), thereby reducing contention and improving per-host utilization without oversubscription. When the adviser yields singletons, the system still shares if feasible by pooling them into a shared VM, maintaining the same deterministic provisioning and lifecycle rules.
+This variant implements ShaRiff 1, which augments the FIFO pipeline with the external co-location adviser ShaReComp and a cluster-aware allocator. Tasks are dequeued in strict arrival order. Before placement, the scheduler invokes ShaReComp with the current set of ready tasks and receives clusters of jobs that are computed to co-locate well. The node-assignment stage then ranks hosts by descending idle-core capacity and fills the largest host first: it forms a batch of up to that hosts idle cores and attaches the ShaRiff cluster map to the batch; if tasks remain, it proceeds to the next host in the ranked list. A small-queue fast path ensures dispatch even when only a few tasks are available.
+The allocator realizes the advisers plan one VM per recommended cluster on the chosen host. For each multi-task cluster, it provisions a VM whose vCPU count and memory equal the sum of the clustered tasks declared requirements, starts the VM, and submits the tasks to that same virtual compute service. Singleton clusters are grouped into a shared VM on the host to avoid VM fragmentation; each submitted task keeps its own job identity, and the allocator tracks VM lifecycle across all tasks assigned to it, tearing the VM down only after the last co-located task completes.
+Conceptually, ShaRiff preserves FIFO ordering and capacity-ranked host filling, but replaces random batching with adviser-driven clustering. The effect is to co-locate tasks that are likely complementary, thereby reducing contention and improving per-host utilization without oversubscription. When the adviser yields single tasks, the system still shares if feasible by pooling them into a shared VM, maintaining the same deterministic provisioning and lifecycle rules.
 
 % ShaRiff 2
 
@@ -1034,9 +1046,10 @@ Conceptually, ShaRiff preserves FIFO ordering and capacity-ranked host filling, 
     \Return{workflow complete}
 \end{algorithm}
 
-This variant retains the ShaRiff-augmented FIFO pipeline but enables controlled oversubscription during placement and VM sizing. Tasks are dequeued in arrival order. Before dispatch, the scheduler queries ShaRiff with the current ready set and receives clusters of tasks predicted to co-locate well (complementary resource use / low interference). Hosts are ranked by descending idle-core capacity; the assigner then fills the largest host first with a batch whose size may exceed the hosts free cores by a fixed factor (e.g., +25\%). If tasks remain, it proceeds to the next host and repeats.
-The allocator implements the advisers plan one VM per cluster on the chosen host, but with oversubscription semantics. For multi-task clusters, it provisions a VM whose vCPU and memory equal the sum of the clusters requests—even if that exceeds the hosts currently free cores (hard oversub). For singleton clusters collected on the same host, it provisions a shared VM and caps vCPUs at the hosts free cores when necessary (soft cap). In both cases the VM is started once, all tasks in the cluster are submitted to the same virtual compute service, and the VM is torn down only after the last co-located task finishes.
-Conceptually, this policy combines adviser-driven co-location with capacity-aware overbooking: FIFO ordering and capacity-ranked host filling are preserved, but batches may intentionally outsize instantaneous capacity to exploit latency hiding and temporal slack (e.g., I/O wait, imbalanced phases). Because ShaRiff groups complementary tasks, oversubscription tends to translate into higher throughput and energy efficiency than naive overbooking; however, when clustered tasks are less complementary, contention can surface, making this variant an explicit trade-off between utilization and interference.
+% ShaRiff 2
+This variant retains the ShaRiff-augmented FIFO pipeline but enables controlled oversubscription during placement and VM sizing. Tasks are dequeued in arrival order. Before dispatch, the scheduler queries ShaReComp with the current ready set and receives clusters of tasks pcomputed to co-locate well. Hosts are ranked by descending idle-core capacity; the assigner then fills the largest host first with a batch whose size may exceed the hosts free cores by a fixed factor of in our example 25\%. If tasks remain, it proceeds to the next host and repeats.
+The allocator implements the advisers plan one VM per cluster on the chosen host, but with oversubscription semantics. For multi-task clusters, it provisions a VM whose vCPU and memory equal the sum of the clusters requests—even if that exceeds the hosts currently free cores. For single task clusters collected on the same host, it provisions a shared VM and caps vCPUs at the hosts free cores when necessary. In both cases the VM is started once, all tasks in the cluster are submitted to the same virtual compute service, and the VM is torn down only after the last co-located task finishes.
+Because ShaReComp groups complementary tasks, oversubscription holds the potential to translate into higher throughput and energy efficiency. However, when clustered tasks are less complementary, contention can surface, making this variant an explicit trade-off between utilization and interference.
 
 % ShaRiff 3
 
@@ -1087,9 +1100,9 @@ Conceptually, this policy combines adviser-driven co-location with capacity-awar
     \Return{workflow complete}
 \end{algorithm}
 
-This variant preserves FIFO dequeuing but combines round-robin first-fit placement with ShaRiff-guided intra-VM co-location. The scheduler releases tasks strictly in arrival order. The node-assignment component scans hosts in round-robin/first-fit fashion and picks the first host reporting at least one idle core. It then pulls up to that hosts idle-core capacity worth of ready tasks and queries ShaRiff for a co-location plan over this batch.
-The allocator realizes ShaRiffs plan one VM per suggested cluster on the chosen host. For each multi-task cluster, it sizes the VM by summing vCPU and memory requirements of the clusters tasks, starts the VM, and submits all cluster tasks to the same virtual compute service. Tasks that ShaRiff leaves as singletons are grouped onto an additional shared VM on that host; its size is the aggregate of the singletons requests. VM lifecycle is managed per cluster: each VM stays up until all of its assigned tasks complete, then is shut down and destroyed.
-Conceptually, the policy is first-fit host, adviser-driven packing. It preserves FIFO ordering and simple first-fit host selection while letting ShaRiff decide which tasks should share a VM to reduce interference (by favoring complementary profiles). Unlike the max-parallel variants, this strategy does not oversubscribe cores; it fills only the currently free capacity of the first eligible host and relies on ShaRiffs clustering to raise utilization and efficiency through informed co-location.
+ShaRiff 3 preserves FIFO dequeuing but combines round-robin first-fit placement with ShaReComp-guided intra-VM co-location. The scheduler releases tasks strictly in arrival order. The node-assignment component scans hosts in round-robin/first-fit fashion and picks the first host reporting at least one idle core. It then pulls up to that hosts idle-core capacity worth of ready tasks and queries ShaReComp for a co-location plan over this batch.
+The allocator realizes ShaReComps plan one VM per suggested cluster on the chosen host. For each multi-task cluster, it sizes the VM by summing vCPU and memory requirements of the clusters tasks, starts the VM, and submits all cluster tasks to the same virtual compute service. Tasks that ShaReComp leaves as singletons are grouped onto an additional shared VM on that host; its size is the aggregate of the singletons requests.
+Conceptually, the policy is first-fit host, adviser-driven packing. Unlike the max-parallel variants, this strategy does not oversubscribe cores. Tt fills only the currently free capacity of the first eligible host and relies on ShaReComp's clustering to raise utilization and efficiency through informed co-location.
 
 % TODO: This part needs to be reworked.
 % MinMin extension
