@@ -1,5 +1,47 @@
 \section{Approach}
 \label{cha:approach}
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.5]{fig/04/04-approach-sim.pdf}
+    \caption{Approach Simulation}
+    \label{fig:04-approach-sim}
+    \tiny
+    Das ist eine Beschreibung der Abbildung.
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.45]{fig/04/04-coloc-problem.pdf}
+    \caption{Coloc Problem}
+    \label{fig:04-coloc-problem}
+    \tiny
+    Das ist eine Beschreibung der Abbildung.
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.45]{fig/04/04-monitoring.pdf}
+    \caption{Monitoring}
+    \label{fig:04-monitoring}
+    \tiny
+    Das ist eine Beschreibung der Abbildung.
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.45]{fig/04/04-overview.pdf}
+    \caption{Overview}
+    \label{fig:04-overwiew}
+    \tiny
+    Das ist eine Beschreibung der Abbildung.
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.5]{fig/04/04-wrench-design.pdf}
+    \caption{Wrench design}
+    \label{fig:04-wrench-design}
+    \tiny
+    Das ist eine Beschreibung der Abbildung.
+\end{figure}
+
+
 % TODO: Add references to the sections and prior chapters.
 % Section: OK
 The following section outlines the methodological approach of this thesis. While concrete implementation details are discussed in the subsequent chapter, this section focuses on establishing the theoretical foundation that builds upon the concepts introduced in the background.
@@ -108,11 +150,9 @@ The following table presents the final selection of data sources that were retai
     \centering
     \setlength{\tabcolsep}{6pt}
     \renewcommand{\arraystretch}{1.2}
-    \small
-    \caption{Preliminary simulation results for a subset of workflows showing the overall improvement for both runtime and energy consumption compared to the average of 2 naive baselines without co-location.}
     \label{tab:workflow_results}
     % \resizebox{\textwidth}{!}{%
-    \resizebox{\textwidth}{0.46\textheight}{%
+    \resizebox{\textwidth}{!}{%
         \begin{tabular}{
             >{\raggedright\arraybackslash}p{2.7cm}
             >{\raggedright\arraybackslash}p{3.3cm}
@@ -130,6 +170,8 @@ The following table presents the final selection of data sources that were retai
             \bottomrule
         \end{tabular}%
     }
+    \small
+    \caption{Preliminary simulation results for a subset of workflows showing the overall improvement for both runtime and energy consumption compared to the average of 2 naive baselines without co-location.}
 \end{table}
 
 % Description of cadvisor, ebpf-energy-monitor
@@ -182,7 +224,7 @@ The design introduced in \ref{alg:monitoring} reduces monitoring overhead and en
 \label{sec:data_analysis}
 This section covers step 2, 3 and 4 seen in \ref{fig:approach_overview} and describes how the collected monitoring data is processed to derive task behavior representations suitable for co-location clustering and predictive modeling.
 
-\paragraph{General Preprocessing of Raw Time-Series Data}
+\myparagraph{General Preprocessing of Raw Time-Series Data}
 \label{sec:data_preprocessing_general}
 
 The collected monitoring data consists of raw time-series files in CSV format. Therefore, an initial step of pre-processing is necessary.
@@ -205,7 +247,7 @@ We attach the correct working directory to every container trace and extract tas
 
 After concluding the initial preprocessing of the raw time-series data we proceed with further refinement of the data according to the needs of performing task clustering.
 
-\paragraph{Preprocessing Raw Time-Series Data for Task-Clustering}
+\myparagraph{Preprocessing Raw Time-Series Data for Task-Clustering}
 \label{sec:data_preprocessing_predictive}
 
 We apply the following two main steps prior to the clustering algorithm.
@@ -221,40 +263,6 @@ We apply the following two main steps prior to the clustering algorithm.
 
 The measurement of resource contention follows a two-stage protocol that first establishes isolated baselines for each workload class and then repeats the same workloads under controlled co-location. In the baseline stage, CPU-bound, memory-bound, and file-I/O-bound benchmark containers are executed one at a time on pinned logical CPUs. Each run records a start and finish timestamp at microsecond resolution. In parallel, Deep-Mon is used to record the power time series for each container. After a run finishes, the power streams of the containers are retained, aligned to the containers lifetime, and summarized to a representative mean value.
 After isolated benchmark execution we replay the same benchmarks in pairs to expose interference effects by CPU pinning. The experiment binds pairs of benchmarks to siblings on the same physical core to amplify shared-core effects. Each co-located container is measured in exactly the same way as in isolation, producing a matched set of durations and power summaries.
-
-Table \ref{tab:synthetic-benchmarks} shows the benchmarks specifications used to generate the workloads.
-
-% Table for the experiment design
-
-\begin{table}[htbp]
-    \centering
-    \caption{Summary of Synthetic Benchmarks Used in Evaluation}
-    \label{tab:synthetic-benchmarks}
-    \begin{tabular}{@{}lcccc@{}}
-        \toprule
-        \textbf{Benchmark Label}                                                                                                                          & \textbf{Image / Version} & \textbf{Execution Command} & \textbf{Behavior Type} & \textbf{Comments} \\
-        \midrule
-
-        \textbf{CPU}                                                                                                                                      &
-        \texttt{stress-ng-cpu:latest}                                                                                                                     &
-        \texttt{stress-ng --cpu 1 --cpu-method matrixprod --cpu-ops 100000 --metrics-brief}                                                               &
-        CPU-bound, matrix computation kernel.                                                                                                             &
-        Used to emulate high arithmetic intensity workloads.                                                                                                                                                                                                   \\
-
-        \textbf{Memory (VM)}                                                                                                                              &
-        \texttt{stress-ng-mem-vm:latest}                                                                                                                  &
-        \texttt{stress-ng --vm 1 --vm-bytes 18G --vm-ops 1000 --metrics-brief}                                                                            &
-        Memory-bound workload.                                                                                                                            &
-        Tests VM allocation, memory contention, and NUMA effects.                                                                                                                                                                                              \\
-
-        \textbf{File I/O}                                                                                                                                 &
-        \texttt{fio:latest}                                                                                                                               &
-        \texttt{fio --name seqread --rw read --bs 1M --size 18G --numjobs 1 --readonly=1 --direct=1 --iodepth=32 --ioengine=io\_uring --group\_reporting} &
-        I/O-intensive sequential read.                                                                                                                    &
-        Evaluates disk and I/O scheduling performance.                                                                                                                                                                                                         \\
-        \bottomrule
-    \end{tabular}
-\end{table}
 
 % Notation for the experiments.
 In order to derive a workload affinity from the contention experiments we define contention effects to occur when co-located workloads exceed their duration and power consumption compared to their isolated measurements.
@@ -356,26 +364,8 @@ where \(\beta > 0\) controls scaling sensitivity.
 Values of $A \approx 0$ indicate minimal interference,
 while \(A \to 1\) signifies strong co-location interference.
 
-% TODO: Put into evaluation.
-\begin{table}[H]
-    \centering
-    \caption{Affinity scores between workload types indicating co-location compatibility.}
-    \label{tab:affinity_scores}
-    \begin{tabularx}{\textwidth}{l l c X}
-        \toprule
-        \textbf{Workload 1} & \textbf{Workload 2} & \textbf{Affinity Score} & \textbf{Comment}                                                                              \\
-        \midrule
-        mem                 & cpu                 & 0.543                   & Moderate compatibility; memory and CPU workloads can share resources with limited contention. \\
-        mem                 & fileio              & 0.148                   & Very low compatibility; strong interference due to I/O and memory bandwidth pressure.         \\
-        fileio              & cpu                 & 0.223                   & Low compatibility; CPU workloads cause contention for shared I/O buffers.                     \\
-        cpu                 & cpu                 & 0.444                   & Medium self-affinity; CPU-bound tasks compete for cores but remain schedulable.               \\
-        mem                 & mem                 & 0.514                   & Moderate self-affinity; memory contention manageable under shared caching.                    \\
-        fileio              & fileio              & 0.346                   & Limited self-affinity; file I/O contention degrades throughput under co-location.             \\
-        \bottomrule
-    \end{tabularx}
-\end{table}
 
-\paragraph{Algorithmic Approach to Task Consolidation}
+\myparagraph{Algorithmic Approach to Task Consolidation}
 Consolidation is formulated as a clustering problem with an important modification: rather than grouping tasks that are similar, the goal is to cluster tasks with complementary resource usage patterns to minimize contention during co-location. Building on the previously established notion of affinity—which quantifies how strongly workloads interfere when sharing resources—the clustering process now incorporates this measure directly into its distance metric. The task task distance increases when two tasks exert pressure on the same resources simultaneously, indicating potential contention, and decreases when their resource usage peaks complement one another.
 
 Algorithm \ref{alg:task_distance_clustering} summarizes the main stages of the task consolidation procedure used in this work. The approach begins by computing pairwise similarities between task signatures, where each signature represents a multi-dimensional profile of resource usage over time. The similarity computation incorporates resource affinity weights derived from the contention experiments. This yields a resource-aware similarity matrix that reflects how well tasks can coexist on the same node without interference.
@@ -475,7 +465,7 @@ The key steps of the algorithm are as follows:
 \subsubsection{Predicting the Runtime and Energy Consumption of Task Clusters with KCCA and Random Forest Regression}
 \label{sec:prediciton_kcca_rfr}
 
-\paragraph{Preprocessing Raw Time-Series Data for Predictive Modelling}
+\myparagraph{Preprocessing Raw Time-Series Data for Predictive Modelling}
 \label{sec:data_preprocessing_predictive}
 
 Differing from the preprocessing \ref{sec:task_clustering}, we define the following actions as a preparation for step 4 in \ref{fig:approach_overview}.
@@ -630,7 +620,7 @@ Building upon \ref{alg:sharecomp} from \ref{sec:task_clustering}, we suggest ano
 
 The predictors used in \ref{alg:sharecomp_prediction} are described in the following.
 
-\paragraph{Kernel Canonical Correlation Analysis}
+\myparagraph{Kernel Canonical Correlation Analysis}
 KCCA wants to identify relationships between task-specific features and their corresponding performance and energy characteristics. To achieve this, the dataset is divided into two parts: approximately 70\% of the tasks are used for training the models, while the remaining 30\% are reserved for testing and validation.
 
 Before training, both the feature data (X) and the target data (Y)—representing task runtime and energy consumption—are standardized separately. Each is transformed to have a mean of zero and a standard deviation of one. This step is essential, as the original values cover different numerical scales, which could negatively affect kernel-based learning methods. Standardization ensures that all features contribute equally to the learning process and prevents those with larger magnitudes from biasing the results.
@@ -709,7 +699,7 @@ while the less efficient task (\(x_2\))
 shows a distinct temporal signature characterized by
 fluctuating utilization and higher runtime.
 
-\paragraph{Random Forest Regression}
+\myparagraph{Random Forest Regression}
 To complement the KCCA model, we trained two non-parametric regressors based on Random Forests—one to predict mean task power and one to predict task runtime from the same preprocessed feature matrix. We reuse the exact same data as we did for the KCCA model as Random Forests perform well on both multivarita input and output data. The power model is trained on mean per-task energy-rate labels, while the runtime model uses task durations as targets. As a sanity check, we established simple baselines by predicting the training-set mean once for power and once for runtime on the test split. These baselines quantify the minimum improvement any learned model must exceed.
 
 % Add little notation.
@@ -744,7 +734,7 @@ representing predicted runtime (s) and energy (W) per cluster.
 \subsection{Simulation of Task Co-location during Workflow Execution}
 \label{sec:simulation_environment}
 
-\paragraph{Outline of Simulation Components}
+\myparagraph{Outline of Simulation Components}
 \label{sec:design_pillars}
 
 To accomplish step 5 and 6 depicted in \ref{fig:approach_overview}, we build upon specific design pillars that structure the simulation environment.
@@ -775,7 +765,7 @@ Our algorithmic approach to define the behavior of the component's resource mana
 We choose to not formulate the embedding of co-location into the scheduling process as an optimization problem but through decision-making within simple, interpretable rules. Heuristic algorithms are well suited for such settings because they rely on deterministic, rule-based traversal of the search space rather than exhaustive or stochastic exploration.  We divide the task-to-node mapping into two steps. \ref{fig:monitoring_client} illustrates this approach.  The simulation launches the controller component which invokes our resource manager. Through the queue management the resource manager retrieves a set of ready-to-run tasks without predeccessors, that they depend on. In our example task 1,2,4,8,11,12,15 are to be scheduled. For the scheduling we choose to adpot list-scheduling algorithms, which form one of the most established heuristic approaches for workflow scheduling. They assign a priority or ranking to each task based on topological and performance factors (e.g., critical path length, execution cost, or communication overhead), producing a priority list. They then iteratively select the highest-priority unscheduled task and map it to a available resources. As we are interest in mapping not singel tasks but clusters of tasks we identify to embed the infomation retrieval on beneficial task consolidation at this exact stage during the scheduling process. The co-location hints my yield in consolidating T1, (T2, T4, T7), T8, (T11, T12) and T15. Lastly, we need to decide which host can accomodate the formed task clusters the best. We again define an interface for node assignment strategies either prioritize the host with the most idle compute cores first or tries to distribute the task clusters among all the available hosts in a fair manner. Finally the allocaiton component creates virtual machines that contain the task clusters and launch them on the assigned host. By this examplified design, we create a ground to not only embed and study the co-location problem in an execution environment but also gain the possibility of implementing different means of comparison through the interfaces per component. The next section formally introduce the simulation environment, consisting of the scientific workflow as the application that executes tasks and a system model that we use to represent our algorithmic approach to the co-location problem.
 
 % System Model that was used for the heuristic design.
-\paragraph{Simulation System Model}
+\myparagraph{Simulation System Model}
 
 \textbf{Workflow Properties}
 
@@ -866,8 +856,7 @@ At runtime:
     \item The \textbf{Job Manager} executes tasks, monitors VM lifecycles, and updates resource states.
 \end{itemize}
 
-% TODO: Move to evaluation.
-To evaluate the effectiveness of the proposed approach, we compare it against a series of progressively refined baseline algorithms that address the co-location problem with increasing complexity. These baselines range from simple scheduling heuristics to more advanced strategies that gradually incorporate awareness of co-location effects. The following table summarizes all baselines considered in this study. It is important to note that while some of them already involve concurrent execution of tasks, this represents uncontrolled co-location rather than informed or optimized placement. For clarity and conciseness, detailed algorithmic designs of these baselines are provided in the appendix, while this section focuses on describing their conceptual behavior.
+
 
 Using the modelling introduced above, we construct an algorithm that depicts the overall behavior of our simulation approach.
 
@@ -900,7 +889,7 @@ Using the modelling introduced above, we construct an algorithm that depicts the
 
 To compare the effectivness of using the ShaReComp approach we define multiple algorithms for the scheduling and node assignment phase that either employ exclusive resource assignment, assign tasks to multiple hosts in parallel or cluster random tasks into virtual machines. Generically all algorithms build on our simulation blueprint showed above \ref{alg:sharecomp_unified}. We call these algorithms baselines. In fact, we implement two baselines where each task gets executed in it's own VM, so no co-location is applied at all. Baselines 3, 3.1 and 3.2 co-locate tasks onto virtual machines and experiment with prioritizing the available compute hosts according to different strategies. Baselines 4 and 4.1 employ oversubscription, meaning that more tasks than reserved compute resources get assigned to a VM, strategically forcing resource contention. All baseline algorithms are included in the appendix of this thesis. In \ref{cha:evaluation} we include more detailed descriptions on the behavior and choice for the baseline algorithms.
 
-\paragraph{Algorithmic Examples of Task Mapping with guided Co-location}
+\myparagraph{Algorithmic Examples of Task Mapping with guided Co-location}
 \label{sec:co-location_strategies}
 
 This chapter on our approach concludes with introducing our main contribution of this thesis. We use our simulation framework to implement the ShaReComp approach directly into the workflow execution process. Therefore, we design four algorithms in 4 different versions of ShaRiff. ShaRiff is an acronym for share ressource if feasible. Each ShaRiff version implements a different strategy of mapping consolidated tasks onto availabel compute hosts while the decision maing for the co-location itself is always guided by the ShaReComp approach, introdcued in \ref{sec:task_clustering}.
@@ -909,22 +898,23 @@ Table \ref{tab:shariff_overview} provides an overview of the key differences bet
 % Table with ShaRiff Overview stuff.
 \begin{table}[H]
     \centering
-    \caption{Overview of ShaRiff and ShaReComp Scheduling Algorithms.}
-    \label{tab:shariff_overview}
-    \begin{tabularx}{\textwidth}{l l X}
+    % resize only width, height is automatic
+    \footnotesize  % verkleinert nur Schrift, nicht Spalten
+    \begin{tabularx}{\textwidth}{l p{6cm} X}
         \toprule
-        \textbf{Algorithm} & \textbf{Type}                                         & \textbf{Description}                                                                                                                         \\
+        \textbf{Algorithm} & \textbf{Type} & \textbf{Description} \\
         \midrule
-        ShaRiff 1          & Contention-Aware Co-location                          & Uses the ShaReComp API to determine affinity-based co-location groups, minimizing interference between tasks.                                \\
-
-        ShaRiff 2          & Adaptive Co-location + Over-Subscription              & Extends ShaRiff 1 by allowing safe CPU over-subscription based on affinity predictions.                                                      \\
-
-        ShaRiff 3          & Round-Robin Node Assignment + Co-location             & Schedules tasks round-robin across hosts while applying affinity-based co-location through the ShaReComp API.                                \\
-
-        ShaReComp          & Adaptive Max-Parallel Co-location + Over-Subscription & Integrates parallel scheduling, affinity-based co-location, and controlled over-subscription for optimized throughput and energy efficiency. \\
+        ShaRiff 1 & Contention-Aware Co-location & Uses the ShaReComp API to determine affinity-based co-location groups, minimizing interference between tasks. \\
+        ShaRiff 2 & Adaptive Co-location + Over-Subscription & Extends ShaRiff 1 by allowing safe CPU over-subscription based on affinity predictions. \\
+        ShaRiff 3 & Round-Robin Node Assignment + Co-location & Schedules tasks round-robin across hosts while applying affinity-based co-location through the ShaReComp API. \\
+        ShaReComp & Adaptive Max-Parallel Co-location + Over-Subscription & Integrates parallel scheduling, affinity-based co-location, and controlled over-subscription for optimized throughput and energy efficiency. \\
         \bottomrule
     \end{tabularx}
+    \small
+    \caption{Overview of ShaRiff and ShaReComp Scheduling Algorithms.}
+    \label{tab:shariff_overview}
 \end{table}
+
 
 In the following we will in-depth describe the behavior of the ShaRiff algorithms one by one.
 
