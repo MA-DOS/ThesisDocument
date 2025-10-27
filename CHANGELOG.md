@@ -1,3 +1,11 @@
+# [1.1.0](https://github.com/MA-DOS/ThesisDocument/compare/v1.0.1...v1.1.0) (2025-10-27)
+
+
+### Features
+
+* added all figures and plots ([fa9f59d](https://github.com/MA-DOS/ThesisDocument/commit/fa9f59d2a8e17542712d314acf6df1a1ccb53390))
+* first iteration of reworked table of contents ([e99dc57](https://github.com/MA-DOS/ThesisDocument/commit/e99dc5798ed00ce25cc74eb1c586429d818068f4))
+
 ## [1.0.1](https://github.com/MA-DOS/ThesisDocument/compare/v1.0.0...v1.0.1) (2025-10-24)
 
 
