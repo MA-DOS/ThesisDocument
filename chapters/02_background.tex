@@ -1,6 +1,121 @@
 \section{Background}
 \label{cha:background}
+\begin{figure}[H]
+    \centering
+    \includegraphics{fig/02/02-clustering.pdf}
+    \caption{Clustering}
+    \label{fig:02-clustering}
+    \tiny
+    Das ist eine Beschreibung der Abbildung.
+\end{figure}
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.5]{fig/02/02-coloc-overview.pdf}
+    \caption{ClusteColoc Overview}
+    \label{fig:02-coloc-overview}
+    \tiny
+    Das ist eine Beschreibung der Abbildung.
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.4]{fig/02/02-ebpf-os.pdf}
+    \caption{EBPF OS}
+    \label{fig:02-ebpf-os}
+    \tiny
+    Das ist eine Beschreibung der Abbildung.
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.4]{fig/02/02-energy-overview.pdf}
+    \caption{Energy Overview}
+    \label{fig:02-energy-overview}
+    \tiny
+    Das ist eine Beschreibung der Abbildung.
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=1.2]{fig/02/02-hpc-nodes.pdf}
+    \caption{HPC Nodes}
+    \label{fig:02-hpc-nodes}
+    \tiny
+    Das ist eine Beschreibung der Abbildung.
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.5]{fig/02/02-monitoring-layers.pdf}
+    \caption{Monitoring Layers}
+    \label{fig:02-monitoring-layers}
+    \tiny
+    Das ist eine Beschreibung der Abbildung.
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.5]{fig/02/02-monitoring-layers2.pdf}
+    \caption{Monitoring Layers 2}
+    \label{fig:02-monitoring-layers2}
+    \tiny
+    Das ist eine Beschreibung der Abbildung.
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.9]{fig/02/02-numa-cores.pdf}
+    \caption{Numa Cores}
+    \label{fig:02-numa-cores}
+    \tiny
+    Das ist eine Beschreibung der Abbildung.
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.5]{fig/02/02-rapl.pdf}
+    \caption{Rapl}
+    \label{fig:02-rapl}
+    \tiny
+    Das ist eine Beschreibung der Abbildung.
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.7]{fig/02/02-rf.pdf}
+    \caption{RF}
+    \label{fig:02-rf}
+    \tiny
+    Das ist eine Beschreibung der Abbildung.
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.45]{fig/02/02-swms.pdf}
+    \caption{SWMS}
+    \label{fig:02-swms}
+    \tiny
+    Das ist eine Beschreibung der Abbildung.
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.4]{fig/02/02-workflow-task.pdf}
+    \caption{Workflow Task}
+    \label{fig:02-workflow-task}
+    \tiny
+    Das ist eine Beschreibung der Abbildung.
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.7]{fig/02/02-wrench.pdf}
+    \caption{Wrench}
+    \label{fig:02-wrench}
+    \tiny
+    Das ist eine Beschreibung der Abbildung.
+\end{figure}
 This chapter provides the necessary background for the thesis. Section 2.1 introduces the domain of High-Performance Computing (HPC), with a focus on modern computational hardware (2.1.1) and virtualization technologies (2.1.2). Section 2.2 then discusses scientific workflows as a representative HPC application, beginning with a definition of scientific workflows (2.2.1), followed by their management systems (2.2.2), and concluding with workflow tasks as their smallest management unit (2.2.3). Section 2.3 introduces the domain of energy-aware computing, while Section 2.4 addresses workflow monitoring, including monitoring targets (2.4.1), resource monitoring (2.4.2), energy monitoring (2.4.3), and task characterization using monitoring data (2.4.4). Section 2.5 presents the co-location problem, which constitutes the core of this thesis. It motivates the problem through resource contention (2.5.1), discusses its relationship to workflow scheduling and task mapping (2.5.2), and provides a general overview with the guiding boundaries that shape the definition of workflow task co-location used throughout this work. Section 2.6 introduces the role of machine learning in scientific workflow processing, focusing on its application in resource management (2.6.1) and the theoretical background of the models applied in this thesis. This includes Kernel Canonical Correlation Analysis (KCCA) (2.6.2.1), Random Forest Regression (2.6.2.2), Linear Regression (2.6.2.3), and Agglomerative Clustering for task clustering (2.6.2.4). Finally, Section 2.7 outlines the evaluation methodology, with an emphasis on simulation approaches and a description of the WRENCH framework for simulating distributed computing environments (2.7.1).
 
 \subsection{High Performance Computing}
@@ -79,7 +194,7 @@ Performance monitoring is a critical stage in application development, extending
 While general HPC performance monitoring tools can provide detailed insights into system resource usage, linking these measurements to higher-level abstractions such as workflow tasks remains challenging. In large-scale scientific workflows executed on distributed environments tasks may be scheduled on arbitrary nodes and may even share resources with other tasks. As a result, locally observed traces of CPU, memory, or I/O usage cannot be directly attributed to specific tasks.  Moreover, metrics natively provided by workflow management systems are often coarse-grained, capturing only summary statistics for task lifetimes. To obtain fine-grained insights into task-level behavior, additional instrumentation and mapping strategies are required to connect low-level monitoring data with workflow abstractions. To deal with this lack of information, resource usage profiles from compute nodes must be correlated with metadata such as workflow logs or job orchestrator information \cite{Witzke2024}.
 
 % TODO: Insert adapted graphic of monitoring layers, inspired by Bader.
-To bridge this gap, \cite{Bader_2022 } proposed an architectural blueprint for workflow monitoring organized into four layers: the resource manager, the workflow, the machine, and the task layer. These layers represent logical distinctions within a scientific workflow execution environment, each focusing on a different monitoring subject and retrieving metrics from lower layers as needed. Unlike user-centric designs, this approach emphasizes system components rather than interaction flows. Higher layers provide increasingly abstract views, relying only on selected metrics from underlying layers while, in theory, being able to access all. For instance, at the resource manager level, systems such as Slurm, Kubernetes, or HTCondor only require aggregate metrics like task resource consumption or available machine resources, without depending on fine-grained traces such as syscalls. The workflow layer captures metrics tied to the workflow specification, while the machine layer delivers detailed reports of node-level resource usage. At the lowest level, the task layer focuses on fine-grained task execution metrics. Together, this hierarchy balances abstraction and granularity, ensuring that relevant monitoring information is exposed at the appropriate level to support both workflow execution and performance optimization \cite{Bader_2022}.
+To bridge this gap,proposed an architectural blueprint for workflow monitoring organized into four layers: the resource manager, the workflow, the machine, and the task layer. These layers represent logical distinctions within a scientific workflow execution environment, each focusing on a different monitoring subject and retrieving metrics from lower layers as needed. Unlike user-centric designs, this approach emphasizes system components rather than interaction flows. Higher layers provide increasingly abstract views, relying only on selected metrics from underlying layers while, in theory, being able to access all. For instance, at the resource manager level, systems such as Slurm, Kubernetes, or HTCondor only require aggregate metrics like task resource consumption or available machine resources, without depending on fine-grained traces such as syscalls. The workflow layer captures metrics tied to the workflow specification, while the machine layer delivers detailed reports of node-level resource usage. At the lowest level, the task layer focuses on fine-grained task execution metrics. Together, this hierarchy balances abstraction and granularity, ensuring that relevant monitoring information is exposed at the appropriate level to support both workflow execution and performance optimization %\cite{Bader_2022}.
 
 \paragraph{Low-level Resource Monitoring}
 % TODO: Insert citation for ebpf book
