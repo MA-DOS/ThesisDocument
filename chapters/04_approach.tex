@@ -355,7 +355,7 @@ while \(A \to 1\) signifies strong co-location interference.
 Building on the previously derived peak time-series representations and the computed workload-type affinity scores, we now turn to the algorithmic formulation of the clustering, or consolidation, process.
 Consolidation is formulated as a clustering problem with an important modification: rather than grouping tasks that are similar, the goal is to cluster tasks with complementary resource usage patterns to minimize contention during co-location. Building on the previously established notion of affinity—which quantifies how strongly workloads interfere when sharing resources—the clustering process now incorporates this measure directly into its distance metric. The distance between tasks increases when two tasks exert pressure on the same resources simultaneously, indicating potential contention, and decreases when their resource usage peaks complement one another.
 
-Algorithm \ref{alg:task_distance_clustering} showcases the ShaReComp task consolidation procedure developed in this work, integrating both the peak-pattern representations and affinity scores into a unified clustering process. The method first computes pairwise similarities between all task signatures, where each signature encodes the temporal evolution of multiple resource metrics. These similarities are weighted by the experimentally derived affinity values to reflect the degree of potential interference between workloads. The resulting similarity matrix thus provides a contention-aware view of task compatibility.
+Algorithm \ref{alg:task_distance_clustering} showcases the \textit{ShaReComp} task consolidation procedure developed in this work, integrating both the peak-pattern representations and affinity scores into a unified clustering process. The method first computes pairwise similarities between all task signatures, where each signature encodes the temporal evolution of multiple resource metrics. These similarities are weighted by the experimentally derived affinity values to reflect the degree of potential interference between workloads. The resulting similarity matrix thus provides a contention-aware view of task compatibility.
 A percentile-based threshold is then applied to adaptively determine the stopping condition for cluster formation, ensuring that only task pairs with sufficiently low contention potential are merged. Finally, agglomerative clustering is executed using average linkage criterion to form consolidated task groups that exhibit complementary resource utilization.
 
 % Algorithm for Task Consolidation in ShaReComp
@@ -578,7 +578,7 @@ power consumption used for model learning or correlation analysis.
 
 This preprocessing yields: (i) a standardized and fixed-length feature matrix X that preserves per-metric usage distributions and (ii) a label matrix Y capturing runtime and energy
 
-Building upon Algorithm \ref{alg:sharecomp} in Section \ref{sec:task_clustering}, we extend the ShaReComp concept by linking task clustering with predictive modeling. This step introduces a follow-up procedure that uses the clustered task groups and their extracted temporal features from Section~\ref{sec:prediciton_kcca_rfr} to model and predict the expected runtime and energy behavior of consolidated task clusters.
+Building upon Algorithm \ref{alg:sharecomp} in Section \ref{sec:task_clustering}, we extend the \textit{ShaReComp} concept by linking task clustering with predictive modeling. This step introduces a follow-up procedure that uses the clustered task groups and their extracted temporal features from Section~\ref{sec:prediciton_kcca_rfr} to model and predict the expected runtime and energy behavior of consolidated task clusters.
 
 % Algorithm for prediction of task clusters.
 \begin{algorithm}[H]
@@ -765,7 +765,7 @@ Our algorithmic design for the resource manager, allocator, and scheduler compon
     Das ist eine Beschreibung der Abbildung.
 \end{figure}
 
-Since our goal is to map not individual tasks but clusters of tasks, we embed the retrieval of co-location information derived from ShaReComp directly into this stage of the scheduling process. In the illustrated example, the co-location hints result in consolidated groups such as T1, (T2, T4, T7), T8, (T11, T12), and T15. After clustering, the next step is to determine which compute host can best accommodate each task group. To this end, we define an interface for node assignment strategies that can either prioritize hosts with the most idle compute cores or distribute task clusters evenly across all available nodes to ensure balanced utilization. Finally, the allocation component creates virtual machines for each task cluster and launches them on their designated hosts, completing the mapping and allocation workflow. Through this exemplified design, we establish a foundation that not only enables the embedding and study of the co-location problem within an execution environment but also allows for systematic comparison through modular component interfaces. The following section formally introduces the simulation environment and the system model that represents our algorithmic formulation of the co-location problem.
+Since our goal is to map not individual tasks but clusters of tasks, we embed the retrieval of co-location information derived from \textit{ShaReComp} directly into this stage of the scheduling process. In the illustrated example, the co-location hints result in consolidated groups such as T1, (T2, T4, T7), T8, (T11, T12), and T15. After clustering, the next step is to determine which compute host can best accommodate each task group. To this end, we define an interface for node assignment strategies that can either prioritize hosts with the most idle compute cores or distribute task clusters evenly across all available nodes to ensure balanced utilization. Finally, the allocation component creates virtual machines for each task cluster and launches them on their designated hosts, completing the mapping and allocation workflow. Through this exemplified design, we establish a foundation that not only enables the embedding and study of the co-location problem within an execution environment but also allows for systematic comparison through modular component interfaces. The following section formally introduces the simulation environment and the system model that represents our algorithmic formulation of the co-location problem.
 
 % System Model that was used for the heuristic design.
 \myparagraph{Simulation System Model}
@@ -887,14 +887,14 @@ We now present the unified algorithm that governs the overall behavior of our si
     \Return{workflow complete}
 \end{algorithm}
 
-To evaluate the effectiveness of the ShaReComp approach, we define several scheduling and node assignment algorithms that differ in their treatment of resource sharing and task placement. All of these algorithms build upon the unified simulation blueprint presented in \ref{alg:sharecomp_unified} and serve as comparative baselines. The first category of baselines executes each task in its own virtual machine, thereby avoiding any form of co-location. The second category enables task co-location by grouping multiple tasks within shared virtual machines and applying different host prioritization and allocation strategies. A third category extends this idea through controlled oversubscription, where more tasks are assigned to a virtual machine than the available reserved resources allow, deliberately inducing resource contention to test system robustness. Detailed algorithmic definitions are provided in the appendix, while \ref{cha:evaluation} discusses their comparative behavior in depth. The ShaRiff algorithms build directly on top of these baselines, extending them with co-location awareness derived from ShaReComp. In doing so, they replace random or static task grouping with data-driven consolidation decisions that account for resource affinity and contention characteristics.
+To evaluate the effectiveness of the \textit{ShaReComp} approach, we define several scheduling and node assignment algorithms that differ in their treatment of resource sharing and task placement. All of these algorithms build upon the unified simulation blueprint presented in \ref{alg:sharecomp_unified} and serve as comparative baselines. The first category of baselines executes each task in its own virtual machine, thereby avoiding any form of co-location. The second category enables task co-location by grouping multiple tasks within shared virtual machines and applying different host prioritization and allocation strategies. A third category extends this idea through controlled oversubscription, where more tasks are assigned to a virtual machine than the available reserved resources allow, deliberately inducing resource contention to test system robustness. Detailed algorithmic definitions are provided in the appendix, while \ref{cha:evaluation} discusses their comparative behavior in depth. The \textit{ShaRiff} algorithms build directly on top of these baselines, extending them with co-location awareness derived from ShaReComp. In doing so, they replace random or static task grouping with data-driven consolidation decisions that account for resource affinity and contention characteristics.
 
 \myparagraph{Algorithmic Examples of Task Mapping with guided Co-location}
 \label{sec:co-location_strategies}
 
-This section concludes our approach by introducing the main contribution of this thesis: the integration of the ShaReComp methodology into the workflow execution process. To this end, we design four scheduling algorithms collectively referred to as ShaRiff (Share Resources if Feasible). Each ShaRiff variant implements a distinct strategy for mapping consolidated task clusters onto available compute hosts, while the co-location decisions themselves are consistently guided by the ShaReComp approach introduced in Section \ref{sec:task_clustering}. An overview of the four ShaRiff variants and their respective strategies is provided in Table \ref{tab:shariff_overview}.
+This section concludes our approach by introducing the main contribution of this thesis: the integration of the \textit{ShaReComp} methodology into the workflow execution process. To this end, we design four scheduling algorithms collectively referred to as \textit{ShaRiff} (Share Resources if Feasible). Each \textit{ShaRiff} variant implements a distinct strategy for mapping consolidated task clusters onto available compute hosts, while the co-location decisions themselves are consistently guided by the \textit{ShaReComp} approach introduced in Section \ref{sec:task_clustering}. An overview of the four \textit{ShaRiff} variants and their respective strategies is provided in Table \ref{tab:shariff_overview}.
 
-% Table with ShaRiff Overview stuff.
+% Table with \textit{ShaRiff} Overview stuff.
 \begin{table}[H]
     \centering
     \footnotesize
@@ -902,21 +902,21 @@ This section concludes our approach by introducing the main contribution of this
         \toprule
         \textbf{Algorithm} & \textbf{Type}                                                                                                  \\
         \midrule
-        ShaRiff 1          & Biggest Host first, parallel Host-backfilling and mapping of Task Clusters                                     \\
-        ShaRiff 2          & Biggest Host first, parallel Host-backfilling and mapping of Task Clusters with controlled VM Oversubscription \\
-        ShaRiff 3          & Round-Robin Assignment of Task Clusters, No parallelism                                                        \\
-        ShaRiff MinMin     & Biggest Host first, parallel Host-backfilling and mapping of ordered Task Clusters                             \\
+        \textit{ShaRiff} 1          & Biggest Host first, parallel Host-backfilling and mapping of Task Clusters                                     \\
+        \textit{ShaRiff} 2          & Biggest Host first, parallel Host-backfilling and mapping of Task Clusters with controlled VM Oversubscription \\
+        \textit{ShaRiff} 3          & Round-Robin Assignment of Task Clusters, No parallelism                                                        \\
+        \textit{ShaRiff} MinMin     & Biggest Host first, parallel Host-backfilling and mapping of ordered Task Clusters                             \\
         \bottomrule
     \end{tabularx}
     \small
-    \caption{Overview of the ShaRiff scheduling variants that make use of ShaReComp.}
+    \caption{Overview of the \textit{ShaRiff} scheduling variants that make use of ShaReComp.}
     \label{tab:shariff_overview}
 \end{table}
 
 
-In the following, we provide a detailed description of the behavior of each ShaRiff algorithm, followed by its formal algorithmic representation.
+In the following, we provide a detailed description of the behavior of each \textit{ShaRiff} algorithm, followed by its formal algorithmic representation.
 
-% ShaRiff 1
+% \textit{ShaRiff} 1
 % Algorithm
 \begin{algorithm}[H]
     \caption{ShaRiff 1 — Biggest Host first, parallel Host-backfilling and mapping of Task Clusters}
@@ -970,11 +970,11 @@ In the following, we provide a detailed description of the behavior of each ShaR
 
 \end{algorithm}
 
-This variant implements ShaRiff 1, which augments a FIFO pipeline with the external co-location adviser ShaReComp and a cluster-aware allocator. Tasks are dequeued in strict arrival order. Before placement, the scheduler invokes ShaReComp with the current set of ready tasks and receives clusters of jobs that are computed to co-locate well. The node-assignment stage then ranks hosts by descending idle-core capacity and fills the largest host first. It forms a batch of up to that hosts idle cores and attaches the ShaRiff cluster map to the batch. If tasks remain, it proceeds to the next host in the ranked list. A small queue path ensures dispatch even when only a few tasks are available.
+This variant implements \textit{ShaRiff} 1, which augments a FIFO pipeline with the external co-location adviser \textit{ShaReComp} and a cluster-aware allocator. Tasks are dequeued in strict arrival order. Before placement, the scheduler invokes \textit{ShaReComp} with the current set of ready tasks and receives clusters of jobs that are computed to co-locate well. The node-assignment stage then ranks hosts by descending idle-core capacity and fills the largest host first. It forms a batch of up to that hosts idle cores and attaches the \textit{ShaRiff} cluster map to the batch. If tasks remain, it proceeds to the next host in the ranked list. A small queue path ensures dispatch even when only a few tasks are available.
 The allocator realizes the advisers plan one VM per recommended cluster on the chosen host. For each multi-task cluster, it provisions a VM whose vCPU count and memory equal the sum of the clustered tasks declared requirements, starts the VM, and submits the tasks to that same virtual compute service. Singleton clusters are grouped into a shared VM on the host to avoid VM fragmentation.
-Conceptually, ShaRiff preserves FIFO ordering and capacity-ranked host filling, but replaces random batching with adviser-driven clustering.
+Conceptually, \textit{ShaRiff} preserves FIFO ordering and capacity-ranked host filling, but replaces random batching with adviser-driven clustering.
 
-% ShaRiff 2
+% \textit{ShaRiff} 2
 % Algorithm
 \begin{algorithm}[H]
     \caption{ShaRiff 2 — Biggest Host first, parallel Host-backfilling and mapping of Task Clusters with controlled VM Oversubscription}
@@ -1033,12 +1033,12 @@ Conceptually, ShaRiff preserves FIFO ordering and capacity-ranked host filling, 
     \Return{workflow complete}
 \end{algorithm}
 
-% ShaRiff 2
-This variant extends ShaRiff 1 by controlled oversubscription during placement and VM sizing. Tasks are dequeued in arrival order. Before dispatch, the scheduler queries ShaReComp with the current ready set and receives clusters of tasks pcomputed to co-locate well. Hosts are ranked by descending idle-core capacity; the assigner then fills the largest host first with a batch whose size may exceed the hosts free cores by a fixed factor of in our example 25\%. If tasks remain, it proceeds to the next host and repeats.
+% \textit{ShaRiff} 2
+This variant extends \textit{ShaRiff} 1 by controlled oversubscription during placement and VM sizing. Tasks are dequeued in arrival order. Before dispatch, the scheduler queries ShaReComp with the current ready set and receives clusters of tasks pcomputed to co-locate well. Hosts are ranked by descending idle-core capacity; the assigner then fills the largest host first with a batch whose size may exceed the hosts free cores by a fixed factor of in our example 25\%. If tasks remain, it proceeds to the next host and repeats.
 The allocator implements the advisers plan one VM per cluster on the chosen host, but with oversubscription semantics. For multi-task clusters, it provisions a VM whose vCPU and memory equal the sum of the clusters requests—even if that exceeds the hosts currently free cores. For single task clusters collected on the same host, it provisions a shared VM and caps vCPUs at the hosts free cores when necessary.
 Because ShaReComp groups complementary tasks, oversubscription holds the potential to translate into higher throughput and energy efficiency. However, when clustered tasks are less complementary, contention can surface, making this variant an explicit trade-off between utilization and interference.
 
-% ShaRiff 3
+% \textit{ShaRiff} 3
 % Algorithm
 
 \begin{algorithm}[H]
@@ -1086,11 +1086,11 @@ Because ShaReComp groups complementary tasks, oversubscription holds the potenti
     \Return{workflow complete}
 \end{algorithm}
 
-ShaRiff 3 combines round-robin first-fit placement with ShaReComp-guided intra-VM co-location. The scheduler releases tasks strictly in arrival order. The node-assignment component scans hosts in round-robin fashion and picks the first host reporting at least one idle core. It then pulls up to that hosts idle-core capacity worth of ready tasks and queries ShaReComp for a co-location plan over this batch.
+ShaRiff 3 combines round-robin first-fit placement with ShaReComp-guided intra-VM co-location. The scheduler releases tasks strictly in arrival order. The node-assignment component scans hosts in round-robin fashion and picks the first host reporting at least one idle core. It then pulls up to that hosts idle-core capacity worth of ready tasks and queries \textit{ShaReComp} for a co-location plan over this batch.
 The allocator realizes ShaReComps plan one VM per suggested cluster on the chosen host. For each multi-task cluster, it sizes the VM by summing vCPU and memory requirements of the clusters tasks, starts the VM, and submits all cluster tasks to the same virtual compute service.
 Conceptually, the policy is first-fit host, adviser-driven packing. Unlike the other variants, this strategy does not oversubscribe cores. It fills only the currently free capacity of the first eligible host and relies on ShaReComp's clustering to raise utilization and efficiency through informed co-location.
 
 % MinMin extension
-This scheduler variant extends the ShaRiff framework with a MinMin ordering layer, a classical heuristic from list scheduling. Instead of operating on individual tasks, it applies the MinMin principle to task clusters generated by ShaReComp's co-location analysis. At each scheduling interval, the scheduler requests a new clustering of ready tasks, queries the prediction service using the models introduced in \ref{sec:prediciton_kcca_rfr} with \ref{alg:sharecomp_prediction} for estimated runtimes, and orders clusters in ascending order of predicted execution time. The ShaRiff node assignment and VM allocator then manage placement and resource provisioning. In essence, this forms a MinMin scheduler over co-located clusters, combining ShaRiff's affinity-based co-location with prediction-guided execution ordering to minimize queueing delays and improve overall workflow completion time.
+This scheduler variant extends the \textit{ShaRiff} framework with a MinMin ordering layer, a classical heuristic from list scheduling. Instead of operating on individual tasks, it applies the MinMin principle to task clusters generated by ShaReComp's co-location analysis. At each scheduling interval, the scheduler requests a new clustering of ready tasks, queries the prediction service using the models introduced in \ref{sec:prediciton_kcca_rfr} with \ref{alg:sharecomp_prediction} for estimated runtimes, and orders clusters in ascending order of predicted execution time. The \textit{ShaRiff} node assignment and VM allocator then manage placement and resource provisioning. In essence, this forms a MinMin scheduler over co-located clusters, combining ShaRiff's affinity-based co-location with prediction-guided execution ordering to minimize queueing delays and improve overall workflow completion time.
 
 % TODO: Add Algorithm
