@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/MA-DOS/ThesisDocument/compare/v1.2.0...v1.3.0) (2025-10-28)
+
+
+### Features
+
+* pre-final version ([568f157](https://github.com/MA-DOS/ThesisDocument/commit/568f15726b1e3251fb9ec8a12ee3ac236fdb33f0))
+
 # [1.2.0](https://github.com/MA-DOS/ThesisDocument/compare/v1.1.0...v1.2.0) (2025-10-28)
 
 
