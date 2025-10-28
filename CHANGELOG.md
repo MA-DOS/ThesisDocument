@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/MA-DOS/ThesisDocument/compare/v1.1.0...v1.2.0) (2025-10-28)
+
+
+### Features
+
+* redactional status ([efd144f](https://github.com/MA-DOS/ThesisDocument/commit/efd144fd1dfa9173cca661a7a0caa0711d7e56fa))
+
 # [1.1.0](https://github.com/MA-DOS/ThesisDocument/compare/v1.0.1...v1.1.0) (2025-10-27)
 
 
