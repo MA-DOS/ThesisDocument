@@ -1,0 +1,35 @@
+
+server_configurations:
+  config_path: 
+  prometheus:
+    target_server:
+      controller: 
+      workers: 
+      address: 
+      timeout: 5s
+monitoring_targets:
+  cpu:
+    enabled: true
+    data_sources:
+      - source: cAdvisor
+        labels: [id, image, job,name]
+        identifier: name
+        metrics:
+          - name: container_cpu_user_seconds_total
+            query: container_cpu_user_seconds_total
+            unit: seconds
+      - source: ebpf-mon
+        labels: [container_id, name]
+        identifier: name
+        metrics:
+          - name: container_weighted_cycles
+            query: container_weighted_cycles
+            unit: counter
+  memory:
+    enabled: true
+    data_sources:
+      - source: 
+        labels: 
+        identifier: 
+        metrics:
+          

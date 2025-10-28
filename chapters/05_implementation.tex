@@ -7,10 +7,12 @@ This chapter details the technical implementation of the concepts introduced in 
 \label{sec:system_architecture}
 % Overview sketch
 
+
 \subsection{Technology and Design Choices}
 \label{sec:technology_and_design_choices}
 % Provide a table per number of the previous figure with the technology and design choice and a brief justification.
 
+% TODO: It shadows the page number
 \begin{table}[H]
     \centering
     \caption{Monitoring features and associated technical components.}
@@ -72,46 +74,23 @@ The extensibility of the overall system is achieved through a decoupled design t
 \label{sec:monitoring_client}
 The monitoring client exemplifies this philosophy by relying on a flexible configuration-driven architecture. Using a YAML-based configuration file, it dynamically defines which metrics to collect from heterogeneous data sources such as Prometheus exporters, cAdvisor, eBPF probes, or SNMP-based sensors. The configuration specifies not only the metric names and queries but also the identifiers and units, allowing seamless adaptation to different environments or workflow engines. This separation of logic and configuration enables the same client to operate across diverse infrastructures without recompilation. The clients implementation, built on the Prometheus API, abstracts away the complexity of time-range queries and concurrent metric fetching through lightweight threading and synchronization mechanisms. As a result, developers can extend the monitoring framework simply by adding new data sources or metrics to the configuration file, without altering the underlying collection logic.
 
-% Table to show the config file of the monitoring client
+% Config File
+\lstinputlisting[
+    language=YAML,
+    caption={Example YAML Configuration File},
+    label={lst:yaml_config},
+    basicstyle=\ttfamily\footnotesize,
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{red},
+    numbers=left,
+    numberstyle=\tiny,
+    stepnumber=1,
+    numbersep=5pt,
+    breaklines=true,
+    frame=single
+]{/home/nfomin3/dev/ThesisDocument/fig/05/05-pcm-config.yml}
 
-\begin{table}[H]
-    \centering
-    \caption{Adaptable Monitoring Configuration Overview.}
-    \label{tab:monitoring_config_overview}
-    \renewcommand{\arraystretch}{1.15}
-    \resizebox{\textwidth}{!}{
-        \begin{tabular}{
-            p{3.5cm}
-            >{\centering\arraybackslash}p{2cm}
-            p{5cm}
-            p{6cm}
-            }
-            \toprule
-            \textbf{Monitoring Target} & \textbf{Enabled} & \textbf{Supported Data Sources}                         & \textbf{Collected Metric Types / Adaptability Notes}                                                                    \\
-            \midrule
-
-            Task Metadata              &                  & slurm-job-exporter                                      & Collects job metadata (state, runtime, working directory). Can adapt to other job schedulers.                           \\
-
-            CPU                        &                  & cAdvisor, ebpf-mon, docker-activity                     & Captures CPU time and cycles from both container and kernel levels. Supports switching sources for varying granularity. \\
-
-            Memory                     &                  & cAdvisor, docker-activity                               & Tracks memory utilization at container or process level. Configurable for byte- or percentage-based metrics.            \\
-
-            Disk                       &                  & cAdvisor                                                & Monitors block I/O and filesystem throughput. Supports extension with storage exporters.                                \\
-
-            Network                    &                  & cAdvisor (optional)                                     & Disabled by default due to noise. Can be enabled for network-intensive workflows.                                       \\
-
-            Energy                     &                  & docker-activity, ebpf-mon, ipmi-exporter, snmp-exporter & Multi-layer energy monitoring from container to node level. Adaptable to hardware sensors and external power meters.    \\
-
-            \midrule
-            \multicolumn{4}{l}{\textbf{Prometheus Configuration}}                                                                                                                                                                             \\[3pt]
-            \multicolumn{4}{p{16.5cm}}{
-                The Prometheus backend collects all metrics via configurable scrape intervals and targets. Controller and worker nodes can be flexibly defined, enabling distributed monitoring setups.
-            }                                                                                                                                                                                                                                 \\
-
-            \bottomrule
-        \end{tabular}
-    }
-\end{table}
 
 \subsubsection{Enabling Access to Co-location Hints in the Simulator}
 \label{sec:statistical_modeling}
