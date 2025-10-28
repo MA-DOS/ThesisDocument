@@ -11,54 +11,64 @@ This chapter details the technical implementation of the concepts introduced in 
 \subsection{Technology and Design Choices}
 \label{sec:technology_and_design_choices}
 % Provide a table per number of the previous figure with the technology and design choice and a brief justification.
-
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.7]{fig/05/05-system-overview.pdf}
+    \caption{System Overview}
+    \small
+    \label{fig:05-system-overview}
+    \tiny
+    A Scientific Workflow Task as part of a Workflow consuming input data and producing output data.
+\end{figure}
 % TODO: It shadows the page number
 \begin{table}[H]
     \centering
     \caption{Monitoring features and associated technical components.}
     \label{tab:monitoring_layers}
-    \renewcommand{\arraystretch}{1.15}
+    % ↓↓↓ kleinere Schrift + etwas engerer Zeilenabstand ↓↓↓
+    \small
+    \renewcommand{\arraystretch}{1.05}
     \resizebox{\textwidth}{!}{
         \begin{tabular}{
             p{4.5cm}
             >{\centering\arraybackslash}p{2.8cm}
             p{8.2cm}
-            }
+        }
             \toprule
-            \textbf{Component Category} & \textbf{Software Used}                                   & \textbf{Comments / Functionality}                               \\
+            \textbf{Component Category} & \textbf{Software Used} & \textbf{Comments / Functionality} \\
             \midrule
 
-            \multicolumn{3}{l}{\textbf{Workflow Execution}}                                                                                                          \\[3pt]
-            Operating System            & Ubuntu 22.04.5 LTS                                       & Base system environment for all components.                     \\
-            Kernel                      & Linux 5.15.0-143-generic                                 & Provides low-level system resource management.                  \\
-            Workflow Management Engine  & Nextflow 25.06.0                                         & Controls workflow DAG execution and task dependency resolution. \\
-            Virtualization Layer        & Docker Engine 28.3.1 (Community)                         & Provides isolated VM environments for task execution.           \\
-            Resource Manager            & Slurm 24.05.2                                            & Allocates CPU and memory resources dynamically across hosts.    \\
+            \multicolumn{3}{l}{\textbf{Workflow Execution}} \\[3pt]
+            Operating System & Ubuntu 22.04.5 LTS & Base system environment for all components. \\
+            Kernel & Linux 5.15.0-143-generic & Provides low-level system resource management. \\
+            Workflow Management Engine & Nextflow 25.06.0 & Controls workflow DAG execution and task dependency resolution. \\
+            Virtualization Layer & Docker Engine 28.3.1 (Community) & Provides isolated VM environments for task execution. \\
+            Resource Manager & Slurm 24.05.2 & Allocates CPU and memory resources dynamically across hosts. \\
 
             \midrule
-            \multicolumn{3}{l}{\textbf{Monitoring System}}                                                                                                           \\[3pt]
-            Time-Series Database        & Prometheus Server 3.3.1                                  & Central metric collector and time-series database.              \\
-            Monitoring Client           & Go 1.24.1                                                & Collects per-node and per-container resource metrics.           \\
+            \multicolumn{3}{l}{\textbf{Monitoring System}} \\[3pt]
+            Time-Series Database & Prometheus Server 3.3.1 & Central metric collector and time-series database. \\
+            Monitoring Client & Go 1.24.1 & Collects per-node and per-container resource metrics. \\
 
             \midrule
-            \multicolumn{3}{l}{\textbf{Workload Experiments}}                                                                                                        \\[3pt]
-            Benchmark Execution         & stress-ng 0.13.12                                        & Generates controlled CPU, memory, and I/O workloads.            \\
-            Monitoring                  & Deep-Mon (custom fork) with Python 3.10.12 \& BCC 0.35.0 & Captures resource traces during workload execution.             \\
+            \multicolumn{3}{l}{\textbf{Workload Experiments}} \\[3pt]
+            Benchmark Execution & stress-ng 0.13.12 & Generates controlled CPU, memory, and I/O workloads. \\
+            Monitoring & Deep-Mon (custom fork) with Python 3.10.12 \& BCC 0.35.0 & Captures resource traces during workload execution. \\
 
             \midrule
-            \multicolumn{3}{l}{\textbf{Data Analysis}}                                                                                                               \\[3pt]
-            Feature Engineering         & Jupyter Kernel 6.29.5, Python 3.10.12, Poetry 2.1.2      & Derives and normalizes temporal task signatures.                \\
-            Clustering                  & scikit-learn 1.5.2                                       & Groups similar task behaviors into consolidated classes.        \\
-            KCCA                        & CCA-Zoo 2.5.0                                            & Learns correlations between performance and energy domains.     \\
-            Random Forest Regressor     & scikit-learn 1.5.2                                       & Predicts runtime and power consumption from task signatures.    \\
-            Kernel Ridge Regression     & scikit-learn 1.5.2                                       & Baseline model for non-linear regression comparison.            \\
+            \multicolumn{3}{l}{\textbf{Data Analysis}} \\[3pt]
+            Feature Engineering & Jupyter Kernel 6.29.5, Python 3.10.12, Poetry 2.1.2 & Derives and normalizes temporal task signatures. \\
+            Clustering & scikit-learn 1.5.2 & Groups similar task behaviors into consolidated classes. \\
+            KCCA & CCA-Zoo 2.5.0 & Learns correlations between performance and energy domains. \\
+            Random Forest Regressor & scikit-learn 1.5.2 & Predicts runtime and power consumption from task signatures. \\
+            Kernel Ridge Regression & scikit-learn 1.5.2 & Baseline model for non-linear regression comparison. \\
 
             \midrule
-            \multicolumn{3}{l}{\textbf{Simulation Framework}}                                                                                                        \\[3pt]
-            Workflow Tracing            & Nextflow Tracer (custom fork)                            & Records execution-level metadata for simulation replay.         \\
-            Simulation Engine           & WRENCH 2.7 \& C++17                                      & Evaluates scheduling strategies under controlled conditions.    \\
-            Clustering API              & FastAPI 0.1.0, Python 3.10.12                            & Provides task grouping via ShaReComp integration.               \\
-            Prediction API              & FastAPI 0.1.0, Python 3.10.12                            & Interfaces learned models for runtime and energy estimation.    \\
+            \multicolumn{3}{l}{\textbf{Simulation Framework}} \\[3pt]
+            Workflow Tracing & Nextflow Tracer (custom fork) & Records execution-level metadata for simulation replay. \\
+            Simulation Engine & WRENCH 2.7 \& C++17 & Evaluates scheduling strategies under controlled conditions. \\
+            Clustering API & FastAPI 0.1.0, Python 3.10.12 & Provides task grouping via \textit{ShaReComp} integration. \\
+            Prediction API & FastAPI 0.1.0, Python 3.10.12 & Interfaces learned models for runtime and energy estimation. \\
 
             \bottomrule
         \end{tabular}
@@ -78,19 +88,10 @@ The monitoring client exemplifies this philosophy by relying on a flexible confi
 \lstinputlisting[
     language=YAML,
     caption={Example YAML Configuration File},
-    label={lst:yaml_config},
-    basicstyle=\ttfamily\footnotesize,
-    keywordstyle=\color{blue},
-    commentstyle=\color{gray},
-    stringstyle=\color{red},
-    numbers=left,
-    numberstyle=\tiny,
-    stepnumber=1,
-    numbersep=5pt,
-    breaklines=true,
-    frame=single
+    label={lst:yaml_config}
 ]{/home/nfomin3/dev/ThesisDocument/fig/05/05-pcm-config.yml}
 
+\verbfilenobox[\mbox{\scriptsize\theVerbboxLineNo:}]{fig/05/05-pcm-config.yml}
 
 \subsubsection{Enabling Access to Co-location Hints in the Simulator}
 \label{sec:statistical_modeling}
@@ -100,7 +101,7 @@ The statistical modeling component, implemented as a standalone FastAPI service,
 
 \begin{table}[H]
     \centering
-    \caption{Overview of REST API Endpoints Exposed by the ShaReComp Service.}
+    \caption{Overview of REST API Endpoints Exposed by the \textit{ShaReComp} Service.}
     \label{tab:api_endpoints}
     \renewcommand{\arraystretch}{1.15}
     \resizebox{\textwidth}{!}{
