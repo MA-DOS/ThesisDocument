@@ -23,7 +23,7 @@ Figure \ref{fig:02-hpc-nodes} shows what distinguishes HPC systems from conventi
 \subsubsection{Modern HPC Hardware}
 \label{sec:background_hpc_hardware}
 
-High-performance computing (HPC) architecture defines how supercomputers are structured, how their components interact, and which instruction set architecture (ISA) they expose to the applications running on them. It is designed to use underlying hardware technologies efficiently to minimize time to solution, maximize computational throughput, and support large-scale, computation-intensive workloads.
+HPC architecture defines how supercomputers are structured, how their components interact, and which instruction set architecture (ISA) they expose to the applications running on them. It is designed to use underlying hardware technologies efficiently to minimize time to solution, maximize computational throughput, and support large-scale, computation-intensive workloads.
 The performance of an HPC system depends largely on the speed and coordination of its components, with processor clock frequency playing a central role. Modern architectures aim to balance computation, memory, and communication performance while maintaining reasonable cost, power consumption, and ease of use to achieve high application throughput.
 Power consumption is a critical factor in HPC, as processors, memory, interconnects, and I/O devices all require electricity, and the resulting heat must be removed to avoid failure. Air cooling suffices for smaller systems, but high-density, high-performance systems increasingly rely on liquid cooling to achieve higher packing density and performance. Modern processors further support power management through dynamic voltage and frequency scaling, variable core activation, and thermal monitoring. These mechanisms enable a balance between power consumption and performance, guided by software that can set or adjust configurations at runtime based on workload demands \cite{STERLING201843}.
 
@@ -37,11 +37,10 @@ Power consumption is a critical factor in HPC, as processors, memory, interconne
     NUMA Core Architecture showing Local and Remote Memory Access.
 \end{figure}
 
-The multiprocessor class of parallel computer represents the dominant architecture in contemporary supercomputing. Broadly defined, it consists of multiple independent processors, each with its own instruction control, interconnected through a communication network and coordinated to execute a single workload. Symmetric multiprocessors (SMPs) use a shared memory model accessible by all processors. Nonuniform memory access (NUMA) architectures extend shared-memory designs by allowing all processors to access the full memory space but with different access times depending on locality. As visualized in \ref{fig:02-numa-cores}, NUMA leverages fast local memory channels alongside slower global interconnects, enabling greater scalability than SMPs.
+The multiprocessor class of parallel computer represents the dominant architecture in contemporary supercomputing. Broadly defined, it consists of multiple independent processors, each with its own instruction control, interconnected through a communication network and coordinated to execute a single workload. Symmetric multiprocessors (SMPs) use a shared memory model accessible by all processors. Nonuniform memory access (NUMA) architectures extend shared-memory designs by allowing all processors to access the full memory space but with different access times depending on locality. As visualized in \ref{fig:02-numa-cores}, NUMA leverages fast local memory channels alongside slower global interconnects, enabling greater scalability than SMPs \cite{5702048} \cite{7349577}.
 
 \subsubsection{Virtualization in HPC}
 \label{sec:background_hpc_virtualization}
-% TODO: Cite paper: Survey on Virtualization of HPC, M. Shao IEEE
 With the ever-growing demand for HPC, hardware resources have continued to expand in scale and complexity, with increasingly intricate interconnections between system components. A central challenge lies in maximizing both performance and resource utilization. Virtualization technologies offer means to improve resource utilization in HPC environments by enabling the provisioning of resources to multiple users on the same physical machine with the goal of maximizing utilization. Depending on the abstraction layer, different virtualization technologies provide distinct benefits. Containers, which virtualize at the operating system level, offer lightweight isolation and have become widely adopted for deploying microservices \cite{9653557}.
 Containers studies have shown that container performance often approaches native execution, particularly for CPU- and memory-intensive workloads, whereas VMs tend to suffer greater degradation for memory, disk, and network-intensive applications. In comparative analyses, Docker containers have demonstrated near-native efficiency for CPU and memory tasks but exhibit performance bottlenecks in certain networking and storage configurations \cite{8397647}.
 
@@ -52,13 +51,13 @@ Containers studies have shown that container performance often approaches native
 \subsubsection{Scientific Workflow Management Systems}
 \label{sec:background_workflows_swms}
 Scientific Workflow Management Systems (SWMS's) enable the composition of complex workflow applications by connecting individual data processing tasks. Figure \ref{fig:02-swms} shows an example of an swms architecture. Tasks, often treated as black boxes, can represent arbitrary programs whose internal logic is abstracted away from the workflow system. The resulting workflows are typically modeled as directed acyclic graphs (DAGs), where channels define the dependencies between tasks: the output of one task serves as the input for one or more downstream tasks. This abstraction allows users to design scalable, reproducible workflows while managing execution complexity across diverse computational environments \cite{thamsen2025energyawareworkflowexecutionoverview}.
-
 SWMSs'sprovide a simplified interface for specifying input and output data, enabling domain scientists to integrate and reuse existing scripts and applications without rewriting code or engaging with complex big data APIs. This abstraction lowers the entry barrier for developing and executing large-scale workflows \cite{Bader_2022}.
 
 %SWMS architecture in general
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.45]{fig/02/02-swms.pdf}
+    \small
     \caption{Scientific Workflow Management System}
     \label{fig:02-swms}
     \tiny
@@ -67,13 +66,14 @@ SWMSs'sprovide a simplified interface for specifying input and output data, enab
 
 \subsubsection{Scientific Workflow Tasks}
 \label{sec:background_workflows_examples}
-Scientific workflows are compositions of sequential and concurrent data processing tasks, whose order is determined by data interdependencies. As \ref{fig:02-workflow-task} depicts, a task is the basic data processing component of a scientific workflow, consuming data from input files or previous tasks and producing data for follow- up tasks or output files. Scientific workflows exist at different levels of abstraction: abstract, concrete, and physical. An abstract workflow models data flow as a concatenation of conceptual processing steps. Assigning actual methods to abstract tasks results in a concrete workflow. To execute a concrete workflow, input data and processing tasks have to be assigned to physical compute resources. In the context of scientific workflows, this assignment is called scheduling and task mapping and results in a physical and executable workflow \cite{Bux2013}.
+Scientific workflows are compositions of sequential and concurrent data processing tasks, whose order is determined by data interdependencies. As \ref{fig:02-workflow-task} illustrates, a task is the basic data processing component of a scientific workflow, consuming data from input files or previous tasks and producing data for follow-up tasks or output files. Scientific workflows exist at different levels of abstraction: abstract, concrete, and physical. An abstract workflow models data flow as a concatenation of conceptual processing steps. Assigning actual methods to abstract tasks results in a concrete workflow. To execute a concrete workflow, input data and processing tasks have to be assigned to physical compute resources. In the context of scientific workflows, this assignment is called scheduling and task mapping and results in a physical and executable workflow \cite{Bux2013} \cite{Witzke2024}.
 Due to their complexity and scale, workflows often consist of large numbers of tasks with multiple parallel paths and are executed on clusters—collections of interconnected compute nodes managed as a single system. SWMS's submit ready-to-run tasks to cluster resource managers such as Slurm or Kubernetes, which allocate resources according to user-defined requirements like CPU cores and memory. Task communication is typically implemented via persistent cluster storage systems like Ceph, HDFS, or NFS, where intermediate data is written and read between tasks \cite{thamsen2025energyawareworkflowexecutionoverview}.
 
 % Graphic of task 
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.4]{fig/02/02-workflow-task.pdf}
+    \small
     \caption{Workflow Task}
     \label{fig:02-workflow-task}
     \tiny
@@ -82,36 +82,48 @@ Due to their complexity and scale, workflows often consist of large numbers of t
 
 \subsection{Monitoring of Scientific Workflows}
 \label{sec:background_monitoring}
-Performance generally helps to prevent degradation by preventable factors, for example by checking whether computation times match processor capabilities or whether communication delays align with message sizes and network bandwidth. Instrumentation of code segments can provide such insights, though even basic measurements introduce latency and overhead that may distort results or even alter execution flow. Hardware-based approaches use modern CPUs to provide dedicated performance counters for events such as instruction retirement, cache misses, or branches. These counters operate transparently, incurring virtually no overhead, though they are limited to a predefined set of measurable events \cite{STERLING201843}.
+Performance monitoring generally helps to prevent degradation by preventable factors, for example by checking whether computation times match processor capabilities or whether communication delays align with message sizes and network bandwidth. Instrumentation of code segments can provide such insights, though even basic measurements introduce latency and overhead that may distort results or even alter execution flow. Hardware-based approaches use modern CPUs to provide dedicated performance counters for events such as instruction retirement, cache misses, or branches. These counters operate transparently, incurring virtually no overhead, though they are limited to a predefined set of measurable events \cite{STERLING201843} \cite{Witzke2024}.
 
 \subsubsection{Distinct Monitoring Layers}
 \label{sec:background_monitoring_layers}
-\paragraph{Highl-level Monitoring}
-While general HPC performance monitoring tools can provide detailed insights into system resource usage, linking these measurements to higher-level abstractions such as workflow tasks remains challenging. \ref{fig:02-monitoring-layers} provides a high-level overview on the relevant monitoring layers.
+\myparagraph{Highl-level Monitoring}
+While general HPC performance monitoring tools can provide detailed insights into system resource usage, linking these measurements to higher-level abstractions such as workflow tasks remains challenging. \ref{fig:02-monitoring-layers} provides a high-level overview on the relevant monitoring layers identified by \cite{Bader_2022}.
 
 % High-Level Layers
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.5]{fig/02/02-monitoring-layers.pdf}
+    \small
     \caption{Monitoring Layers}
     \label{fig:02-monitoring-layers}
     \tiny
     Monitoring Layers in Scientific Workflows.
 \end{figure}
 
-In large-scale scientific workflows executed on distributed environments tasks may be scheduled on arbitrary nodes and may even share resources with other tasks. As a result, locally observed traces of CPU, memory, or I/O usage cannot be directly attributed to specific tasks.  Moreover, metrics natively provided by workflow management systems are often coarse-grained, capturing only summary statistics for task lifetimes. To obtain fine-grained insights into task-level behavior, additional instrumentation and mapping strategies are required to connect low-level monitoring data with workflow abstractions. To deal with this lack of information, resource usage profiles from compute nodes must be correlated with metadata such as workflow logs or job orchestrator information \cite{Witzke2024}.
+In large-scale scientific workflows executed on distributed environments tasks may be scheduled on arbitrary nodes and may even share resources with other tasks. As a result, locally observed traces of CPU, memory, or I/O usage cannot be directly attributed to specific tasks.  Moreover, metrics natively provided by workflow management systems are often coarse-grained, capturing only summary statistics for task lifetimes. To obtain fine-grained insights into task-level behavior, additional instrumentation and mapping strategies are required to connect low-level monitoring data with workflow abstractions. To deal with this lack of information, resource usage profiles from compute nodes must be correlated with metadata such as workflow logs or job orchestrator information \cite{Witzke2024} \cite{Bader_2022}.
 
-To bridge this gap, \cite{Bader_2022} proposed an architectural blueprint for workflow monitoring is organized into four layers: the resource manager, the workflow, the machine, and the task layer. These layers represent logical distinctions within a scientific workflow execution environment, each focusing on a different monitoring subject and retrieving metrics from lower layers as needed. Higher layers provide increasingly abstract views, relying only on selected metrics from underlying layers while, in theory, being able to access all. Lower layers, as shown in Figure \ref{fig:02-monitoring-layers2} the resource manager level aggregates metrics like task resource consumption or available machine resources, without depending on fine-grained traces such as syscalls. The workflow layer captures metrics tied to the workflow specification, while the machine layer delivers detailed reports of node-level resource usage. At the lowest level, the task layer focuses on fine-grained task execution metrics \cite{Bader_2022}.
+To bridge this gap, \cite{Bader_2022} proposed an architectural blueprint for workflow monitoring that is organized into four layers: the resource manager, the workflow, the machine, and the task layer. These layers represent logical distinctions within a scientific workflow execution environment, each focusing on a different monitoring subject and retrieving metrics from lower layers as needed. Higher layers provide increasingly abstract views, relying only on selected metrics from underlying layers while, in theory, being able to access all. Lower layers, as shown in Figure \ref{fig:02-monitoring-layers2} show that the resource manager level aggregates metrics like task resource consumption or available machine resources. The workflow layer captures metrics tied to the workflow specification, while the machine layer delivers detailed reports of node-level resource usage. At the lowest level, the task layer focuses on fine-grained task execution metrics \cite{Bader_2022}.
 
-\paragraph{Low-level Resource Monitoring}
+% Low-Level Layers
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.5]{fig/02/02-monitoring-layers2.pdf}
+    \caption{Monitoring Layers}
+    \label{fig:02-monitoring-layers2}
+    \tiny
+    Monitoring Layers in Scientific Workflows.
+\end{figure}
+
+\myparagraph{Low-level Resource Monitoring}
 % TODO: Insert citation for ebpf book
-Monitoring scientific workflows requires tools that can capture and relate information across different components of a computing system, since no single perspective provides sufficient detail for effective optimization. Low-level system monitors can reveal CPU, memory, or I/O usage but lack awareness of which workflow tasks generate that load, while workflow management systems expose task-level metrics that are often too coarse to identify inefficiencies. In the following, we briefly discuss tools and approaches for monitoring the low layers.
+Low-level monitoring scientific workflows requires tools that can capture and relate information across different components of a computing system, since no single perspective provides sufficient detail for effective optimization. Low-level system monitors can reveal CPU, memory, or I/O usage but lack awareness of which workflow tasks generate that load, while workflow management systems expose task-level metrics that are often too coarse to identify inefficiencies \cite{Witzke2024}. In the following, we briefly discuss tools and approaches for monitoring the low layers.
 Central among low-level techniques is tracing, which captures fine-grained event-based records such as system calls, I/O operations, or network packets. The Berkeley Packet Filter (BPF) allows small programs to run directly in the kernel, making it possible to process events in real time and reduce the overhead of storing and analyzing massive trace logs. In contrast, sampling tools collect subsets of data at regular intervals to create coarse-grained performance profiles. Together with fixed hardware or software counters, tracing and sampling form the backbone of observability.
 The BPF ecosystem provides several user-friendly front ends for tracing, most notably BCC (BPF Compiler Collection) and bpftrace \cite{gregg2020bpf}. Figure \ref{fig:02-ebpf-os} illustrates common monitoring targets at the OS level using eBPF.
 % Monitoring targets on OS-level
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.4]{fig/02/02-ebpf-os.pdf}
+    \small
     \caption{Low Level Monitoring Targets.}
     \label{fig:02-ebpf-os}
     \tiny
@@ -134,6 +146,7 @@ Monitoring hypervisors poses challenges similar to containers but with a differe
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.4]{fig/02/02-energy-overview.pdf}
+    \small
     \caption{Power Measurements in Data Center.}
     \label{fig:02-energy-overview}
     \tiny
@@ -147,7 +160,8 @@ The most widely used of these interfaces is Intel's Running Average Power Limit 
 % RAPL
 \begin{figure}[H]
     \centering
-    \includegraphics[scale=0.5]{fig/02/02-rapl.pdf}
+    \includegraphics[scale=0.4]{fig/02/02-rapl.pdf}
+    \small
     \caption{RAPL Domains}
     \label{fig:02-rapl}
     \tiny
@@ -160,7 +174,7 @@ Tools such as DEEP-mon build on RAPL by combining kernel-level event tracing wit
 \subsection{The Co-location Problem}
 \label{sec:background_colocation}
 The problem of co-location can be traced back to classical operating system scheduling, where the core challenge lies in allocating activities to functional units in both time and space. Traditionally, scheduling in operating systems refers to assigning processes or threads to processors, but this problem appears at multiple levels of granularity, from whole programs to fine-grained instruction streams executed within superscalar architectures \cite{5702048}. On multiprocessor and multicore systems, the scheduler must not only decide when to run a task but also where, since shared caches, memory bandwidth, and execution units create interdependencies between co-located workloads. Early work in operating systems introduced co-scheduling or gang scheduling, where groups of related tasks are executed simultaneously to reduce synchronization delays, exploit data locality, and minimize contention for shared resources. These concepts are directly relevant to modern scientific workflows, where multiple interdependent tasks are often co-located on the same nodes or cores in high-performance computing environments. The performance and energy efficiency of workflows are therefore closely tied to scheduling decisions, as co-located tasks may either benefit from shared resource usage or suffer from interference, making scheduling a fundamental problem for efficient workflow execution.
-Assigning each task to a separate server leads to poor energy efficiency, as servers continue to draw a substantial fraction of their peak power even under low utilization \cite{6193474} \cite{Kuity_2023}. Server consolidation thus emerges as a promising strategy, where multiple workflow tasks are mapped onto fewer servers to reduce total power consumption and resource costs. In this context, the terms consolidation and co-location can be used interchangeably, as both refer to the placement of multiple tasks onto the same physical resources with the aim of improving efficiency \cite{5644899}. However, consolidation is far from trivial: the resource usage of colocated tasks is not additive, and interference effects can significantly impact both power consumption and application performance. Furthermore, the temporal variation in workflow task demands requires runtime-aware provisioning strategies to avoid resource contention and performance degradation \cite{5644899}
+Assigning each task to a separate server leads to poor energy efficiency, as servers continue to draw a substantial fraction of their peak power even under low utilization \cite{6193474} \cite{Kuity_2023}. Server consolidation thus emerges as a promising strategy, where multiple workflow tasks are mapped onto fewer servers to reduce total power consumption and resource costs. In this context, the terms consolidation and co-location can be used interchangeably, as both refer to the placement of multiple tasks onto the same physical resources with the aim of improving efficiency \cite{5644899}. However, consolidation is far from trivial: the resource usage of colocated tasks is not additive, and interference effects can significantly impact both power consumption and application performance. Furthermore, the temporal variation in workflow task demands requires runtime-aware provisioning strategies to avoid resource contention and performance degradation \cite{5644899}.
 
 \subsubsection{Impacts of Co-location on Resource Contention and Interference}
 \label{sec:background_colocation_interference}
@@ -169,7 +183,8 @@ Assigning each task to a separate server leads to poor energy efficiency, as ser
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.5]{fig/02/02-coloc-overview.pdf}
-    \caption{The Co-location Problem.}
+    \small
+    \caption{The Co-location Problem}
     \label{fig:02-coloc-overview}
     \tiny
     Different Levels of Co-location on a Compute Node.
@@ -185,10 +200,10 @@ While scheduling seeks to allocate time and space efficiently, co-location must 
 
 \subsection{Machine Learning Techniques applied in HPC}
 \label{sec:background_ml}
-
+%TODO: Add sentence between these 2 sections
 \subsubsection{Intelligent Resource Management}
 \label{sec:background_ml_resourcemanagement}
-When executing scientific workflows on large-scale computing infrastructures, researchers are required to define task-level resource limits, such as execution time or memory usage, to ensure that tasks complete successfully under the control of cluster resource managers. However, these estimates are often inaccurate, as resource demands can vary significantly across workflow tasks and between different input datasets, leading either to task failures when limits are underestimated or to inefficient overprovisioning when limits are set too conservatively \cite{BADER2024171}. Overprovisioning, while preventing failures, reduces cluster parallelism and throughput, as excess resources are reserved but left unused, while incorrect runtime estimates can distort scheduling decisions and degrade overall system efficiency. To address this, recent research has explored workflow task performance prediction as a means to automate the estimation of runtime, memory, and other resource needs. Machine learning plays a central role in these efforts, with approaches ranging from offline models trained on historical execution data, to online models that adapt dynamically during workflow execution, to profiling-based methods applied before execution \cite{Hou_2022} \cite{Borghesi_2016} \cite{10061770}. Performance prediction models can integrate into both workflow management systems and resource managers, enabling more informed scheduling, efficient resource utilization, and improved energy- and cost-aware computing \cite{bader2025predictingperformancescientificworkflows}  \cite{ZACARIAS2021125}.
+When executing scientific workflows on large-scale computing infrastructures, researchers are required to define task-level resource limits, such as execution time or memory usage, to ensure that tasks complete successfully under the control of cluster resource managers. However, these estimates are often inaccurate, as resource demands can vary significantly across workflow tasks and between different input datasets, leading either to task failures when limits are underestimated or to inefficient overprovisioning when limits are set too conservatively \cite{BADER2024171}. Overprovisioning, while preventing failures, reduces cluster parallelism and throughput, as excess resources are reserved but left unused, while incorrect runtime estimates can distort scheduling decisions and degrade overall system efficiency. To address this, recent research has explored workflow task performance prediction as a means to automate the estimation of runtime, memory, and other resource needs. Machine learning plays a central role in these efforts, with approaches ranging from offline models trained on historical execution data, to online models that adapt dynamically during workflow execution, to profiling-based methods applied before execution \cite{Hou_2022} \cite{Borghesi_2016} \cite{10061770}. Performance prediction models can integrate into both workflow management systems and resource managers, enabling more informed scheduling, efficient resource utilization, and improved energy- and cost-aware computing \cite{bader2025predictingperformancescientificworkflow} \cite{ZACARIAS2021125}.
 
 \subsubsection{Utilized Machine Learning Models in this Thesis}
 \label{sec:background_ml_algorithms}
@@ -203,6 +218,7 @@ Overall, Kernel Ridge Regression combines the simplicity and stability of ridge 
 
 \myparagraph{Kernel Canonical Correlation Analysis}
 \label{sec:background_ml_kcca}
+\noindent
 Kernel Canonical Correlation Analysis (KCCA) is a statistical technique designed to identify and maximize correlations between two sets of variables. Unlike Principal Component Analysis, which focuses on variance within a single dataset, CCA aims to find linear projections of two datasets such that their correlation is maximized. The result is a set of canonical variables that capture the strongest relationships between the two domains. KCCA extends this idea by applying kernel methods, allowing the detection of nonlinear relationships. In KCCA, the data are implicitly mapped into high-dimensional feature spaces through kernel functions, and correlations are then maximized in that transformed space. This enables KCCA to capture more complex dependencies than linear CCA, making it particularly powerful in settings where relationships between datasets are not strictly linear \cite{1202783} \cite{5644899} \href{https://cca-zoo.readthedocs.io/en/stable/modules/generated/cca_zoo.nonparametric.KCCA.html#cca_zoo.nonparametric.KCCA}{CCA-Zoo documentation on nonparametric KCCA}.
 
 \myparagraph{Random Forest Regression}
@@ -212,6 +228,7 @@ Kernel Canonical Correlation Analysis (KCCA) is a statistical technique designed
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.7]{fig/02/02-rf.pdf}
+    \small
     \caption{Random Forest Procedure}
     \label{fig:02-rf}
     \tiny
@@ -227,6 +244,7 @@ Visualized in \ref{fig:02-rf} a Random Forest Regressor is an ensemble learning 
 \begin{figure}[H]
     \centering
     \includegraphics{fig/02/02-clustering.pdf}
+    \small
     \caption{Agglomerative Clustering Procedure}
     \label{fig:02-clustering}
     \tiny
@@ -244,6 +262,7 @@ WRENCH was introduced as a simulation framework that provides accurate, scalable
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.7]{fig/02/02-wrench.pdf}
+    \small
     \caption{WRENCH}
     \label{fig:02-wrench}
     \tiny

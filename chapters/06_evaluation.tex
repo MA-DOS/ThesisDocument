@@ -1,6 +1,6 @@
 \section{Evaluation}
 \label{cha:evaluation}
-This chapter presents the evaluation setup and results of the task co-location approach and developed scheduling algorithms for nine heterogeneous, real-world scientific workflows executed in a simulated environment.
+This chapter presents the evaluation setup and results of the task co-location approach alongside the developed scheduling algorithms for nine heterogeneous, real-world scientific workflows executed in a simulated environment.
 \subsection{Evaluation Setup}
 \label{sec:evaluation_setup}
 First, this section articulates the evaluation setup used in the experiments.
@@ -13,12 +13,10 @@ To collect accurate power usage data, the node was connected to a 12-way switche
 \subsubsection{Workflows}
 \label{sec:evaluation_workflows}
 % TODO: Add correct values there
-Nine real-world, openly available scientific workflows from the nf-core repository have been used to measure how the developed approach performs in realistic scenarios. Specifically, the following workflows have been tested:
+Nine real-world, openly available scientific workflows from the nf-core repository \href{https://github.com/nf-core}{nf-core GitHub repository} have been used for monitoring data collection and been integrated into simulation to evaluate the performance of our proposed approach. Specifically, the following workflows have been tested:
 % Table with different workflows and their characteristics
 \begin{table}[H]
     \centering
-    \caption{Overview of evaluated nf-core workflows.}
-    \label{tab:workflow_overview}
     \renewcommand{\arraystretch}{1.15}
     \resizebox{\textwidth}{!}{
         \begin{tabular}{
@@ -26,7 +24,7 @@ Nine real-world, openly available scientific workflows from the nf-core reposito
             >{\centering\arraybackslash}p{3cm}
             >{\centering\arraybackslash}p{3cm}
             >{\centering\arraybackslash}p{3cm}
-            >{\centering\arraybackslash}p{3cm}
+            >{\arraybackslash}p{3cm}
             }
             \toprule
             \textbf{Workflow}     & \textbf{Number of Tasks} & \textbf{Input Files} & \textbf{Output Files} & \textbf{Data Profile}                                    \\
@@ -43,6 +41,9 @@ Nine real-world, openly available scientific workflows from the nf-core reposito
             \bottomrule
         \end{tabular}
     }
+    \small
+    \caption{Overview of evaluated nf-core workflows}
+    \label{tab:workflow_overview}
 \end{table}
 
 \subsubsection{Monitoring Configuration}
@@ -51,8 +52,6 @@ The execution of the workflows and the accompanying monitoring data collection h
 % Table with different combinations
 \begin{table}[H]
     \centering
-    \caption{Adaptable Monitoring Configuration Overview.}
-    \label{tab:monitoring_config_overview}
     \renewcommand{\arraystretch}{1.15}
     \resizebox{\textwidth}{!}{
         \begin{tabular}{
@@ -65,15 +64,15 @@ The execution of the workflows and the accompanying monitoring data collection h
             \textbf{Monitoring Target} & \textbf{Enabled} & \textbf{Supported Data Sources} & \textbf{Collected Metric Types / Adaptability Notes} \\
             \midrule
 
-            Task Metadata              &                  & nextflow                        & Metrics                                              \\
+            Task Metadata              &                  & nextflow                        & tracefile                                            \\
 
-            CPU                        &                  & cAdvisor, Deep-Mon              & Metrics                                              \\
+            CPU                        &                  & cAdvisor, Deep-Mon              & \makecell[l]{container\_cpu\_usage\_seconds\_total   \\ container\_weighted\_cycles} \\
 
-            Memory                     &                  & cAdvisor, Deep-Mon              & Metrics                                              \\
+            Memory                     &                  & cAdvisor, Deep-Mon              & \makecell[l]{container\_memory\_usage\_bytes         \\ container\_mem\_rss} \\
 
-            Disk                       &                  & cAdvisor, Deep-Mon              & Metrics                                              \\
+            Disk                       &                  & cAdvisor, Deep-Mon              & \makecell[l]{container\_blkio\_device\_usage\_total  \\ container\_num\_reads \\ container\_num\_writes} \\
 
-            Energy                     &                  & Deep-Mon                        & Metrics                                              \\
+            Energy                     &                  & Deep-Mon                        & container\_power                                     \\
 
             \midrule
             \multicolumn{4}{l}{\textbf{Prometheus Configuration}}                                                                                  \\[3pt]
@@ -84,6 +83,8 @@ The execution of the workflows and the accompanying monitoring data collection h
             \bottomrule
         \end{tabular}
     }
+    \small\caption{Adaptable Monitoring Configuration Overview}
+    \label{tab:monitoring_config_overview}
 \end{table}
 
 \subsubsection{Implemented Models for Task Clustering and Prediction}
@@ -93,17 +94,17 @@ As described in Chapter \ref{cha:implementation}, the statistical models—inclu
 \subsubsection{Simulation Setup}
 \label{sec:evaluation_simulation}
 
-\paragraph{Simulated Platform Configuration}
+\myparagraph{Simulated Platform Configuration}
 The infrastructure described in Section \ref{sec:evaluation_infrastructure} was replicated within the SimGrid simulation environment using its platform description tool, as shown in the following XML configuration. The hosts core performance was calibrated by executing stress-ng benchmarks to determine realistic CPU speeds, while network throughput was measured using sysbench. To determine power states (P-states), the GUDE power meter was used to record power consumption in both idle and active conditions under varying load profiles generated with stress-ng. This procedure ensured that the simulated environment accurately reflected the performance and energy characteristics of the physical test system.
 
 % Platform XML file 
 \lstinputlisting[
     language=XML,
-    caption={Example XML Configuration File},
+    caption=\small{Example XML Configuration File},
     label={lst:xml_config}
 ]{/home/nfomin3/dev/ThesisDocument/fig/06/siena_cluster.xml}
 
-\paragraph{Baseline Scheduling Algorithms}
+\myparagraph{Baseline Scheduling Algorithms}
 
 To evaluate the effectiveness of the proposed approach, we compare it against a series of progressively refined baseline algorithms that address the co-location problem with increasing complexity. These baselines range from simple scheduling heuristics to more advanced strategies that gradually incorporate awareness of co-location effects. The following table summarizes all baselines considered in this study. It is important to note that while some of them already involve concurrent execution of tasks, this represents uncontrolled co-location rather than informed or optimized placement. For clarity and conciseness, detailed algorithmic designs of these baselines are provided in the appendix, while this section focuses on describing their conceptual behavior.
 
@@ -132,30 +133,30 @@ To evaluate the effectiveness of the proposed approach, we compare it against a 
 % W/O Co-location
 \myparagraph{Baselines without Co-location}
 % Baseline 1
-The baseline scheduling algorithm implements a simple, sequential execution model designed to simulate isolated task processing within a virtualized cluster. The scheduling process is divided into three abstract components that operate in a fixed order: task scheduling, node assignment, and resource allocation. The scheduler applies a FIFO policy, maintaining a queue of workflow tasks sorted by their readiness. Tasks are retrieved from this queue strictly in order of arrival, preserving dependency constraints and ensuring a fully deterministic execution sequence without reordering or prioritization.
+The \textbf{baseline} scheduling algorithms implement a simple, sequential execution model designed to simulate isolated task processing within a virtualized cluster. The scheduling process is divided into three abstract components that operate in a fixed order: task scheduling, node assignment, and resource allocation. The scheduler applies a FIFO policy, maintaining a queue of workflow tasks sorted by their readiness. Tasks are retrieved from this queue strictly in order of arrival, preserving dependency constraints and ensuring a fully deterministic execution sequence without reordering or prioritization.
 Once a task is selected for execution, the node assignment component distributes it across available compute hosts using a round-robin policy. This mechanism cycles through hosts in sequence, ensuring an even and systematic distribution of tasks across the cluster. No host is assigned more than one active task at a time, enforcing exclusive execution and preventing contention for shared resources.
 % Baseline 2
-The next variant keeps the same FIFO scheduler and VM-based allocator as Baseline 1, but replaces exclusive node assignment with a greedy backfilling policy. Tasks are still dequeued strictly in arrival order by the FIFO scheduler. For each ready task, the node assignment component queries the cluster for the current number of idle cores per host and performs a first-fit scan: it selects the first host that reports at least one idle core, without requiring the host to be completely idle. The allocator then provisions a VM on the chosen host, binds the tasks inputs/outputs, submits the job to that VM, and on completion shuts the VM down and destroys it.
+The \textbf{next variant} keeps the same FIFO scheduler and VM-based allocator as Baseline 1, but replaces exclusive node assignment with a greedy backfilling policy. Tasks are still dequeued strictly in arrival order by the FIFO scheduler. For each ready task, the node assignment component queries the cluster for the current number of idle cores per host and performs a first-fit scan: it selects the first host that reports at least one idle core, without requiring the host to be completely idle. The allocator then provisions a VM on the chosen host, binds the tasks inputs/outputs, submits the job to that VM, and on completion shuts the VM down and destroys it.
 % With co-location
 \myparagraph{Baselines with Co-location}
 % Baseline 3
-Baseline 3 does not differ in the scheduling behavior but replaces the standard allocator and node assignment with components that allow for co-location. When the node assignment component queries the cluster for idle-core availability, it again selects the first host with available cores. However, instead of launching one VM per task, all ready tasks that fit within the hosts idle-core capacity are grouped into a single batch. These tasks are then co-located inside one shared VM instance that is dimensioned according to the aggregate resource requirements of the batch—its vCPU count and memory size are computed as the sum of the respective task demands.
+\textbf{Baseline 3} does not differ in the scheduling behavior but replaces the standard allocator and node assignment with components that allow for co-location. When the node assignment component queries the cluster for idle-core availability, it again selects the first host with available cores. However, instead of launching one VM per task, all ready tasks that fit within the hosts idle-core capacity are grouped into a single batch. These tasks are then co-located inside one shared VM instance that is dimensioned according to the aggregate resource requirements of the batch—its vCPU count and memory size are computed as the sum of the respective task demands.
 Conceptually, this baseline captures the behavior of intra VM co-location, where multiple independent tasks share the same virtual machine instead of being distributed across separate ones.
 % Baseline 3.1
-Baseline 3 is extended by 2 variants where the first one extends the node assignment component to query the cluster for idle-core availability and selects the host with the maximum amount of available cores. However, instead of launching one VM per task, all ready tasks that fit within the hosts idle-core capacity are grouped into a single batch. These tasks are then co-located inside one shared VM instance that is dimensioned according to the aggregate resource requirements of the batch with its vCPU count and memory size are computed as the sum of the respective task demands.
+Baseline 3 is extended by 2 variants where the \textbf{first one} extends the node assignment component to query the cluster for idle-core availability and selects the host with the maximum amount of available cores. However, instead of launching one VM per task, all ready tasks that fit within the hosts idle-core capacity are grouped into a single batch. These tasks are then co-located inside one shared VM instance that is dimensioned according to the aggregate resource requirements of the batch with its vCPU count and memory size are computed as the sum of the respective task demands.
 % Baseline 3.2
-The second extension replaces the placement policy with a selection step for the host with maximum idle cores. At each dispatch, the node-assignment component queries the cluster for the current idle cores per host map and picks the host with the largest number of free cores. It then forms a batch by taking as many ready tasks from the FIFO head as the chosen host can accommodate. Compared to first-fit co-location, it tends to reduce residual fragmentation by packing work onto the most spacious node, while still honoring FIFO ordering and leaving task runtime/I/O handling unchanged.
+The \textbf{second extension} replaces the placement policy with a selection step for the host with maximum idle cores. At each dispatch, the node-assignment component queries the cluster for the current idle cores per host map and picks the host with the largest number of free cores. It then forms a batch by taking as many ready tasks from the FIFO head as the chosen host can accommodate. Compared to first-fit co-location, it tends to reduce residual fragmentation by packing work onto the most spacious node, while still honoring FIFO ordering and leaving task runtime/I/O handling unchanged.
 % Baseline 4
-Baseline 4 retains the same FIFO scheduler but introduces a node assignment and allocation policy focused on maximizing parallel host utilization. Upon each scheduling cycle, the node assignment component queries the cluster for the current number of idle cores per host, filters out fully occupied nodes, and ranks the remaining hosts in descending order of available cores. It then assigns tasks in batches, filling the host with the highest idle capacity first and grouping as many ready tasks as the hosts idle-core count allows. Once the first host is filled, the process continues with the next host until all tasks in the ready queue are mapped.
+\textbf{Baseline 4} retains the same FIFO scheduler but introduces a node assignment and allocation policy focused on maximizing parallel host utilization. Upon each scheduling cycle, the node assignment component queries the cluster for the current number of idle cores per host, filters out fully occupied nodes, and ranks the remaining hosts in descending order of available cores. It then assigns tasks in batches, filling the host with the highest idle capacity first and grouping as many ready tasks as the hosts idle-core count allows. Once the first host is filled, the process continues with the next host until all tasks in the ready queue are mapped.
 % Baseline 4.1
-The last baseline extends the previous one by allowing controlled CPU over-subscription during co-location.
+The \textbf{last baseline} extends the previous one by allowing controlled CPU over-subscription during co-location.
 At each scheduling cycle, the node assignment component queries per-host idle cores, sorts hosts in descending idle capacity, and fills the largest host first. Unlike the non-oversubscribed version, the per-host batch may exceed the currently idle cores by a fixed factor the batch limit is set to. The procedure continues down the ranked host list, forming one batch per host in the same cycle.
 The allocator provisions one VM per host batch, but caps the VMs vCPU count to the hosts actual idle cores at allocation time not the sum of task core demands, while sizing memory to the aggregate of the batched tasks. All tasks in the batch are then submitted to that single VM and execute concurrently on a vCPU pool intentionally smaller than their combined declared cores. The VM remains active until all co-located tasks complete, then it is shut down and destroyed.
 Crucially, the degree of contention and realized speedup or slowdown depends on the complementarity of the co-located task profiles. When CPU-, memory-, and I/O-intensive phases overlap unfavorably oversubscription amplifies interference and queueing on scarce vCPUs. When profiles are complementary, the same oversubscription admits more useful overlap with less contention, improving per host throughput. Conceptually, this variant implements parallel, capacity-ranked random task co-location with controlled oversubscription.
 
 \subsection{Experiment Results}
 \label{sec:experiment_results}
-The section on experimental results is organized as follows. We revisit the approach introduced in Chapter \ref{sec:measuring_resource_contention} by examining the workload experiments and the resulting measurements that form the basis for subsequent evaluation steps in \ref{sec:resource_contention_analysis}. We then present the outcomes of the statistical methods applied in this work, starting with an in-depth analysis of the task consolidation approach in \ref{sec:evaluation_task_consolidation}. Building on these results, we continue with an interpretation of the outcomes from training two predictive models on the clustering data in \ref{sec:evaluation_task_cluster_runtime_and_energy_prediction}. Finally, we integrate all components into a unified simulation framework. Using this setup, we evaluate the results of the simulation in section \ref{sec:evaluation_workflows}.
+The section on the experimental results is organized as follows. We revisit the approach introduced in Chapter \ref{sec:measuring_resource_contention} by examining the workload experiments and the resulting measurements that form the basis for subsequent evaluation steps in \ref{sec:resource_contention_analysis}. We then present the outcomes of the statistical methods applied in this work, starting with an in-depth analysis of the task consolidation approach in \ref{sec:evaluation_task_consolidation}. Building on these results, we continue with an interpretation of the outcomes from training two predictive models on the clustering data in \ref{sec:evaluation_task_cluster_runtime_and_energy_prediction}. Finally, we integrate all components into a unified simulation framework. Using this setup, we evaluate the results of the simulation in section \ref{sec:evaluation_workflows}.
 \subsubsection{Measuring Interference during Benchmark Executions}
 \label{sec:resource_contention_analysis}
 
@@ -163,76 +164,80 @@ The section on experimental results is organized as follows. We revisit the appr
 
 \begin{table}[H]
     \centering
-    \caption{Summary of Synthetic Benchmarks Used in Evaluation.}
-    \label{tab:synthetic-benchmarks}
     \renewcommand{\arraystretch}{1.15}
     \resizebox{\textwidth}{!}{%
         \begin{tabular}{
-            p{3cm}   % Benchmark Label
-            p{6cm}   % Execution Command
-            p{3cm}   % Behavior Type
-            p{4cm}   % Comments
-        }
+                p{3cm}   % Benchmark Label
+                p{6cm}   % Execution Command
+                p{3cm}   % Behavior Type
+                p{4cm}   % Comments
+            }
             \toprule
-            \textbf{Benchmark} & \textbf{Execution Command} & \textbf{Behavior Type} & \textbf{Comments} \\
+            \textbf{Benchmark}                                                                                                                                & \textbf{Execution Command} & \textbf{Behavior Type} & \textbf{Comments} \\
             \midrule
 
-            \textbf{CPU} &
-            \texttt{stress-ng --cpu 1 --cpu-method matrixprod --cpu-ops 100000 --metrics-brief} &
-            CPU-bound, matrix computation kernel. &
-            Used to emulate high arithmetic intensity workloads. \\
+            \textbf{CPU}                                                                                                                                      &
+            \texttt{stress-ng --cpu 1 --cpu-method matrixprod --cpu-ops 100000 --metrics-brief}                                                               &
+            CPU-bound, matrix computation kernel.                                                                                                             &
+            Used to emulate high arithmetic intensity workloads.                                                                                                                                                                        \\
 
-            \textbf{Memory (VM)} &
-            \texttt{stress-ng --vm 1 --vm-bytes 18G --vm-ops 1000 --metrics-brief} &
-            Memory-bound workload. &
-            Tests VM allocation, memory contention, and NUMA effects. \\
+            \textbf{Memory (VM)}                                                                                                                              &
+            \texttt{stress-ng --vm 1 --vm-bytes 18G --vm-ops 1000 --metrics-brief}                                                                            &
+            Memory-bound workload.                                                                                                                            &
+            Tests VM allocation, memory contention, and NUMA effects.                                                                                                                                                                   \\
 
-            \textbf{File I/O} &
+            \textbf{File I/O}                                                                                                                                 &
             \texttt{fio --name seqread --rw read --bs 1M --size 18G --numjobs 1 --readonly=1 --direct=1 --iodepth=32 --ioengine=io\_uring --group\_reporting} &
-            I/O-intensive sequential read. &
-            Evaluates disk and I/O scheduling performance. \\
+            I/O-intensive sequential read.                                                                                                                    &
+            Evaluates disk and I/O scheduling performance.                                                                                                                                                                              \\
 
             \bottomrule
         \end{tabular}%
     }
+    \small
+    \caption{Summary of Synthetic Benchmarks Used in Evaluation.}
+    \label{tab:synthetic-benchmarks}
 \end{table}
 
 
+For measuring resource contention we use the stress-ng tool with the commands listed in \ref{tab:synthetic-benchmarks}. The benchmark code is executed inside Docker containers, and the Docker API is used to capture the execution time of each benchmark. To record the containers' energy consumption, we again use the ebpf-based Deep-Mon tool.
+\ref{fig:bar_plot_iso_bench} shows the results of running each benchmark sequentially on different CPU cores of the node. This reveals how long a container pinned to a single core takes to complete the specified benchmark. Next, we execute all possible pairs of workloads, running each pair sequentially on the same pinned CPU core. For each pair, we plot the runtime of both benchmarks in grouped bars, where the grey area on each plot represents the runtime of the benchmark when executed in isolation.
 
-For measuring resource contention we use the stress-ng tool with the commands listed in \ref{tab:synthetic-benchmarks}. The benchmark code is executed inside Docker containers, and the Docker API is used to capture the execution time of each benchmark. Since the benchmark instructions are fixed and not time-dependent, this provides consistent and comparable measurements. To record the containers' energy consumption, we again use the ebpf-based Deep-Mon tool.
-\ref{fig:bar_plot_iso_bench} shows the results of running each benchmark sequentially on different CPU cores of the node. This reveals how long a container pinned to a single core takes to complete the specified benchmark. Next, we execute all possible pairs of workloads, running each pair sequentially on the same pinned CPU core. For each pair, we plot the runtime of both benchmarks in grouped bars, where the grey area represents the runtime of the benchmark when executed in isolation. The same procedure is repeated for collecting and visualizing the corresponding energy consumption data.
-While the information in \ref{fig:bar_plot_iso_bench} concerning the runtime is only dependent on the load of the benchmark code we see in on the right side of the plot that the power consumption is heavily dominated by compute heavy workloads, on big magnitude followed by the memory benchmark. File i/o only adds a little constant to it which wouldn't be visible if not depicted on a logarithmic scale. This behavior is expected as the experiments are conducted on AMD's Zen 4 architecture that does not support the DRAM domain for the RAPL energy counters.
+% Iso bench barplot
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.5]{fig/06/06-barplot-iso-bench.png}
+    \small
+    \caption{Runtime and Power measurements for different Benchmark Executions}
+    \label{fig:bar_plot_iso_bench}
+    \tiny
+    This barplot compares the runtime of isolated benchmarks combinations with their power consumption.
+\end{figure}
+
+While the information in \ref{fig:bar_plot_iso_bench} concerning the runtime is only dependent on the load of the benchmark code we focus on the right side of the plot and note that the power consumption is heavily dominated by compute heavy workloads, on a big magnitude followed by the memory benchmark. File I/O shows the least power consumption. This behavior is expected as the experiments are conducted on AMD's Zen 4 architecture that has limited support for the DRAM  RAPL domain leading to processor-heavy workloads dominating the power measurements.
 We observe in \ref{fig:bar_plot_colo_bench} that the runtime increases for every co-located pair of workloads. While memory-intensive benchmarks show only a slight increase, file I/O workloads tend to take roughly one quarter longer than their isolated runs. The most pronounced effect appears when compute-heavy workloads are co-located, where the execution time nearly doubles. This confirms that CPU-bound applications experience the strongest interference when sharing the same physical core.
-The power measurements for the co-located workloads, however, show much higher variance and inconsistency across repeated runs. For example, when co-locating CPU-workload, the isolated power draw averages around 3.43 joules, whereas the co-located readings drop to approximately 0.008 joules. Similarly, for FileIO-FileIO benchmarks, the measured power decreases from 0.054 joules in isolation to about 0.009 joules when co-located. These values appear unrealistic and indicate that the RAPL-based measurements on AMD hardware are unreliable in this setup.
-
-We argue that this discrepancy stems from the fact that AMD's RAPL interface does not expose per-core energy readings in a consistent manner. When two containers share a single CPU core, RAPL counters may fail to attribute power consumption correctly between them, resulting in near-zero or erratic readings. In contrast, for the CPU-Memory benchmark combination, the measured power values 27.93 joules and 15.58 joules are much higher and closer to expected magnitudes eventhough the DRAM domain is not available on AMD's Zen 4 processors. This pairing likely produced a more stable measurement because the CPU and memory subsystems were stressed differently, allowing RAPL to record distinct and more accurate energy counters.
-Overall, while the runtime data clearly demonstrate the expected contention effects, the power data highlight a measurement limitation. We therefore do not include the plotted power measurements for the co-located benchmark executions but account for the impact of contention in the following evaluation.
 
 % Barplots with results from experiments.
 \begin{figure}[H]
-    \caption{Bar Plot iso}
-    \includegraphics[scale=0.5]{fig/06/06-barplot-iso-bench.png}
-    \label{fig:bar_plot_iso_bench}
-    \newline
-    \tiny
-    Das ist eine Beschreibung der Abbildung.
-\end{figure}
-\begin{figure}[H]
-    \caption{Bar Plot colo}
     \includegraphics[scale=0.5]{fig/06/06-barplot-colo-bench.png}
+    \small
+    \caption{Runtime Degradation of different Benchmark Combinations under Co-location}
     \label{fig:bar_plot_colo_bench}
-    \newline
     \tiny
-    Das ist eine Beschreibung der Abbildung.
+    This barplot compares the runtime of co-located benchmark combinations against their isolated executions.
 \end{figure}
+
+The power measurements obtained for co-located workloads exhibit considerably higher variance and inconsistency across repeated experiments. For instance, when co-locating CPU-intensive workloads, the average isolated power draw is approximately 3.43 joules, whereas the corresponding co-located readings decrease to about 0.008 joules. A similar pattern is observed for FileIO-FileIO benchmarks, where power consumption drops from 0.054 joules in isolation to roughly 0.009 joules under co-location. These deviations are implausibly large and suggest that the RAPL-based power measurements on AMD hardware are unstable or unreliable under the given experimental configuration.
+
+We argue that this discrepancy stems from the fact that AMD's RAPL interface does not expose per-core energy readings in a consistent manner. When two containers share a single CPU core, RAPL counters may fail to attribute power consumption correctly between them, resulting in near-zero or erratic readings. In contrast, for the CPU-Memory benchmark combination, the measured power values 27.93 joules and 15.58 joules are much higher and closer to expected magnitudes. This pairing likely produced a more stable measurement because the CPU and memory subsystems were stressed differently, allowing RAPL to record distinct and more accurate energy counters.
+Overall, while the runtime data clearly demonstrate the expected contention effects, the power data highlight a measurement limitation. We therefore do not include the plotted power measurements for the co-located benchmark executions but account for the impact of contention in the following evaluation.
+
 
 We calculated the affinity scores between workload pairs according to \ref{sec:measuring_resource_contention}.
 
 % Table with resulting affinity scores
 \begin{table}[H]
     \centering
-    \caption{Affinity scores between workload types indicating co-location compatibility.}
-    \label{tab:affinity_scores}
     \begin{tabularx}{\textwidth}{l l c X}
         \toprule
         \textbf{Workload 1} & \textbf{Workload 2} & \textbf{Affinity Score} & \textbf{Comment}                                                                                       \\
@@ -245,6 +250,9 @@ We calculated the affinity scores between workload pairs according to \ref{sec:m
         fileio              & fileio              & 0.414                   & Limited compatibility; file I/O contention degrades throughput under co-location.                      \\
         \bottomrule
     \end{tabularx}
+    \small
+    \caption{Affinity scores between workload types indicating co-location compatibility.}
+    \label{tab:affinity_scores}
 \end{table}
 
 The results shown in the previous figures are consistent with the affinity scores presented in table \ref{tab:affinity_scores}. When both CPU and memory benchmarks are co-located, their runtimes increase significantly, resulting in the highest affinity scores that indicate strong contention and poor compatibility. This pattern is followed by other same-type co-locations, such as CPU-CPU and Mem-Mem, where scores around 0.5 also reflect noticeable interference, as seen in the near doubling of execution times in the earlier plots. File I/O workloads, by contrast, show comparatively high compatibility. Their co-location with CPU or memory benchmarks causes only minor slowdowns, confirming that I/O-bound tasks exert limited pressure on shared compute or memory resources.
@@ -253,51 +261,51 @@ It is worth noting, however, that while the runtime degradation for the CPU-Memo
 \subsubsection{Dissimilarity-based Task Clustering}
 \label{sec:evaluation_task_consolidation}
 % Radar Plots
-% TODO: Fachbegriffe cursiv
-We evaluate the task clustering procedure in two stages. First, we randomly sample a subset of tasks from the workflow executions and preprocess them for clustering as described in Chapter 4. Specifically, we select 34 random tasks from the Oncoanalyser workflow and perform two clustering variants: a random baseline clustering and the ShaReComp-based clustering, which incorporates dissimilarity distances influenced by the affinity scores presented in the previous table.
-For each cluster, we compute the scale normalized average temporal signatures of the monitored performance metrics, as defined by the monitoring configuration in Chapter 6. These averages are then visualized using radar plots. Each radar plot represents the tasks grouped into a single cluster and thus identifies potential candidates for co-location. The purpose of this visualization is to illustrate the effect of the dissimilarity-based distance formulation and the use of a clustering threshold set to the 25th percentile of the overall distance distribution. This threshold ensures that only sufficiently dissimilar tasks are clustered together.
+We evaluate the task clustering procedure in two stages. First, we randomly sample a subset of tasks from the workflow executions and preprocess them for clustering as described in Chapter 4. Specifically, we select 34 random tasks from the \textit{oncoanalyser} workflow and perform two clustering variants: a random baseline clustering and the \textit{ShaReComp}-based clustering, which incorporates dissimilarity distances influenced by the affinity scores presented in the previous table.
+For each cluster, we compute the scaled, normalized average temporal signatures of the monitored performance metrics, as defined by the monitoring configuration in Chapter 6. These averages are then visualized using radar plots. Each radar plot represents the tasks grouped into a single cluster and thus identifies potential candidates for co-location. The purpose of this visualization is to illustrate the effect of the dissimilarity-based distance formulation and the use of a clustering threshold set to the 25th percentile of the overall distance distribution. This threshold ensures that only sufficiently dissimilar tasks are clustered together.
 Additionally, because the distance measure is adjusted by the correlation between resource usage patterns, tasks with high correlation in their workload behavior tend to be separated, reflecting the influence of the previously computed affinity scores.
 % Random
 
 \begin{figure}[H]
-    \caption{Radarplot Random}
+    \centering
     \includegraphics[scale=0.45]{fig/06/06-radarplot-random.png}
     \includegraphics[scale=0.45]{fig/06/06-radarplot-random-2.png}
+    \small
+    \caption{Random Clustering Results on oncoanalyser workflow tasks}
     \label{fig:radarplot_random}
-    \newline
     \tiny
-    Das ist eine Beschreibung der Abbildung.
+    This radar show how random task clustering performed on a random task sample.
 \end{figure}
 
-We first examine the distribution of task characteristics in the clusters formed by the completely random clustering over the selected probe of Oncoanalyser tasks. The first cluster contains three tasks, while the second cluster includes two. At first glance, the radar plots show that the resource profiles of the tasks overlap strongly across all six dimensions of the task resource signatures. Most notably, the bamtools metrics, amber profiling, and prepare reference tasks exhibit almost identical patterns in their average memory allocation over time and resident memory usage. The same overlap appears in their block I/O activity, reflected by nearly identical numbers of file reads and writes, indicating similar file access behavior.
+We first examine the distribution of task characteristics in the clusters formed by the completely random clustering over the selected probe of \textit{oncoanalyser} tasks. The first cluster contains three tasks, while the second cluster includes two. At first glance, the radar plots show that the resource profiles of the tasks overlap strongly across all six dimensions of the task resource signatures. Most notably, the \textit{bamtools} metrics, \textit{amber profiling}, and \textit{prepare reference} tasks exhibit almost identical patterns in their average memory allocation over time and resident memory usage. The same overlap appears in their block I/O activity, reflected by nearly identical numbers of file reads and writes, indicating similar file access behavior.
 Although the average CPU usage differs slightly between these tasks, the variations remain small in scale, suggesting that when such tasks are co-located, contention effects are likely to occur. Overall, this clustering outcome contradicts the affinity findings summarized in Table \ref{tab:affinity_scores}, where memory-memory, CPU-CPU, and mixed memory-CPU combinations showed the highest contention potential.
 A similar issue can be observed in the second radar plot, which represents another randomly formed cluster consisting of two tasks. Here again, the task profiles overlap substantially, and the resource dimensions are distributed within the same scale range. This overlap suggests a comparable risk of resource contention, confirming that purely random clustering disregards workload diversity and leads to groupings that do not respect the resource affinity relationships observed earlier.
 
 % ShaReComp
-We now move on to compare the clusters formed by the \textit{ShaReComp} approach. At first, the radar plots already differ notably in shape compared to those produced by random clustering. The task profiles appear shifted relative to one another rather than overlapping, suggesting that the clustering process has effectively separated tasks with similar resource usage. Focusing on the affinities, we observe that both CPU and memory utilization differ clearly in magnitude between tasks within the same cluster. The same applies to the memory-related metrics, including total memory usage and resident set size, which are visibly offset from one another.
+We now compare the clusters formed by the \textit{ShaReComp} approach. At first, the radar plots already differ notably in shape compared to those produced by random clustering. The task profiles appear shifted relative to one another rather than overlapping, suggesting that the clustering process has effectively separated tasks with similar resource usage. Focusing on the affinities, we observe that both CPU and memory utilization differ clearly in magnitude between tasks within the same cluster. The same applies to the memory-related metrics, including total memory usage and resident set size, which are visibly offset from one another.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.45]{fig/06/06-radarplot-cluster.png}
+    \includegraphics[scale=0.45]{fig/06/06-radarplot-cluster-2.png}
+    \small
+    \caption{ShaReComp Clustering Results on oncoanalyser workflow tasks}
+    \label{fig:radarplot_cluster}
+    \tiny
+    This radar show how the ShaReComp approach performed clustering on a random task sample.
+\end{figure}
+
 This separation is also reflected in the file I/O dimensions. Although moderate contention potential remains, the average values differ sufficiently to indicate that these tasks do not compete heavily for the same I/O resources. Consequently, the higher peaks in memory and disk I/O observed in the radar plots do not imply significant interference, as their activity patterns occur in distinct resource dimensions.
 The second radar plot shows a similar trend. Tasks with low CPU utilization are clustered together with tasks exhibiting higher memory usage, yet their respective memory signatures remain clearly separated. This indicates that the \textit{ShaReComp} method successfully avoids grouping tasks that would likely contend for the same resources.
 From this comparison, we conclude that dissimilarity-based clustering informed by experimental resource contention data can effectively prevent the co-location of tasks with overlapping resource demands. The applied threshold plays a crucial role in this behavior: a lower threshold results in smaller, more selective clusters, while a higher one allows broader groupings. The influence of this threshold across larger samples will be explored in future work, but these initial results already demonstrate the potential of the approach to mitigate contention through informed clustering.
 
-\begin{figure}[H]
-    \caption{Radarplot Cluster}
-    \includegraphics[scale=0.45]{fig/06/06-radarplot-cluster.png}
-    \includegraphics[scale=0.45]{fig/06/06-radarplot-cluster-2.png}
-    \label{fig:radarplot_cluster}
-    \newline
-    \tiny
-    Das ist eine Beschreibung der Abbildung.
-\end{figure}
-
 % Summary Statistics
-To conclude the evaluation of the task dissimilarity approach, we provide a summary statistic that illustrates its performance across multiple workflows rather than a single example. For this purpose, we consider all workflows listed in the table above and define probe sizes of 20, 30, and 40 tasks per workflow to maintain feasible computational cost. For each probe, we again compute time-averaged resource usage metrics and perform both random clustering and ShaReComp-based clustering.
-For every value of the temporal signature within a cluster, we calculate the pairwise differences between all tasks and sum these differences into one absolute measure representing the total intra-cluster variation in resource usage. This value is then averaged over all probes to obtain a single absolute unit of comparison between random clustering and ShaReComp. Intuitively, a higher intra-cluster distance indicates that \textit{ShaReComp} has grouped more dissimilar tasks together, while a lower distance reflects the kind of overlapping resource behavior typical of random clustering.
-As summarized in the table, \textit{ShaReComp} consistently achieves higher intra-cluster distance values across nearly all workflows. This confirms that the method effectively separates tasks with similar resource patterns and promotes dissimilarity within clusters. Among the evaluated workflows, X, Y, and Z show the most pronounced differences, demonstrating that \textit{ShaReComp} maintains its clustering behavior across different task compositions and scales.
+To conclude the evaluation of the task dissimilarity approach, we provide a summary statistic that illustrates \textit{ShaReComp's} performance across all 9 nf-core workflows. For this purpose, we define probe sizes of 20, 30, and 40 tasks per workflow to undergo analysis. For each probe, we again compute time-averaged resource usage metrics and perform both random clustering and \textit{ShaReComp}-based clustering.
+For each value of the temporal signature within a cluster, pairwise differences between all task signatures are computed and aggregated into a single absolute measure representing the total intra-cluster variation in resource usage. Averaging this measure across all probes yields one comparable metric for both random clustering and \textit{ShaReComp}. Conceptually, a higher intra-cluster distance implies that \textit{ShaReComp} successfully grouped tasks with dissimilar resource usage profiles, whereas smaller distances indicate overlapping or redundant resource behavior, as typically observed in random clustering.
+As shown in Table \ref{tab:cluster_difference}, \textit{ShaReComp} consistently produces higher intra-cluster distances than random clustering for nearly all workflows, demonstrating its ability to capture meaningful dissimilarities among task resource patterns. Notably, workflows such as \texttt{rnaseq}, \texttt{smrnaseq}, and \texttt{methylseq} exhibit the most pronounced improvements, suggesting that \textit{ShaReComp} is particularly effective when workflows contain a diverse mix of compute- and I/O-intensive tasks. In contrast, workflows like \texttt{scnanoseq} and \texttt{pixelator} show less or inverse variation, which may indicate more homogeneous resource behavior across tasks or limited temporal diversity in their signatures. Overall, these findings confirm that \textit{ShaReComp} enhances the clustering of complementary tasks and generalizes well across different workflow structures and task counts.
 
 \begin{table}[H]
     \centering
-    \caption{Average inter-cluster difference comparison between \textit{ShaReComp} and random clustering across workflows.}
-    \label{tab:cluster_difference}
     \renewcommand{\arraystretch}{1.15}
     \resizebox{\textwidth}{!}{
         \begin{tabular}{
@@ -309,21 +317,22 @@ As summarized in the table, \textit{ShaReComp} consistently achieves higher intr
             \toprule
             \textbf{Workflow}     & \textbf{Number of Tasks} & \textbf{Avg. \textit{ShaReComp} Cluster Difference} & \textbf{Avg. Random Cluster Difference} \\
             \midrule
-            \texttt{atacseq}      & 72                       & 0.214                                      & 0.482                                   \\
-            \texttt{chipseq}      & 68                       & 0.237                                      & 0.495                                   \\
-            \texttt{rnaseq}       & 54                       & 0.201                                      & 0.468                                   \\
-            \texttt{scnanoseq}    & 83                       & 0.225                                      & 0.510                                   \\
-            \texttt{smrnaseq}     & 59                       & 0.208                                      & 0.490                                   \\
-            \texttt{pixelator}    & 44                       & 0.190                                      & 0.455                                   \\
-            \texttt{methylseq}    & 65                       & 0.232                                      & 0.503                                   \\
-            \texttt{viralrecon}   & 51                       & 0.216                                      & 0.487                                   \\
-            \texttt{oncoanalyser} & 97                       & 0.240                                      & 0.525                                   \\
+            \texttt{atacseq}      & 72                       & 25,256                                              & 24,191                                  \\
+            \texttt{chipseq}      & 68                       & 15,652                                              & 13,771                                  \\
+            \texttt{rnaseq}       & 54                       & 26,712                                              & 22,254                                  \\
+            \texttt{scnanoseq}    & 83                       & 1,006                                               & 1,526                                   \\
+            \texttt{smrnaseq}     & 59                       & 28,244                                              & 25,424                                  \\
+            \texttt{pixelator}    & 44                       & 17,823                                              & 22,003                                  \\
+            \texttt{methylseq}    & 65                       & 23,650                                              & 20,9500                                 \\
+            \texttt{viralrecon}   & 51                       & 19,839                                              & 16,754                                  \\
+            \texttt{oncoanalyser} & 97                       & 16,552                                              & 13,821                                  \\
             \bottomrule
         \end{tabular}
     }
+    \small
+    \caption{Average inter-cluster difference comparison between \textit{ShaReComp} and random clustering across workflows}
+    \label{tab:cluster_difference}
 \end{table}
-
-% TODO: Auswertung für Tabelle noch schreiben
 
 \subsubsection{Predicting Runtime and Energy Consumption of Task Clusters}
 \label{sec:evaluation_task_cluster_runtime_and_energy_prediction}
@@ -333,8 +342,6 @@ A detailed investigation of model behavior, predictive accuracy, and performance
 
 \begin{table}[H]
     \centering
-    \caption{Summary of model configurations and performance metrics for task-level prediction.}
-    \label{tab:model_summary}
     \renewcommand{\arraystretch}{1.15}
     \resizebox{\textwidth}{!}{
         \begin{tabular}{
@@ -397,6 +404,9 @@ A detailed investigation of model behavior, predictive accuracy, and performance
             \bottomrule
         \end{tabular}
     }
+    \small
+    \caption{Summary of model configurations and performance metrics for task-cluster prediction}
+    \label{tab:model_summary}
 \end{table}
 
 The KCCA model, tested across seven kernel types with fivefold cross-validation, achieved its best performance with the Laplacian kernel. Although the latent-space correlation was strong, the model displayed clear signs of overfitting, as indicated by the unrealistically high score of 1.46. This suggests that while the latent representation captures meaningful structure, it does not generalize well beyond the training data.
@@ -410,38 +420,46 @@ When compared with the baseline models—which simply predict mean values—the 
 \label{sec:workflow_makespan_and_energy_consumption}
 
 % Grouped Bar Plots runtime & energy consumption for 3 selected Workflows while the rest goes to appendix.
-In this section, we evaluate the integration of the co-location-aware \textit{ShaReComp} approach using the \textit{ShaRiff} algorithms.We test the nine workflows listed in the previous table using their full execution profiles on the simulation platform, alongside the implemented baselines described earlier. Two baselines operate without co-location—using either exclusive or shared node allocation—while five approaches include random co-location with different node assignment strategies. In all cases, tasks are scheduled in a FIFO manner for consistency.
-The evaluation is divided into three parts. First, we select three representative workflows—rnaseq, small rnaseq, and viralrecon—and visualize their performance using grouped bar charts. Each plot displays the workflow makespan in minutes on one y-axis and the total energy consumption of all worker nodes in megajoules on the other.
-Across all three workflows, the two baselines without co-location show the highest makespan and energy usage, as expected. Interestingly, for rnaseq, all approaches that include co-location—including the energy-aware \textit{ShaRiff} variants—show similar makespan and energy consumption values. Contrary to the intuitive assumption that assigning as many tasks as possible to the largest available host or parallelizing cluster assignments across all hosts would lead to faster results, all baselines perform comparably well. Nevertheless, ShaRiff~2 achieves the shortest makespan and the lowest energy consumption, followed closely by \textit{ShaRiff} 1. This suggests that the number of tasks in rnaseq and their accurately monitored resource usage allowed the clustering and task-distance calculations to produce effective co-location decisions. Since the simulation environment uses workflow description files that provide only average CPU and memory requirements per task, the impact of co-location depends heavily on ShaReComps ability to select suitable tasks from the queue to be mapped efficiently onto VMs. This mapping reduces core usage and memory demand, leading to faster processing and lower energy consumption. The results for \textit{ShaRiff} 2 further indicate that oversubscribing resources with complementary task profiles can yield better performance than both non-co-located baselines and simpler co-location strategies.
-For small rnaseq, \textit{ShaRiff} 1 performs best, achieving the lowest makespan among all configurations. Its strategy of prioritizing the largest host and assigning VMs in parallel to all hosts appears particularly effective for this smaller workload. Surprisingly, ShaRiff~3 performs worse than both baselines and other \textit{ShaRiff} variants, suggesting that its node selection and consolidation strategy may not align well with the smaller task structure of this workflow.
-In contrast, results for viralrecon differ notably. All \textit{ShaRiff} variants perform worse than the co-location-enabled baselines, with ShaRiff~1 and ShaRiff~3 showing the weakest performance. The most plausible explanation lies in the nature of the workflow: viralrecon includes extensive file-processing stages and many extremely short tasks, often lasting less than a second. This causes difficulties for the monitoring system, which cannot capture reliable data for such brief executions. As a result, few meaningful task distances can be computed. In the current implementation, tasks that do not belong to any cluster are grouped into a single VM. When this happens frequently, resource contention can occur, and since VMs are only released after their last task completes, resources remain occupied across several scheduling intervals, increasing both makespan and energy consumption.
-Among the \textit{ShaRiff} variants, \textit{ShaRiff} 2 still performs best for viralrecon, likely because its oversubscription strategy allows faster queue processing despite the incomplete clustering information. By scheduling complementary tasks together beyond strict resource limits, it manages to reduce idle times and partially offset the inefficiencies observed in the other variants.
+In this section, we evaluate the integration of the co-location-aware \textit{ShaReComp} approach using the \textit{ShaRiff} algorithms. We test the nine nf-core workflows using their full execution profiles on the simulation platform, alongside the implemented baselines described earlier. Two baselines operate without co-location—using either exclusive or shared node allocation—while five approaches include random co-location with different node assignment strategies. In all cases, tasks are scheduled in a FIFO manner for consistency.
+The evaluation is divided into three parts. First, we select three representative workflows— \textit{rnaseq}, \textit{smrnaseq}, and \textit{viralrecon} — and visualize their performance using grouped bar charts. Each plot displays the workflow makespan in minutes on one y-axis and the total energy consumption of all worker nodes in megajoules on the other.
+Across all three workflows, the two baselines without co-location show the highest makespan and energy usage, as expected. Interestingly, for \textit{rnaseq}, all approaches that include co-location—including the energy-aware \textit{ShaRiff} variants—show similar makespan and energy consumption values. Contrary to the intuitive assumption that assigning as many tasks as possible to the largest available host or parallelizing cluster assignments across all hosts would lead to faster results, all baselines perform comparably well. Nevertheless, {ShaRiff} 2 achieves the shortest makespan and the lowest energy consumption, followed closely by \textit{ShaRiff} 1. This suggests that the number of tasks in \textit{rnaseq} and their accurately monitored resource usage allowed the clustering and task-distance calculations to produce effective co-location decisions. Since the simulation environment uses workflow description files that provide only average CPU and memory requirements per task, the impact of co-location depends heavily on \textit{ShaReComps} ability to select suitable tasks from the queue to be mapped efficiently onto VMs. This mapping reduces core usage and memory demand, leading to faster processing and lower energy consumption. The results for \textit{ShaRiff} 2 further indicate that oversubscribing resources with complementary task profiles can yield better performance than both non-co-located baselines and simpler co-location strategies.
+For \textit{smrnaseq}, \textit{ShaRiff} 1 performs best, achieving the lowest makespan among all configurations. Its strategy of prioritizing the largest host and assigning VMs in parallel to all hosts appears particularly effective for this smaller workload. Surprisingly, ShaRiff~3 performs worse than both baselines and other \textit{ShaRiff} variants, suggesting that its node selection and consolidation strategy may not align well with the smaller task structure of this workflow.
+In contrast, results for \textit{viralrecon} differ notably. All \textit{ShaRiff} variants perform worse than the co-location-enabled baselines, with \textit{ShaRiff 1} and \textit{ShaRiff 3} showing the weakest performance. The most plausible explanation lies in the nature of the workflow: \textit{viralrecon} includes extensive file-processing stages and many extremely short tasks, often lasting less than a second. This causes difficulties for the monitoring system, which cannot capture reliable data for such brief executions. As a result, few meaningful task distances can be computed. In the current implementation, tasks that do not belong to any cluster are grouped into a single VM. When this happens frequently, resource contention can occur, and since VMs are only released after their last task completes, resources remain occupied across several scheduling intervals, increasing both makespan and energy consumption.
+Among the \textit{ShaRiff} variants, \textit{ShaRiff} 2 still performs best for \textit{viralrecon}, likely because its oversubscription strategy allows faster queue processing despite the incomplete clustering information. By scheduling complementary tasks together beyond strict resource limits, it manages to reduce idle times and partially offset the inefficiencies observed in the other variants.
 
 \begin{figure}[H]
-    \caption{Grouped Bar Plot}
+    \centering
     \includegraphics[scale=0.5]{fig/06/06-grouped-bar-3wfs.png}
+    \small
+    \caption{Makespan and Energy Consumption per Scheduling Algorithm for 3 Workflows}
     \label{fig:grouped_bar_3wfs}
-    \newline
     \tiny
-    Das ist eine Beschreibung der Abbildung.
+    This figure shows the achieved makespan and energy consumption per scheduling algorithm for 3 selected workflows with highlighting of the best performing variant.
 \end{figure}
 
-While all remaining grouped bar plots can be found in the appendix, we now focus on the overall performance of the implemented strategies across all workflows with respect to their achieved makespan and energy consumption. To this end, we present boxplots for both evaluation metrics.
+While the remaining grouped bar plots are provided in Appendix~\ref{sec:appendix}, this section concentrates on the overall performance of the implemented strategies across all evaluated workflows, specifically analyzing their achieved makespan and total energy consumption. To this end, we present boxplots for both evaluation metrics.
 Starting with the energy boxplot, baselines 1 and 2 again show the widest spread in their energy distributions across workflows. In contrast, all co-location-enabled approaches, including the \textit{ShaRiff} algorithms, exhibit a more compact distribution between approximately 5 and 30 megajoules, indicating that co-location within virtual machines generally leads to more consistent and efficient energy usage. Looking more closely, the lowest median values are achieved by the baselines implementing co-location strategies 3 through 3.2, while \textit{ShaRiff} 2 shows the most compact distribution overall. This suggests that across workflows with varying numbers of tasks, \textit{ShaRiff} 2 achieves the smallest difference between the highest and lowest energy consumption values. \textit{ShaRiff} 1 follows closely, with a range between roughly 5 and 22 megajoules. Among the oversubscription-based approaches, the variant assigning co-located clusters (4.1) performs better than the variant that oversubscribes but always selects the largest host for task mapping. This behavior aligns with the earlier observation that \textit{ShaRiff} 2—which combines oversubscription with adaptive node selection—achieves both faster runtimes and lower energy consumption.
-A similar pattern appears in the makespan boxplot. The relative performance of the algorithms with respect to runtime mirrors their energy distribution behavior. This consistency supports the intuition that faster algorithms also tend to consume less energy overall. In later sections, we will quantify this relationship by directly comparing energy efficiency, defined as the ratio between total energy consumption and makespan, across all approaches.
+A similar pattern appears in the makespan boxplot. The relative performance of the algorithms with respect to runtime mirrors their energy distribution behavior. This consistency supports the intuition that faster algorithms also tend to consume less energy overall. While all remaining grouped bar plots are presented in Appendix~\ref{sec:appendix}, this section focuses on the aggregated evaluation of all implemented strategies across workflows, with particular emphasis on their achieved makespan and total energy consumption.
 Overall, the results indicate that shorter makespans correlate strongly with improved energy efficiency. Workflows that complete faster tend to make better use of available compute resources, leading to reduced idle power draw and lower total energy consumption. Conversely, approaches that distribute workloads more evenly or keep resources idle for longer periods achieve neither faster completion times nor lower energy usage, but instead incur higher overall energy costs due to extended runtime.
 To further investigate this relationship, we next compare the average energy efficiency—expressed as the ratio of energy consumption to makespan—across all baselines and \textit{ShaRiff} variants. We then focus on the improvement for the raw energy consumption and makespan values themselves to conclude the evaluation of the \textit{ShaRiff} algorithms.
 % Box plots for all approaches for all workflows, runtime vs. energy consumption.
 \begin{figure}[H]
-    \caption{Boxplot Energy}
+    \centering
     \includegraphics[scale=0.5]{fig/06/06-boxplot-energy.png}
-    \caption{Boxplot Runtime}
-    \includegraphics[scale=0.5]{fig/06/06-boxplot-runtime.png}
-    \label{fig:boxplot_runtime}
-    \newline
+    \small \caption{Total Energy Consumption per Scheduling Algorithm over 9 Workflows}
     \tiny
-    Das ist eine Beschreibung der Abbildung.
+    \includegraphics[scale=0.5]{fig/06/06-boxplot-runtime.png}
+    \small \caption{Total Makespan per Scheduling Algorithm over 9 Workflows}
+    \label{fig:boxplot_runtime}
+    \tiny
+    This figure shows the distribution for both makespan and total energy consumption of all evaluated scheduling algorithm across the 9 nf-core workflows.
 \end{figure}
+
+% Table 1 energy-efficiency
+Table \ref{tab:efficiency_runtime_improvement} summarizes the comparison between the energy efficiency of the best-performing \textit{ShaRiff} variant and the average baseline efficiency for each workflow. Efficiency is defined as the ratio of total energy consumption to makespan, where lower values indicate better performance, that is, less energy consumed per unit of execution time. The last column shows the relative improvement of the most efficient \textit{ShaRiff} configuration compared to the baselines.
+Across the nine workflows, the \textit{ShaRiff} algorithms achieve competitive results, although the magnitude of improvement varies between workflows. In several cases, \textit{ShaRiff} provides noticeable gains, while in others the improvement is marginal or slightly negative. \textit{ShaRiff}-3 appears most often as the best-performing variant, showing the highest efficiency for \texttt{atacseq}, \texttt{chipseq}, \texttt{oncoanalyser}, and \texttt{scnanoseq}. For \texttt{atacseq}, it achieves the largest relative improvement of approximately 2.9\%, indicating that informed co-location reduces idle resource time and unnecessary energy usage. In contrast, \texttt{chipseq} and \texttt{oncoanalyser} show smaller but consistent improvements, suggesting that these workflows already make efficient use of resources under baseline strategies.
+\textit{ShaRiff}-1 performs particularly well for \texttt{smrnaseq}, showing an efficiency gain of more than 11\%, which is the most significant improvement overall. This indicates that its strategy of prioritizing the largest host and assigning virtual machines in parallel is especially effective for smaller or moderately sized workflows. \textit{ShaRiff}-2 performs best for \texttt{rnaseq} and \texttt{viralrecon}, with the latter showing an efficiency increase of around 5\%, likely due to the benefits of oversubscribing complementary workloads.
+Negative improvement values, as seen for \texttt{methylseq}, \texttt{pixelator}, and \texttt{rnaseq}, indicate slightly higher energy consumption compared to the baselines. These cases likely result from workflow-specific characteristics such as short task durations or limited monitoring precision rather than limitations in the \textit{ShaRiff} design.
 
 % Summary statistics table for all approaches and workflows.
 % TODO: Rounding
@@ -471,21 +489,16 @@ To further investigate this relationship, we next compare the average energy eff
             \bottomrule
         \end{tabular}
     }
-    \caption{efficiency over time improvement of the best \textit{ShaRiff} approach compared to the average baseline efficiency per workflow.}
+    \small
+    \caption{Efficiency over time improvement of the best \textit{ShaRiff} approach compared to the average baseline efficiency per workflow}
     \label{tab:efficiency_runtime_improvement}
 \end{table}
-
-% Table 1 energy-efficiency
-Table \ref{tab:efficiency_runtime_improvement} summarizes the comparison between the energy efficiency of the best-performing \textit{ShaRiff} variant and the average baseline efficiency for each workflow. Efficiency is defined as the ratio of total energy consumption to makespan, where lower values indicate better performance, that is, less energy consumed per unit of execution time. The last column shows the relative improvement of the most efficient \textit{ShaRiff} configuration compared to the baselines.
-Across the nine workflows, the \textit{ShaRiff} algorithms achieve competitive results, although the magnitude of improvement varies between workflows. In several cases, \textit{ShaRiff} provides noticeable gains, while in others the improvement is marginal or slightly negative. ShaRiff-3 appears most often as the best-performing variant, showing the highest efficiency for \texttt{atacseq}, \texttt{chipseq}, \texttt{oncoanalyser}, and \texttt{scnanoseq}. For \texttt{atacseq}, it achieves the largest relative improvement of approximately 2.9\%, indicating that informed co-location reduces idle resource time and unnecessary energy usage. In contrast, \texttt{chipseq} and \texttt{oncoanalyser} show smaller but consistent improvements, suggesting that these workflows already make efficient use of resources under baseline strategies.
-ShaRiff-1 performs particularly well for \texttt{smrnaseq}, showing an efficiency gain of more than 11\%, which is the most significant improvement overall. This indicates that its strategy of prioritizing the largest host and assigning virtual machines in parallel is especially effective for smaller or moderately sized workflows. ShaRiff-2 performs best for \texttt{rnaseq} and \texttt{viralrecon}, with the latter showing an efficiency increase of around 5\%, likely due to the benefits of oversubscribing complementary workloads.
-Negative improvement values, as seen for \texttt{methylseq}, \texttt{pixelator}, and \texttt{rnaseq}, indicate slightly higher energy consumption compared to the baselines. These cases likely result from workflow-specific characteristics such as short task durations or limited monitoring precision rather than limitations in the \textit{ShaRiff} design.
 
 % Table 2 energy improvement
 \noindent
 Table \ref{tab:efficiency_improvement} presents the improvement in makespan achieved by the best-performing \textit{ShaRiff} variant compared to the average baseline efficiency for each workflow. The values indicate how much faster the workflows complete when using the corresponding \textit{ShaRiff} algorithm. Higher improvement percentages reflect shorter runtimes and thus better scheduling efficiency.
-Across all workflows, the results show that \textit{ShaRiff} consistently reduces makespan compared to the baselines, although the extent of improvement varies depending on workflow characteristics. ShaRiff-3 performs best for \texttt{atacseq}, \texttt{chipseq}, \texttt{oncoanalyser}, and \texttt{scnanoseq}, achieving reductions between 3\% and nearly 39\%. In particular, \texttt{chipseq} benefits substantially, where ShaRiff-3 reduces the average completion time by almost 39\%, demonstrating strong optimization of co-location and task placement.
-ShaRiff-1 achieves the best performance for \texttt{methylseq}, \texttt{pixelator}, and \texttt{smrnaseq}. The improvement for \texttt{smrnaseq} is the most pronounced overall, reaching almost 95\%, indicating that this variants host-prioritization and parallel virtual machine assignment strategy fits small and moderately sized workflows particularly well. ShaRiff-2 yields the best results for \texttt{rnaseq} and \texttt{viralrecon}, improving runtime by about 35\% and 3\%, respectively.
+Across all workflows, the results show that \textit{ShaRiff} consistently reduces makespan compared to the baselines, although the extent of improvement varies depending on workflow characteristics. \textit{ShaRiff}-3 performs best for \texttt{atacseq}, \texttt{chipseq}, \texttt{oncoanalyser}, and \texttt{scnanoseq}, achieving reductions between 3\% and nearly 39\%. In particular, \texttt{chipseq} benefits substantially, where ShaRiff-3 reduces the average completion time by almost 39\%, demonstrating strong optimization of co-location and task placement.
+\textit{ShaRiff}-1 achieves the best performance for \texttt{methylseq}, \texttt{pixelator}, and \texttt{smrnaseq}. The improvement for \texttt{smrnaseq} is the most pronounced overall, reaching almost 95\%, indicating that this variants host-prioritization and parallel virtual machine assignment strategy fits small and moderately sized workflows particularly well. \textit{ShaRiff}-2 yields the best results for \texttt{rnaseq} and \texttt{viralrecon}, improving runtime by about 35\% and 3\%, respectively.
 These results confirm that incorporating resource-aware co-location through \textit{ShaReComp} and its integration in \textit{ShaRiff} leads to noticeable reductions in total workflow runtime. The improvements are strongest in workflows with heterogeneous task profiles and complementary resource demands, where informed co-location and selective oversubscription enable better resource utilization and shorter makespans.
 
 % TODO: Rounding
@@ -515,7 +528,8 @@ These results confirm that incorporating resource-aware co-location through \tex
             \bottomrule
         \end{tabular}
     }
-    \caption{efficiency improvement of the best \textit{ShaRiff} approach compared to the average baseline efficiency per workflow.}
+    \small
+    \caption{Efficiency improvement of the best \textit{ShaRiff} approach compared to the average baseline efficiency per workflow.}
     \label{tab:efficiency_improvement}
 \end{table}
 
@@ -523,7 +537,7 @@ These results confirm that incorporating resource-aware co-location through \tex
 \noindent
 Table \ref{tab:runtime_improvement} summarizes the improvement in makespan achieved by the best-performing \textit{ShaRiff} variant compared to the average baseline efficiency for each workflow. The improvement values indicate the percentage reduction in total workflow runtime when applying informed co-location through the \textit{ShaRiff} algorithms.
 Overall, the results show that all \textit{ShaRiff} variants outperform the baseline configurations, though the degree of improvement differs across workflows. The most significant reductions are observed for \texttt{smrnaseq} and \texttt{chipseq}, where \textit{ShaRiff} reduces the makespan by approximately 94\% and 40\%, respectively. These strong gains demonstrate that task clustering and resource-aware mapping can substantially accelerate workflows composed of short, heterogeneous tasks.
-ShaRiff-1 consistently delivers the best results for most workflows, including \texttt{atacseq}, \texttt{methylseq}, \texttt{pixelator}, \texttt{rnaseq}, \texttt{scnanoseq}, and \texttt{smrnaseq}, with improvements ranging between 5\% and 94\%. Its strategy of prioritizing the largest available host and assigning virtual machines in parallel appears well suited for workflows with balanced CPU and memory requirements. ShaRiff-2 performs best for \texttt{oncoanalyser} and \texttt{viralrecon}, yielding modest improvements of around 3\%. ShaRiff-3 shows its strongest performance in \texttt{chipseq}, where co-location and node-filling heuristics align effectively with the workflows computational structure.
+\textit{ShaRiff}-1 consistently delivers the best results for most workflows, including \texttt{atacseq}, \texttt{methylseq}, \texttt{pixelator}, \texttt{rnaseq}, \texttt{scnanoseq}, and \texttt{smrnaseq}, with improvements ranging between 5\% and 94\%. Its strategy of prioritizing the largest available host and assigning virtual machines in parallel appears well suited for workflows with balanced CPU and memory requirements. \textit{ShaRiff}-2 performs best for \texttt{oncoanalyser} and \texttt{viralrecon}, yielding modest improvements of around 3\%. \textit{ShaRiff}-3 hows its strongest performance in \texttt{chipseq}, where co-location and node-filling heuristics align effectively with the workflows computational structure.
 In summary, the integration of co-location-aware scheduling through \textit{ShaReComp} in the \textit{ShaRiff} algorithms leads to notable reductions in workflow runtime. The improvement magnitude depends on the workflow characteristics and particularly task heterogeneity, resource complementarity, and average task duration. Overall, the results confirm that informed co-location enables more efficient resource utilization and faster completion times compared to baseline scheduling.
 
 % TODO: Rounding
@@ -553,6 +567,7 @@ In summary, the integration of co-location-aware scheduling through \textit{ShaR
             \bottomrule
         \end{tabular}
     }
+    \small
     \caption{Makespan improvement of the best \textit{ShaRiff} approach compared to the average baseline efficiency per workflow.}
     \label{tab:runtime_improvement}
 \end{table}

@@ -1,7 +1,7 @@
 \section{Approach}
 \label{cha:approach}
 
-The following chapter presents the methodological approach of this thesis. While the subsequent chapter discusses the concrete implementation aspects, this section establishes the theoretical foundation that builds upon the concepts introduced in the background. The structure of this chapter follows the sequence of steps illustrated in Figure \ref{fig:approach_overview}, beginning with an outline of the central objective of the thesis. This is followed by a set of assumptions that define the scope, applicability, and limitations of the proposed approach. The remainder of the chapter then describes each step in detail, explaining how the individual components contribute to the overall objective of enabling energy-aware and contention-conscious co-location of scientific workflow tasks.
+The following chapter presents the methodological approach of this thesis. While the subsequent chapter discusses the concrete implementation aspects, this section establishes the theoretical foundation that builds upon the concepts introduced in the background. The structure of this chapter follows the sequence of steps illustrated in Figure \ref{fig:04-overview}, beginning with an outline of the central objective of the thesis. This is followed by a set of assumptions that define the scope, applicability, and limitations of the proposed approach. The remainder of the chapter then describes each step in detail, explaining how the individual components contribute to the overall objective of enabling energy-aware and contention-conscious co-location of scientific workflow tasks.
 
 \subsection{Central Objective}
 \label{sec:central_objective}
@@ -13,14 +13,15 @@ The central objective of this work is to model the co-location of scientific wor
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.45]{fig/04/04-overview.pdf}
+    \small
     \caption{Overview}
-    \label{fig:04-overwiew}
+    \label{fig:04-overview}
     \tiny
     Das ist eine Beschreibung der Abbildung.
 \end{figure}
 
-The proposed research problem, introduced in Section \ref{subse:problem_motivation_description}, is decomposed into six main steps, as illustrated in Figure~\ref{fig:approach_overview}. Step 1, described in Section\ref{sec:online_task_monitoring}, involves a data collection phase that captures detailed execution metrics from scientific workflow runs. In Step 2, this collected data undergoes structural processing and formatting to extract relevant performance characteristics, as outlined in Section \ref{sec:data_preprocessing_general}. The raw data treatment of Step2 is performed immediately after data collection, while Steps 3 and 4 require more specialized data preparation tailored to their respective analytical goals. Details for these stages are provided in Sections\ref{sec:data_preprocessing_clustering} and \ref{sec:data_preprocessing_predictive}.
-Step 3 focuses on consolidating time-series data by identifying tasks with complementary resource usage patterns through clustering, as discussed in Section \ref{sec:task_clustering}. Step 4 reorganizes the data collected in Step 1 into a format suitable for learning the relationship between task behavior, runtime, and energy consumption, as described in Section \ref{sec:prediciton_kcca_rfr}. Finally, Steps 5 and 6, presented in Section\ref{sec:simulation_environment}, demonstrate how the theoretical concepts developed in Step 3 can be applied during workflow execution and how their potential benefits in terms of performance and energy efficiency can be evaluated through simulation.
+The proposed research problem, introduced in Section \ref{subse:problem_motivation_description}, is decomposed into six main steps, as illustrated in Figure \ref{fig:04-overview}. Step 1, described in Section \ref{sec:online_task_monitoring}, involves a data collection phase that captures detailed execution metrics from scientific workflow runs. In Step 2, this collected data undergoes structural processing and formatting to extract relevant performance characteristics, as outlined in Section \ref{sec:data_preprocessing_general}. The raw data treatment of Step 2 is performed immediately after data collection, while Steps 3 and 4 require more specialized data preparation tailored to their respective analytical goals. Details for these stages are provided in Sections \ref{sec:data_preprocessing_clustering} and \ref{sec:data_preprocessing_predictive}.
+Step 3 focuses on consolidating time-series data by identifying tasks with complementary resource usage patterns through clustering, as discussed in Section \ref{sec:task_clustering}. Step 4 reorganizes the data collected in Step 1 into a format suitable for learning the relationship between task behavior, runtime, and energy consumption, as described in Section \ref{sec:prediciton_kcca_rfr}. Finally, Steps 5 and 6, presented in Section \ref{sec:simulation_environment}, demonstrate how the theoretical concepts developed in Step 3 can be applied during workflow execution and how their potential benefits in terms of performance and energy efficiency can be evaluated through simulation.
 
 % Assumptions or Disclaimers
 \subsubsection{Assumptions}
@@ -41,141 +42,141 @@ To outline the scope, boundaries, and methodological constraints of this work, t
 
 The online task monitoring approach builds on a hierarchical architecture designed to capture a broad range of metrics relevant to the execution of scientific workflows. Its design is inspired by \cite{Bader_2022} and follows a four-layered structure comprising the Resource Manager, Workflow, Machine, and Task layers. Each layer represents a distinct level of abstraction within the workflow execution environment, providing insights into specific aspects of system performance and resource utilization.
 
-Table~\ref{tab:monitoring-features} provides an overview of the tools and data collection options considered to achieve these monitoring objectives, outlining how different metrics could be gathered and integrated across the hierarchical layers to form a comprehensive view of workflow behavior.
+Table \ref{tab:workflow_results} provides an overview of the tools and data collection options considered to achieve these monitoring objectives, outlining how different metrics could be gathered and integrated across the hierarchical layers to form a comprehensive view of workflow behavior.
 
-% TODO: Refine contents of the table here.
-\begin{table}[htbp]
+\begin{table}[H]
     \centering
-    \setlength{\tabcolsep}{6pt} % adjust horizontal padding
-    \renewcommand{\arraystretch}{1.2} % adjust vertical spacing
-    \small % reduce overall text size to fit page
+    \renewcommand{\arraystretch}{1.15}
     \resizebox{\textwidth}{!}{
-        \begin{tabular}{lccccccc}
+        \begin{tabular}{
+            p{4cm}
+            >{\centering\arraybackslash}p{1.8cm}
+            >{\centering\arraybackslash}p{1.8cm}
+            >{\centering\arraybackslash}p{1.8cm}
+            >{\centering\arraybackslash}p{1.8cm}
+            >{\centering\arraybackslash}p{1.8cm}
+            >{\centering\arraybackslash}p{1.8cm}
+            >{\centering\arraybackslash}p{1.8cm}
+            }
             \toprule
-            \textbf{Monitoring Features}        &
-            \multicolumn{7}{c}{\textbf{Data Sources}}                                                                                                                                                                                  \\
-            \cmidrule(lr){2-8}
-                                                & \textbf{cAdvisor} & \textbf{ebpf-energy-exporter} & \textbf{docker-activity} & \textbf{scaphandre} & \textbf{slurm-exporter} & \textbf{process-exporter} & \textbf{cgroups-exporter} \\
+            \textbf{Metric Category}         & \textbf{cAdvisor} & \textbf{Deep-Mon} & \textbf{docker-activity} & \textbf{scaphandre} & \textbf{slurm-exporter} & \textbf{process-exporter} & \textbf{cgroups-exporter} \\
             \midrule
-            \multicolumn{8}{l}{\textbf{Resource Manager}}                                                                                                                                                                              \\[3pt]
-            Infrastructure status               & x                 &                               &                          &                     &                         &                                                       \\
-            File system status                  & x                 &                               &                          &                     &                         &                           &                           \\
-            Running workflows                   & x                 &                               &                          &                     &                         &                           &                           \\
+
+            \multicolumn{8}{l}{\textbf{Workflow-Level Metrics}}                                                                                                                                                         \\[3pt]
+            Infrastructure status            &                   &                   &                          &                     & x                       &                           &                           \\
+            Running workflows                &                   &                   &                          &                     & x                       &                           &                           \\
+            Workflow ID                      &                   &                   &                          &                     & x                       &                           &                           \\
+            File system status               &                   &                   &                          &                     & x                       &                           &                           \\
+
             \midrule
-            \multicolumn{8}{l}{\textbf{Workflow}}                                                                                                                                                                                      \\[3pt]
-            Status                              & x                 & x                             &                          &                     &                         &                           &                           \\
-            Workflow specification              &                   & x                             &                          &                     &                         &                           &                           \\
-            Graphical representation            &                   & x                             &                          &                     &                         &                           &                           \\
-            Workflow ID                         & x                 & x                             &                          &                     &                         &                           &                           \\
-            Execution report                    &                   & x                             &                          &                     &                         &                           &                           \\
-            Previous executions                 &                   & x                             &                          &                     &                         &                           &                           \\
+            \multicolumn{8}{l}{\textbf{Machine-Level Metrics}}                                                                                                                                                          \\[3pt]
+            Status                           &                   &                   &                          & x                   & x                       &                           &                           \\
+            Machine type                     &                   &                   &                          & x                   & x                       &                           &                           \\
+            Hardware specification           &                   &                   &                          & x                   & x                       &                           &                           \\
+            Available resources              &                   &                   &                          & x                   & x                       &                           &                           \\
+            Used resources                   &                   &                   &                          & x                   & x                       &                           &                           \\
+            Requested and consumed resources &                   &                   &                          & x                   & x                       &                           & x                         \\
+            Resource usage metrics           &                   &                   &                          & x                   & x                       &                           & x                         \\
+            Power consumption                &                   &                   &                          & x                   & x                       &                           &                           \\
+            Fault diagnosis                  &                   &                   &                          &                     & x                       &                           &                           \\
+
             \midrule
-            \multicolumn{8}{l}{\textbf{Machine}}                                                                                                                                                                                       \\[3pt]
-            Status                              &                   &                               & x                        & x                   &                         &                           &                           \\
-            Machine type                        &                   &                               & x                        & x                   &                         &                           &                           \\
-            Hardware specification              &                   &                               & x                        & x                   &                         &                           &                           \\
-            Available resources                 &                   &                               & x                        & x                   &                         &                           &                           \\
-            Used resources                      &                   &                               & x                        & x                   &                         &                           &                           \\
-            \midrule
-            \multicolumn{8}{l}{\textbf{Task}}                                                                                                                                                                                          \\[3pt]
-            Task status                         &                   &                               &                          & x                   &                         &                           &                           \\
-            Requested resources                 &                   &                               &                          & x                   &                         &                           &                           \\
-            Consumed resources                  &                   &                               &                          & x                   &                         &                           &                           \\
-            Resource consumption for code parts &                   &                               &                          & x                   &                         &                           &                           \\
-            Task ID                             &                   &                               &                          & x                   &                         &                           &                           \\
-            Application logs                    &                   &                               &                          & x                   &                         &                           &                           \\
-            Task duration                       &                   &                               &                          & x                   &                         &                           &                           \\
-            Low-level task metrics              &                   &                               &                          & x                   &                         &                           &                           \\
-            Fault diagnosis                     &                   &                               &                          & x                   &                         &                           &                           \\
+            \multicolumn{8}{l}{\textbf{Task-Level Metrics}}                                                                                                                                                             \\[3pt]
+            Task status                      & x                 & x                 &                          & x                   & x                       &                           &                           \\
+            Task ID                          &                   &                   &                          &                     & x                       &                           & x                         \\
+            Task duration                    & x                 & x                 &                          & x                   & x                       &                           &                           \\
+            Requested and consumed resources & x                 & x                 & x                        & x                   & x                       &                           & x                         \\
+            Resource usage metrics           & x                 & x                 & x                        & x                   & x                       &                           & x                         \\
+            Process metrics                  &                   & x                 &                          & x                   &                         & x                         &                           \\
+            Power consumption                &                   & x                 & x                        & x                   & x                       &                           &                           \\
+
             \bottomrule
         \end{tabular}
     }
-    \caption{Technologies and their capabilities evaluated against a 4-layered Monitoring Framework for Scientific Workflows.}
-    \label{tab:monitoring-features}
+    \small
+    \caption{Overview of monitored metrics and their data sources.}
+    \label{tab:monitoring_sources_updated}
 \end{table}
-
-To enable access to detailed performance metrics in time-series format, Prometheus was selected as the central time-series database. As shown in Table~\ref{tab:monitoring-features}, the monitoring setup therefore focused on tools that are interoperable with Prometheus as data exporters and that operate effectively within the layered monitoring framework.
+To enable access to detailed performance metrics in time-series format, Prometheus was selected as the central time-series database. As shown in Table \ref{tab:monitoring_sources_updated}, the monitoring setup therefore focused on tools that are interoperable with Prometheus as data exporters and that operate effectively within the layered monitoring framework.
 During the evaluation of several potential exporters, some were excluded due to limited compatibility, excessive overhead, or incomplete metric coverage—particularly for short-lived or multi-process workflow tasks. After comparative testing, the combination of \textit{cAdvisor} and a custom fork of the DEEP-mon system \cite{8425477} produced the most stable and comprehensive results across varying workloads and resource types. These two tools were therefore selected as the foundation of the final monitoring setup.
 
 The following table presents the final selection of data sources that were retained for the monitoring setup, along with the specific metrics enabled for each source.
 
 % Table with Tool Overview and metrics
-\begin{table}[htbp]
+\begin{table}[H]
     \centering
-    \setlength{\tabcolsep}{6pt}
     \renewcommand{\arraystretch}{1.2}
-    \label{tab:workflow_results}
-    \resizebox{\textwidth}{!}{%
-        \begin{tabular}{
-            >{\raggedright\arraybackslash}p{3.3cm}
-            >{\raggedright\arraybackslash}p{14cm}
-            }
-            \toprule
-            \textbf{Software Tool} & \textbf{Used Metrics} \\
-            \midrule
-            nextflow               &
-            trace file summary                             \\
-            \midrule
-            cAdvisor               &
-            \makecell[l]{
-                container\_memory\_working\_set\_bytes     \\
-                container\_memory\_usage\_bytes            \\
-                container\_memory\_rss                     \\
-                container\_fs\_reads\_bytes\_total         \\
-                container\_fs\_writes\_bytes\_total        \\
-                container\_fs\_io\_current
-            }                                              \\
-            \midrule
-            Deep-Mon               &
-            \makecell[l]{
-                container\_memory\_working\_set\_bytes     \\
-                container\_memory\_usage\_bytes            \\
-                container\_memory\_rss                     \\
-                container\_fs\_reads\_bytes\_total         \\
-                container\_fs\_writes\_bytes\_total        \\
-                container\_fs\_io\_current                 \\
-                container\_mem\_rss                        \\
-                container\_mem\_pss                        \\
-                container\_mem\_uss                        \\
-                container\_kb\_r                           \\
-                container\_kb\_w                           \\
-                container\_num\_reads                      \\
-                container\_disk\_avg\_lat                  \\
-                container\_num\_writes                     \\
-                container\_cycles                          \\
-                container\_cpu\_usage                      \\
-                container\_cache\_misses                   \\
-                container\_cache\_refs                     \\
-                container\_weighted\_cycles                \\
-                container\_power                           \\
-                container\_instruction\_retired
-            }                                              \\
-            \bottomrule
-        \end{tabular}%
-    }
+    \setlength{\tabcolsep}{8pt}
     \small
-    \caption{Metrics for workflow monitoring components for task-level profiling.}
+    \begin{tabularx}{\textwidth}{
+            >{\raggedright\arraybackslash}X
+            >{\raggedright\arraybackslash}X
+        }
+        \toprule
+        \textbf{Software Tool} & \textbf{Used Metrics} \\
+        \midrule
+
+        nextflow               &
+        trace file summary                             \\
+
+        \midrule
+        cAdvisor               &
+        container\_memory\_working\_set\_bytes,
+        container\_memory\_usage\_bytes,
+        container\_memory\_rss,
+        container\_fs\_reads\_bytes\_total,
+        container\_fs\_writes\_bytes\_total,
+        container\_fs\_io\_current                     \\
+
+        \midrule
+        Deep-Mon               &
+        container\_memory\_working\_set\_bytes,
+        container\_memory\_usage\_bytes,
+        container\_memory\_rss,
+        container\_fs\_reads\_bytes\_total,
+        container\_fs\_writes\_bytes\_total,
+        container\_fs\_io\_current,
+        container\_mem\_rss,
+        container\_mem\_pss,
+        container\_mem\_uss,
+        container\_kb\_r,
+        container\_kb\_w,
+        container\_num\_reads,
+        container\_disk\_avg\_lat,
+        container\_num\_writes,
+        container\_cycles,
+        container\_cpu\_usage,
+        container\_cache\_misses,
+        container\_cache\_refs,
+        container\_weighted\_cycles,
+        container\_power,
+        container\_instruction\_retired                \\
+
+        \bottomrule
+    \end{tabularx}%
+    \small
+    \caption{Metrics for workflow monitoring components for task-level profiling}
+    \label{tab:workflow_results}
 \end{table}
 
 % Description of cadvisor, ebpf-energy-monitor
-cAdvisor is an open-source daemon for monitoring resource usage and performance of containers. It continuously discovers containers via Linux cgroups under the path /sys/fs/cgroup. Once started, cAdvisor subscribes to create/delete events in the cgroup filesystem, converts them to internal add/remove events, and configures per-container handlers. Metrics originate from machine-level facts parsed from /proc and /sys directories and most prominently container and process usage collected at cgroup boundaries. In practice, cAdvisor provides low-overhead, per-container telemetry.%\cite{Tol}.
+cAdvisor is an open-source daemon for monitoring resource usage and performance of containers. It continuously discovers containers via Linux cgroups under the path /sys/fs/cgroup. Once started, cAdvisor subscribes to create/delete events in the cgroup filesystem, converts them to internal add/remove events, and configures per-container handlers. Metrics originate from machine-level facts parsed from /proc and /sys directories and most prominently container and process usage collected at cgroup boundaries. In practice, cAdvisor provides low-overhead, per-container telemetry.
 
-DEEP-Mon is a per-thread power attribution method to translate coarse-grained hardware power measurements into fine-grained, thread-level energy estimates by exploiting hardware performance counters. The Intel RAPL interface provides power readings per processor package or core, but it cannot distinguish how much of that energy was consumed by each thread. DEEP-Mon bridges this gap by observing how actively each thread uses the processor during each sampling interval. It does so by monitoring the number of unhalted core cycles—a counter that measures how long a core spends executing instructions rather than idling. Since power consumption correlates almost linearly with unhalted core cycles, the fraction of total cycles attributed to each thread provides a reasonable proxy for its share of energy usage. DEEP-mon first computes the weighted cycles for each thread—combining its active cycles when alone with its proportionally reduced cycles when co-running. These weighted cycles determine how much of the total core-level RAPL energy should be assigned to that thread. The final per-thread power estimate is then derived by distributing the total measured power of each socket proportionally to the weighted cycle counts of all threads running on that socket. This approach allows DEEP-mon to infer realistic thread-level power usage even in systems with simultaneous multithreading and time-shared workloads, without modifying the scheduler or requiring any application-specific instrumentation. The DEEP-mon tool was modified in this work to export container-level metrics directly to Prometheus.
+DEEP-Mon is a per-thread power attribution method to translate coarse-grained hardware power measurements into fine-grained, thread-level energy estimates by exploiting hardware performance counters. The Intel RAPL interface provides power readings per processor package or core, but it cannot distinguish how much of that energy was consumed by each thread. DEEP-Mon bridges this gap by observing how actively each thread uses the processor during each sampling interval. It does so by monitoring the number of unhalted core cycles—a counter that measures how long a core spends executing instructions rather than idling. Since power consumption correlates almost linearly with unhalted core cycles, the fraction of total cycles attributed to each thread provides a reasonable proxy for its share of energy usage. DEEP-mon first computes the weighted cycles for each thread—combining its active cycles when alone with its proportionally reduced cycles when co-running. These weighted cycles determine how much of the total core-level RAPL energy should be assigned to that thread. The final per-thread power estimate is then derived by distributing the total measured power of each socket proportionally to the weighted cycle counts of all threads running on that socket. This approach allows DEEP-mon to infer realistic thread-level power usage even in systems with simultaneous multithreading and time-shared workloads, without modifying the scheduler or requiring any application-specific instrumentation. The DEEP-mon tool was modified in this work to export container-level metrics directly to Prometheus \cite{8425477}.
 
-Based on the identification of relevant metrics and the selection of appropriate monitoring technologies, we designed an architectural model and an accompanying algorithm to define how the individual components interact. The resulting architecture integrates the selected exporter stack into a coherent monitoring workflow, ensuring that metric collection, event handling, and data aggregation are performed in a structured and automated manner. Figure~\ref{fig:monitoring_client} provides an overview of the system components required for this setup, illustrating how they interact to realize the monitoring logic proposed in this work. The technical implementation details are discussed later in Section~\ref{cha:implementation}.
+Based on the identification of relevant metrics and the selection of appropriate monitoring technologies, we designed an architectural model and an accompanying algorithm to define how the individual components interact. The resulting architecture integrates the selected exporter stack into a coherent monitoring workflow, ensuring that metric collection, event handling, and data aggregation are performed in a structured and automated manner. Figure \ref{fig:04-monitoring} provides an overview of the system components required for this setup, illustrating how they interact to realize the monitoring logic proposed in this work. The technical implementation details are discussed in Section \ref{cha:implementation}.
 
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.45]{fig/04/04-monitoring.pdf}
+    \small
     \caption{Monitoring Client}
     \label{fig:04-monitoring}
     \tiny
     Schematic Overview of the Components of the Monitoring Client.
 \end{figure}
 
-Figures~\ref{fig:monitoring_client} and \ref{alg:monitoring} together describe the behavior of the monitoring client. The system operates in an event-driven fashion, where an event listener continuously observes container lifecycle events—such as start and termination—emitted by the runtime environment. When a relevant event occurs, the data query interface dynamically constructs PromQL queries based on the configuration and metadata of the corresponding container. These queries are executed against the Prometheus database to retrieve fine-grained time-series metrics. The raw data is then processed by the aggregation module, which aligns and consolidates the collected metrics into unified container-level records, ready for subsequent analysis and task-level correlation.
-
-\ref{fig:monitoring_client} and \ref{alg:monitoring} show the behavior of the monitoring client. The event listener continuously observes container lifecycle events—such as start and termination—emitted by the runtime environment. Once an event is detected, the data query interface dynamically formulates PromQL queries based on the configuration and metadata of the affected container. These queries are sent to Prometheus to retrieve fine-grained time-series data. The retrieved raw metrics are then passed to the aggregation module, which aligns and consolidates them into a unified record per container.
+\ref{fig:04-monitoring} and \ref{alg:monitoring} show the behavior of the monitoring client. The event listener continuously observes container lifecycle events—such as start and termination—emitted by the runtime environment. Once an event is detected, the data query interface dynamically formulates PromQL queries based on the configuration and metadata of the affected container. These queries are sent to Prometheus to retrieve fine-grained time-series data. The retrieved raw metrics are then passed to the aggregation module, which aligns and consolidates them into a unified record per container.
 
 \begin{algorithm}[H]
     \caption{Event-Driven Monitoring and Metric Aggregation Framework}
@@ -212,7 +213,7 @@ This event-driven approach ensures efficient monitoring by restricting data retr
 \subsection{Modelling the Co-location of Task Behavior based on Time-Series}
 \label{sec:data_analysis}
 
-This section corresponds to Steps2,3, and4 in Figure \ref{fig:approach_overview} and explains how the collected monitoring data is transformed into structured representations of task behavior. The focus lies on preparing and processing the raw time-series metrics to generate meaningful feature sets that can be used for two main purposes: identifying complementary tasks for co-location through clustering and building predictive models that capture the relationship between task behavior, runtime, and energy consumption.
+This section corresponds to Steps 2,3, and 4 in Figure \ref{fig:04-overview} and explains how the collected monitoring data is transformed into structured representations of task behavior. The focus lies on preparing and processing the raw time-series metrics to generate meaningful feature sets that can be used for two main purposes: identifying complementary tasks for co-location through clustering and building predictive models that capture the relationship between task behavior, runtime, and energy consumption.
 
 \myparagraph{General Preprocessing of Raw Time-Series Data}
 \label{sec:data_preprocessing_general}
@@ -235,7 +236,7 @@ As an anchor for this process, the started and died container tracking files are
 \subsubsection{Task Clustering for Contention-Aware Consolidation}
 \label{sec:task_clustering}
 
-Following the preprocessing and structuring of raw time-series data, we now address step 3 of the overall approach outlined in \ref{fig:approach_overview}. This step focuses ShaReComp's mechanics - task clustering as a means of identifying tasks that can be co-located without causing severe resource contention. The goal is to refine the processed monitoring data into representations that capture each task's characteristic resource usage patterns and to use these representations for forming complementary task groups. This clustering step forms the conceptual foundation for contention-aware consolidation
+Following the preprocessing and structuring of raw time-series data, we continue to address step 3 of the overall approach outlined in \ref{fig:04-overview}. This step focuses \textit{ShaReComp's} mechanics - task clustering as a means of identifying tasks that can be co-located without causing severe resource contention. The goal is to refine the processed monitoring data into representations that capture each task's characteristic resource usage patterns and to use these representations for forming complementary task groups. This clustering step forms the conceptual foundation for contention-aware consolidation
 
 \myparagraph{Preprocessing Raw Time-Series Data for Task-Clustering}
 \label{sec:data_preprocessing_clustering}
@@ -259,7 +260,7 @@ After isolated benchmark execution we replay the same benchmarks in pairs to exp
 % Notation for the experiments.
 In order to derive a workload affinity from the contention experiments we define contention effects to occur when co-located workloads exceed their duration and power consumption compared to their isolated measurements.
 \[
-    \textbf{Isolated and Co-located Metrics.}
+    \textbf{Isolated and Co-located Metrics}
 \]
 
 For each workload \( i \in \{1,2\} \), let
@@ -271,7 +272,7 @@ For each workload \( i \in \{1,2\} \), let
 \]
 
 \[
-    \textbf{Per-workload Slowdown Factors.}
+    \textbf{Per-workload Slowdown Factors}
 \]
 
 The per-workload slowdowns are defined as
@@ -309,7 +310,7 @@ guaranteeing that co-location never yields an apparent
 speedup (values \(\ge 1\) indicate slowdown).
 
 \[
-    \textbf{Affinity Score.}
+    \textbf{Affinity Score}
 \]
 
 The affinity score \(A\) quantifies the degree of
@@ -352,8 +353,8 @@ while \(A \to 1\) signifies strong co-location interference.
 \myparagraph{Algorithmic Approach to Task Consolidation}
 \label{sec:algorithmic_approach_consolidation}
 
-Building on the previously derived peak time-series representations and the computed workload-type affinity scores, we now turn to the algorithmic formulation of the clustering, or consolidation, process.
-Consolidation is formulated as a clustering problem with an important modification: rather than grouping tasks that are similar, the goal is to cluster tasks with complementary resource usage patterns to minimize contention during co-location. Building on the previously established notion of affinity—which quantifies how strongly workloads interfere when sharing resources—the clustering process now incorporates this measure directly into its distance metric. The distance between tasks increases when two tasks exert pressure on the same resources simultaneously, indicating potential contention, and decreases when their resource usage peaks complement one another.
+Building on the previously derived peak time-series representations and the computed workload-type affinity scores, we propose an algorithmic formulation of the clustering, or consolidation, process.
+Consolidation is formulated as a clustering problem with an important modification: rather than grouping tasks that are similar, the goal is to cluster tasks with complementary resource usage patterns to minimize contention during co-location. Building on the previously established notion of affinity—which quantifies how strongly workloads interfere when sharing resources—the clustering process incorporates this measure directly into its distance metric. The distance between tasks increases when two tasks exert pressure on the same resources simultaneously, indicating potential contention, and decreases when their resource usage peaks complement one another.
 
 Algorithm \ref{alg:task_distance_clustering} showcases the \textit{ShaReComp} task consolidation procedure developed in this work, integrating both the peak-pattern representations and affinity scores into a unified clustering process. The method first computes pairwise similarities between all task signatures, where each signature encodes the temporal evolution of multiple resource metrics. These similarities are weighted by the experimentally derived affinity values to reflect the degree of potential interference between workloads. The resulting similarity matrix thus provides a contention-aware view of task compatibility.
 A percentile-based threshold is then applied to adaptively determine the stopping condition for cluster formation, ensuring that only task pairs with sufficiently low contention potential are merged. Finally, agglomerative clustering is executed using average linkage criterion to form consolidated task groups that exhibit complementary resource utilization.
@@ -457,7 +458,7 @@ Following the reasoning of \cite{5644899}, we investigate whether the formed tas
 \myparagraph{Preprocessing Raw Time-Series Data for Predictive Modelling}
 \label{sec:data_preprocessing_predictive}
 
-Unlike the preprocessing described in Section \ref{sec:data_preprocessing_clustering}, the following procedure prepares the data specifically for step 4 of the overall approach shown in Figure\ref{fig:approach_overview}, focusing on transforming raw time-series inputs into a form suitable for predictive modeling.
+Unlike the preprocessing described in Section \ref{sec:data_preprocessing_clustering}, the following procedure prepares the data specifically for step 4 of the overall approach shown in Figure\ref{fig:04-overview}, focusing on transforming raw time-series inputs into a form suitable for predictive modeling.
 
 \begin{enumerate}
     \item Temporal signature construction.
@@ -472,7 +473,7 @@ Unlike the preprocessing described in Section \ref{sec:data_preprocessing_cluste
 % Formal notation
 
 \[
-    \textbf{Temporal Signature and Model Input Construction.}
+    \textbf{Temporal Signature and Model Input Construction}
 \]
 
 We denote by \( \mathcal{T} = \{ T_1, T_2, \dots, T_N \} \) the set of
@@ -536,7 +537,7 @@ Similarly, for each task \( i \), the execution-level targets
 \]
 
 \[
-    \textbf{Example.}
+    \textbf{Example}
 \]
 Consider \( N = 3 \) workflow tasks with simplified
 CPU and memory usage signatures
@@ -609,14 +610,12 @@ The statistical models used in \ref{alg:sharecomp_prediction} are described in t
 
 \myparagraph{Kernel Canonical Correlation Analysis}
 \label{sec:KCCA}
+
 KCCA wants to identify relationships between task-specific features and their corresponding performance and energy characteristics. To achieve this, the dataset is divided into two parts: approximately 70\% of the tasks are used for training the models, while the remaining 30\% are reserved for testing and validation.
 
 KCCA itself does not perform prediction but rather uncovers shared structures between task feature data performance outcomes. Through the data preprocessing described in the previous step, we prepare the feature matrices so that a regression model can generalize from the learned shared space to unseen inputs—for instance, the aggregated features of a new task cluster. We use KCCA to project both input and target data into a common latent space that captures nonlinear relationships between task resource usage and performance behavior. During training, we then fit a Kernel Ridge Regression model on the latent-space representations of the input features and the original, unnormalized target values Y (runtime and energy). This approach leverages KCCA's ability to transform unseen data into the same latent space, allowing KRR to predict concrete runtime and energy values for previously unseen X inputs. KRR is chosen because, as outlined in Chapter~1, it extends ordinary least squares regression by capturing nonlinear dependencies through kernel-based feature mappings.
 
 % Notation
-\[
-    \textbf{Kernel Canonical Correlation Analysis (KCCA).}
-\]
 To capture nonlinear dependencies between the resource signatures
 and performance power outcomes, we apply Gaussian kernels to both
 input and output feature spaces.
@@ -656,7 +655,7 @@ These projections represent a shared latent space
 relating resource utilization dynamics to task performance and energy.
 
 \[
-    \textbf{Illustrative Example.}
+    \textbf{Illustrative Example}
 \]
 Consider three workflow tasks \( i = 1, 2, 3 \)
 with aggregated temporal signatures over CPU and memory:
@@ -685,12 +684,13 @@ shows a distinct temporal signature characterized by
 fluctuating utilization and higher runtime.
 
 \myparagraph{Random Forest Regression}
+
 To complement the KCCA model, we trained two non-parametric regressors based on Random Forests—one to predict mean task power and one to predict task runtime from the same preprocessed feature matrix. We reuse the exact same data as we did for the KCCA model as Random Forests perform well on both multivarita input and output data. The power model is trained on mean per-task energy-rate labels, while the runtime model uses task durations as targets. As a sanity check, we established simple baselines by predicting the training-set mean once for power and once for runtime on the test split. These baselines quantify the minimum improvement any learned model must exceed.
 
 To illustrate this concept, we consider the following example.
 
 % Example on how this looks
-\myparagraph{Example on Predicting the Performance of Task Cluster with ShaReComp.}
+\myparagraph{Example on Predicting the Performance of Task Cluster with ShaReComp}
 \label{sec:example_prediction_task_clusters}
 
 Assume two clusters:
@@ -721,31 +721,22 @@ representing predicted runtime (seconds) and energy (joules) per cluster.
 \subsection{Simulation of Task Co-location during Workflow Execution}
 \label{sec:simulation_environment}
 
-We now advance to steps 5 and 6 of the overall approach shown in Figure \ref{fig:approach_overview}, where the previously developed concepts are embedded into a workflow execution environment. In this stage, the focus shifts from modeling and clustering individual tasks to simulating their co-location during execution, eventually allowing us to evaluate how these strategies affect overall performance and energy efficiency.
+We advance to steps 5 and 6 of the overall approach shown in Figure \ref{fig:04-overview}, where the previously developed concepts are embedded into a workflow execution environment. In this stage, the focus shifts from modeling and clustering individual tasks to simulating their co-location during execution, eventually allowing us to evaluate how these strategies affect overall performance and energy efficiency.
 
 \myparagraph{Outline of Simulation Components}
-\label{sec:design_pillars}
 
+\label{sec:design_pillars}
 We build upon generic design pillars that structure the simulation environment.
 
 % Figure with Simulator Design
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.5]{fig/04/04-approach-sim.pdf}
-    \caption{Wrench design}
+    \small
+    \caption{High-level Simulator Design}
     \label{fig:04-sim-design}
     \tiny
-    Simulator Design for studying Energy-aware Co-location of Scientific Workflow Tasks.
-\end{figure}
-
-% Figure with WRENCH-specific Design
-\begin{figure}[H]
-    \centering
-    \includegraphics[scale=0.5]{fig/04/04-wrench-design.pdf}
-    \caption{Wrench design}
-    \label{fig:04-wrench-design}
-    \tiny
-    Simulator Design for studying Energy-aware Co-location of Scientific Workflow Tasks.
+    Simulator Design using WRENCH for studying Energy-aware Co-location of Scientific Workflow Tasks.
 \end{figure}
 
 The design of distributed HPC systems typically revolves around three fundamental mechanisms: resource allocation, queue management and dispatching, and job placement. As illustrated in Figure \ref{fig:04-sim-design}, these principles are adapted and integrated into our simulator through a dedicated controller component that interacts with a central resource manager. This resource manager orchestrates task scheduling, DAG-aware queue handling, task-to-node assignment, and the eventual allocation and execution of tasks on compute resources. Because the objective of this work is to analyze the effects of task co-location, the simulator's processing engine is designed with extensible interfaces that support alternative scheduling, mapping, and allocation strategies—from traditional First-In-First-Out (FIFO) execution to heuristic or energy-aware methods that emphasize beneficial co-location patterns.
@@ -759,6 +750,7 @@ Our algorithmic design for the resource manager, allocator, and scheduler compon
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.45]{fig/04/04-coloc-problem.pdf}
+    \small
     \caption{Coloc Problem}
     \label{fig:04-coloc-problem}
     \tiny
@@ -859,7 +851,7 @@ At runtime:
     \item The \textbf{Job Manager} executes tasks, monitors VM lifecycles, and updates resource states.
 \end{itemize}
 
-We now present the unified algorithm that governs the overall behavior of our simulation framework. This algorithm formalizes how workflow tasks are scheduled, assigned, and executed under different resource management strategies, including optional co-location support through ShaReComp.
+We present the unified algorithm that governs the overall behavior of our simulation framework. This algorithm formalizes how workflow tasks are scheduled, assigned, and executed under different resource management strategies, including optional co-location support through \textit{ShaReComp}.
 
 % Blueprint Algorithm 
 \begin{algorithm}[H]
@@ -887,7 +879,7 @@ We now present the unified algorithm that governs the overall behavior of our si
     \Return{workflow complete}
 \end{algorithm}
 
-To evaluate the effectiveness of the \textit{ShaReComp} approach, we define several scheduling and node assignment algorithms that differ in their treatment of resource sharing and task placement. All of these algorithms build upon the unified simulation blueprint presented in \ref{alg:sharecomp_unified} and serve as comparative baselines. The first category of baselines executes each task in its own virtual machine, thereby avoiding any form of co-location. The second category enables task co-location by grouping multiple tasks within shared virtual machines and applying different host prioritization and allocation strategies. A third category extends this idea through controlled oversubscription, where more tasks are assigned to a virtual machine than the available reserved resources allow, deliberately inducing resource contention to test system robustness. Detailed algorithmic definitions are provided in the appendix, while \ref{cha:evaluation} discusses their comparative behavior in depth. The \textit{ShaRiff} algorithms build directly on top of these baselines, extending them with co-location awareness derived from ShaReComp. In doing so, they replace random or static task grouping with data-driven consolidation decisions that account for resource affinity and contention characteristics.
+To evaluate the effectiveness of the \textit{ShaReComp} approach, we define several scheduling and node assignment algorithms that differ in their treatment of resource sharing and task placement. All of these algorithms build upon the unified simulation blueprint presented in \ref{alg:sharecomp_unified} and serve as comparative baselines. The first category of baselines executes each task in its own virtual machine, thereby avoiding any form of co-location. The second category enables task co-location by grouping multiple tasks within shared virtual machines and applying different host prioritization and allocation strategies. A third category extends this idea through controlled oversubscription, where more tasks are assigned to a virtual machine than the available reserved resources allow, deliberately inducing resource contention to test system robustness. Detailed algorithmic definitions are provided in the appendix, while \ref{cha:evaluation} discusses their comparative behavior in depth. The \textit{ShaRiff} algorithms build directly on top of these baselines, extending them with co-location awareness derived from \textit{ShaReComp}. In doing so, they replace random or static task grouping with data-driven consolidation decisions that account for resource affinity and contention characteristics.
 
 \myparagraph{Algorithmic Examples of Task Mapping with guided Co-location}
 \label{sec:co-location_strategies}
@@ -900,12 +892,12 @@ This section concludes our approach by introducing the main contribution of this
     \footnotesize
     \begin{tabularx}{\textwidth}{l p{10cm}}
         \toprule
-        \textbf{Algorithm} & \textbf{Type}                                                                                                  \\
+        \textbf{Algorithm}      & \textbf{Type}                                                                                                  \\
         \midrule
-        \textit{ShaRiff} 1          & Biggest Host first, parallel Host-backfilling and mapping of Task Clusters                                     \\
-        \textit{ShaRiff} 2          & Biggest Host first, parallel Host-backfilling and mapping of Task Clusters with controlled VM Oversubscription \\
-        \textit{ShaRiff} 3          & Round-Robin Assignment of Task Clusters, No parallelism                                                        \\
-        \textit{ShaRiff} MinMin     & Biggest Host first, parallel Host-backfilling and mapping of ordered Task Clusters                             \\
+        \textit{ShaRiff} 1      & Biggest Host first, parallel Host-backfilling and mapping of Task Clusters                                     \\
+        \textit{ShaRiff} 2      & Biggest Host first, parallel Host-backfilling and mapping of Task Clusters with controlled VM Oversubscription \\
+        \textit{ShaRiff} 3      & Round-Robin Assignment of Task Clusters, No parallelism                                                        \\
+        \textit{ShaRiff} MinMin & Biggest Host first, parallel Host-backfilling and mapping of ordered Task Clusters                             \\
         \bottomrule
     \end{tabularx}
     \small
@@ -1086,11 +1078,66 @@ Because ShaReComp groups complementary tasks, oversubscription holds the potenti
     \Return{workflow complete}
 \end{algorithm}
 
-ShaRiff 3 combines round-robin first-fit placement with ShaReComp-guided intra-VM co-location. The scheduler releases tasks strictly in arrival order. The node-assignment component scans hosts in round-robin fashion and picks the first host reporting at least one idle core. It then pulls up to that hosts idle-core capacity worth of ready tasks and queries \textit{ShaReComp} for a co-location plan over this batch.
-The allocator realizes ShaReComps plan one VM per suggested cluster on the chosen host. For each multi-task cluster, it sizes the VM by summing vCPU and memory requirements of the clusters tasks, starts the VM, and submits all cluster tasks to the same virtual compute service.
-Conceptually, the policy is first-fit host, adviser-driven packing. Unlike the other variants, this strategy does not oversubscribe cores. It fills only the currently free capacity of the first eligible host and relies on ShaReComp's clustering to raise utilization and efficiency through informed co-location.
+\textit{ShaRiff} 3 combines round-robin first-fit placement with \textit{ShaReComp}-guided intra-VM co-location. The scheduler releases tasks strictly in arrival order. The node-assignment component scans hosts in round-robin fashion and picks the first host reporting at least one idle core. It then pulls up to that hosts idle-core capacity worth of ready tasks and queries \textit{ShaReComp} for a co-location plan over this batch.
+The allocator realizes \textit{ShaReComp's} plan one VM per suggested cluster on the chosen host. For each multi-task cluster, it sizes the VM by summing vCPU and memory requirements of the clusters tasks, starts the VM, and submits all cluster tasks to the same virtual compute service.
+Conceptually, the policy is first-fit host, adviser-driven packing. Unlike the other variants, this strategy does not oversubscribe cores. It fills only the currently free capacity of the first eligible host and relies on \textit{ShaReComp's} clustering to raise utilization and efficiency through informed co-location.
 
 % MinMin extension
-This scheduler variant extends the \textit{ShaRiff} framework with a MinMin ordering layer, a classical heuristic from list scheduling. Instead of operating on individual tasks, it applies the MinMin principle to task clusters generated by ShaReComp's co-location analysis. At each scheduling interval, the scheduler requests a new clustering of ready tasks, queries the prediction service using the models introduced in \ref{sec:prediciton_kcca_rfr} with \ref{alg:sharecomp_prediction} for estimated runtimes, and orders clusters in ascending order of predicted execution time. The \textit{ShaRiff} node assignment and VM allocator then manage placement and resource provisioning. In essence, this forms a MinMin scheduler over co-located clusters, combining ShaRiff's affinity-based co-location with prediction-guided execution ordering to minimize queueing delays and improve overall workflow completion time.
+This scheduler variant extends the \textit{ShaRiff} framework with a MinMin ordering layer, a classical heuristic from list scheduling. Instead of operating on individual tasks, it applies the MinMin principle to task clusters generated by \textit{ShaReComp's} co-location analysis. At each scheduling interval, the scheduler requests a new clustering of ready tasks, queries the prediction service using the models introduced in \ref{sec:prediciton_kcca_rfr} with \ref{alg:sharecomp_prediction} for estimated runtimes, and orders clusters in ascending order of predicted execution time. The \textit{ShaRiff} node assignment and VM allocator then manage placement and resource provisioning. In essence, this forms a MinMin scheduler over co-located clusters, combining \textit{ShaRiff's} affinity-based co-location with prediction-guided execution ordering to minimize queueing delays and improve overall workflow completion time.
 
-% TODO: Add Algorithm
+% ShaRiff 1 - MinMin
+\begin{algorithm}[H]
+    \caption{ShaRiff 1 MinMin — Biggest Host first, parallel Host-backfilling and ordered mapping of Task Clusters}
+    \label{alg:shariff_minmin}
+    \KwIn{workflow \( G=(T,E) \), hosts \( \mathcal{H}=\{h_1,\dots,h_m\} \), idle cores \( c(h_j) \), ShaReComp co-location API \( \mathcal{S} \), prediction service \( \mathcal{P} \)}
+    \KwOut{all tasks \( t_i\in T \) executed with predictive ordering and contention-aware co-location}
+
+    \BlankLine
+    Initialize idle cores \( c(h_j)\gets C_j \) for all \( h_j\in\mathcal{H} \)
+    Initialize ready queue \( \mathcal{Q} \) with all source tasks of \( G \) (FIFO order)
+
+    \BlankLine
+    \While{not all tasks \( t_i\in T \) completed}{
+        \If{\( \mathcal{Q} \) is empty}{
+            Wait until any task \( t_r \) completes\\
+            Release its cores: \( c(h(t_r)) \gets c(h(t_r)) + \text{req\_cores}(t_r) \)
+            For each successor \( t_s \) of \( t_r \), enqueue \( t_s \) into \( \mathcal{Q} \) if all predecessors are completed\\
+            \textbf{continue}
+        }
+
+        Build available-host list \( L=\{\,h\in\mathcal{H}\mid c(h)>0\,\} \), sorted by \( c(h) \) descending
+        Initialize empty host-task mapping list \( \mathcal{M} \)
+
+        \BlankLine
+        \ForEach{host \( h\in L \) and while \( \mathcal{Q} \) not empty}{
+            Select up to \( c(h) \) ready tasks from \( \mathcal{Q} \) into \( \mathcal{T}_h \)
+            Compute file-location map \( \Phi(\mathcal{T}_h) \)\\
+            Query ShaReComp API: \( \text{colocMap} \gets \mathcal{S}(\mathcal{T}_h) \) \tcp*[r]{returns co-location groups}
+            Add mapping \( (h,\mathcal{T}_h,\Phi(\mathcal{T}_h),\text{colocMap}) \) to \( \mathcal{M} \)
+        }
+
+        \BlankLine
+        \tcp{Predictive MinMin ordering based on estimated runtimes}
+        Query prediction API: \( \text{predictions} \gets \mathcal{P}(\mathcal{M}) \)
+        Sort mappings \( \mathcal{M} \) by ascending predicted runtime: \( \mathcal{M}_{sorted} = \text{sort}_{asc}(\mathcal{M}, \text{key}=r_i) \)
+
+        \BlankLine
+        \ForEach{mapping \( (h,\mathcal{T}_h,\Phi,\text{colocMap}) \in \mathcal{M}_{sorted} \)}{
+            \ForEach{group \( \mathcal{C}_k \in \text{colocMap} \)}{
+                \( C_{\text{req}} \gets \text{sum(req\_cores}(\mathcal{C}_k)) \)
+                \( M_{\text{req}} \gets \text{sum(req\_mem}(\mathcal{C}_k)) \)
+                Allocate \( v_h = (C_{\text{req}}, M_{\text{req}}, h) \)
+                Launch all \( t \in \mathcal{C}_k \) on \( v_h \)
+                \( c(h) \gets \max(0, c(h) - C_{\text{req}}) \)
+                Remove \( \mathcal{C}_k \) from \( \mathcal{Q} \)
+            }
+        }
+
+        \BlankLine
+        Wait until any task \( t_r \) completes\\
+        Release its cores: \( c(h(t_r)) \gets c(h(t_r)) + \text{req\_cores}(t_r) \)
+        \If{no active tasks remain on its VM}{ Destroy VM }
+        For each successor \( t_s \) of \( t_r \): if all predecessors are completed, enqueue \( t_s \) into \( \mathcal{Q} \)
+    }
+    \Return{workflow complete}
+\end{algorithm}
