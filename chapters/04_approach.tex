@@ -3,8 +3,8 @@
 
 The following chapter presents the methodological approach of this thesis. While the subsequent chapter discusses the concrete implementation aspects, this section establishes the theoretical foundation that builds upon the concepts introduced in the background. The structure of this chapter follows the sequence of steps illustrated in Figure \ref{fig:approach_overview}, beginning with an outline of the central objective of the thesis. This is followed by a set of assumptions that define the scope, applicability, and limitations of the proposed approach. The remainder of the chapter then describes each step in detail, explaining how the individual components contribute to the overall objective of enabling energy-aware and contention-conscious co-location of scientific workflow tasks.
 
-\subsection{Central Objective - Modelling of Task Co-location}
-\label{sec:problem_statement}
+\subsection{Central Objective}
+\label{sec:central_objective}
 
 The central objective of this work is to model the co-location of scientific workflow tasks with a focus on achieving energy awareness and determining how this knowledge can be applied during workflow execution to improve resource utilization and overall energy efficiency. To accomplish this, we introduce two key concepts: (i) \textit{ShaReComp} and (ii) \textit{ShaRiff}. Both address the idea of shared resource usage but from different perspectives. \textit{ShaReComp} defines the modeling approach for resource sharing during computation. It focuses on understanding and representing co-location with respect to resource usage, contention, and energy behavior. In contrast, \textit{ShaRiff} introduces an algorithmic framework that applies the \textit{ShaReComp} model during workflow execution to enable informed and feasible resource sharing. Together, these concepts provide both the theoretical foundation and practical mechanism for energy-aware co-location in scientific workflows.
 \textit{ShaReComp} is inspired by the work presented in \cite{5644899}, which introduced a mathematical formulation of the co-location problem. However, the implementation of \textit{ShaReComp} differs significantly in its scope and application. By combining \textit{ShaReComp} with \textit{ShaRiff}, this work aims to investigate how co-location can be directly integrated into the dynamic scheduling and task mapping process, emphasizing that co-location and scheduling are inherently interdependent and should be addressed jointly. To achieve this, workflow tasks are characterized prior to execution, enabling contention-aware co-location decisions at runtime. In this setting, co-location is implemented at the virtual container level, focusing on virtual machines deployed on physical hosts. Additionally, this work extends the scope of co-location from merely determining which tasks should share resources to understanding how the performance behavior of co-located tasks can be modeled and predicted, thereby providing actionable insights for resource managers in future workflow executions.
@@ -118,36 +118,36 @@ The following table presents the final selection of data sources that were retai
             \midrule
             cAdvisor               &
             \makecell[l]{
-            container\_memory\_working\_set\_bytes         \\
-            container\_memory\_usage\_bytes                \\
-            container\_memory\_rss                         \\
-            container\_fs\_reads\_bytes\_total             \\
-            container\_fs\_writes\_bytes\_total            \\
+                container\_memory\_working\_set\_bytes     \\
+                container\_memory\_usage\_bytes            \\
+                container\_memory\_rss                     \\
+                container\_fs\_reads\_bytes\_total         \\
+                container\_fs\_writes\_bytes\_total        \\
                 container\_fs\_io\_current
             }                                              \\
             \midrule
             Deep-Mon               &
             \makecell[l]{
-            container\_memory\_working\_set\_bytes         \\
-            container\_memory\_usage\_bytes                \\
-            container\_memory\_rss                         \\
-            container\_fs\_reads\_bytes\_total             \\
-            container\_fs\_writes\_bytes\_total            \\
-            container\_fs\_io\_current                     \\
-            container\_mem\_rss                            \\
-            container\_mem\_pss                            \\
-            container\_mem\_uss                            \\
-            container\_kb\_r                               \\
-            container\_kb\_w                               \\
-            container\_num\_reads                          \\
-            container\_disk\_avg\_lat                      \\
-            container\_num\_writes                         \\
-            container\_cycles                              \\
-            container\_cpu\_usage                          \\
-            container\_cache\_misses                       \\
-            container\_cache\_refs                         \\
-            container\_weighted\_cycles                    \\
-            container\_power                               \\
+                container\_memory\_working\_set\_bytes     \\
+                container\_memory\_usage\_bytes            \\
+                container\_memory\_rss                     \\
+                container\_fs\_reads\_bytes\_total         \\
+                container\_fs\_writes\_bytes\_total        \\
+                container\_fs\_io\_current                 \\
+                container\_mem\_rss                        \\
+                container\_mem\_pss                        \\
+                container\_mem\_uss                        \\
+                container\_kb\_r                           \\
+                container\_kb\_w                           \\
+                container\_num\_reads                      \\
+                container\_disk\_avg\_lat                  \\
+                container\_num\_writes                     \\
+                container\_cycles                          \\
+                container\_cpu\_usage                      \\
+                container\_cache\_misses                   \\
+                container\_cache\_refs                     \\
+                container\_weighted\_cycles                \\
+                container\_power                           \\
                 container\_instruction\_retired
             }                                              \\
             \bottomrule
@@ -449,7 +449,7 @@ resource affinity and temporal peak correlation, are grouped together.
 % \textbf{From clusters to co-location candidates}. Each cluster defines a candidate co-location set. To make these cluster-level entities usable by predictive models discussed in \ref{sec:prediciton_kcca_rfr}, we construct cluster feature vectors by flattening and concatenating the per-task temporal signatures of all members and summing them dimension-wise. This potentially approximates the combined load shape we would see if the clusters tasks were executed in a co-located manner.
 
 
-\subsubsection{Predicting the Runtime and Energy Consumption of Task Clusters with KCCA and Random Forest Regression}
+\subsubsection{Predicting the Runtime and Energy Consumption of Task Clusters}
 \label{sec:prediciton_kcca_rfr}
 
 Following the reasoning of \cite{5644899}, we investigate whether the formed task clusters exhibit shared structures in terms of correlations between their time-series behavior and their corresponding energy and performance metrics. To this end, we adopt their proposed approach for preprocessing time-series data into temporal signatures on a per-task basis.
@@ -690,7 +690,7 @@ To complement the KCCA model, we trained two non-parametric regressors based on 
 To illustrate this concept, we consider the following example.
 
 % Example on how this looks
-myparagraph{Example on Predicting the Performance of Task Cluster with ShaReComp.}
+\myparagraph{Example on Predicting the Performance of Task Cluster with ShaReComp.}
 \label{sec:example_prediction_task_clusters}
 
 Assume two clusters:
@@ -1090,7 +1090,6 @@ ShaRiff 3 combines round-robin first-fit placement with ShaReComp-guided intra-V
 The allocator realizes ShaReComps plan one VM per suggested cluster on the chosen host. For each multi-task cluster, it sizes the VM by summing vCPU and memory requirements of the clusters tasks, starts the VM, and submits all cluster tasks to the same virtual compute service.
 Conceptually, the policy is first-fit host, adviser-driven packing. Unlike the other variants, this strategy does not oversubscribe cores. It fills only the currently free capacity of the first eligible host and relies on ShaReComp's clustering to raise utilization and efficiency through informed co-location.
 
-% TODO: This part needs to be reworked.
 % MinMin extension
 This scheduler variant extends the ShaRiff framework with a MinMin ordering layer, a classical heuristic from list scheduling. Instead of operating on individual tasks, it applies the MinMin principle to task clusters generated by ShaReComp's co-location analysis. At each scheduling interval, the scheduler requests a new clustering of ready tasks, queries the prediction service using the models introduced in \ref{sec:prediciton_kcca_rfr} with \ref{alg:sharecomp_prediction} for estimated runtimes, and orders clusters in ascending order of predicted execution time. The ShaRiff node assignment and VM allocator then manage placement and resource provisioning. In essence, this forms a MinMin scheduler over co-located clusters, combining ShaRiff's affinity-based co-location with prediction-guided execution ordering to minimize queueing delays and improve overall workflow completion time.
 
