@@ -1,12 +1,11 @@
 \section{Implementation}
 \label{cha:implementation}
-% TODO: Insert previous chapter references
-This chapter details the technical implementation of the concepts introduced in the previous section. While the chapter \ref{cha:approach} established the conceptual and algorithmic foundations of the proposed scheduling framework, the following sections focus on how these ideas were realized in practice. The implementation emphasizes architectural modularity, clear component interfaces, and the integration of machine learning-based decision layers within a simulation-driven environment. This decoupled design not only facilitates reproducibility and maintainability but also enables future extensions, such as the replacement of predictive models or the addition of new scheduling policies, without major structural changes. The remainder of this chapter outlines the overall system architecture, mentions the chosen technologies and design principles, and describes the concrete implementation of the monitoring client, the statistical learning components, and the simulator setup.
+This chapter details the technical implementation of the concepts introduced in the previous section. While chapter \ref{cha:approach} established the conceptual and algorithmic foundations of the proposed scheduling framework, the following sections focus on how these ideas were realized in practice. The implementation emphasizes architectural modularity, clear component interfaces, and the integration of machine learning-based decision layers within a simulation-driven environment. This decoupled design not only facilitates reproducibility and maintainability but also enables future extensions, such as the replacement of predictive models or the addition of new scheduling policies, without major structural changes. The remainder of this chapter outlines the overall system architecture, mentions the chosen technologies and design principles, and describes the concrete implementation of the monitoring client, the statistical learning components, and the simulator setup.
 
 \subsection{System Architecture}
 \label{sec:system_architecture}
 % Overview sketch
-%TODO: Insert sentence here between these 2 sections
+Figure \ref{fig:05-system-overview} illustrates the procedural flow of our system architecture.
 
 \myparagraph{Technology and Design Choices}
 \label{sec:technology_and_design_choices}
@@ -18,9 +17,11 @@ This chapter details the technical implementation of the concepts introduced in 
     \caption{System Overview}
     \label{fig:05-system-overview}
     \tiny
-    A Scientific Workflow Task as part of a Workflow consuming input data and producing output data.
+    A procedural view on the System Architecture.
 \end{figure}
-% TODO: insert sentence here between these 2 sections
+
+Each implemented component in \ref{fig:05-system-overview} is denoted with a number. These numbers correspond with the following table \ref{tab:technology} and mention the technology and design choices.
+
 \begin{table}[H]
     \centering
     % ↓↓↓ kleinere Schrift + etwas engerer Zeilenabstand ↓↓↓
@@ -36,25 +37,25 @@ This chapter details the technical implementation of the concepts introduced in 
             \textbf{Component Category} & \textbf{Software Used}                                   & \textbf{Comments / Functionality}                               \\
             \midrule
 
-            \multicolumn{3}{l}{\textbf{Workflow Execution}}                                                                                                          \\[3pt]
+            \multicolumn{3}{l}{\textbf{ (1) Workflow Execution}}                                                                                                     \\[3pt]
             Operating System            & Ubuntu 22.04.5 LTS                                       & Base system environment for all components.                     \\
-            Kernel                      & Linux 5.15.0-143-generic                                 & Provides low-level system resource management.                  \\
+            Kernel                      & Linux 5.15.0-143-generic                                 & Linux Kernel.                                                   \\
             Workflow Management Engine  & Nextflow 25.06.0                                         & Controls workflow DAG execution and task dependency resolution. \\
-            Virtualization Layer        & Docker Engine 28.3.1 (Community)                         & Provides isolated VM environments for task execution.           \\
+            Virtualization Layer        & Docker Engine 28.3.1 (Community)                         & Provides isolated container environments for task execution.    \\
             Resource Manager            & Slurm 24.05.2                                            & Allocates CPU and memory resources dynamically across hosts.    \\
 
             \midrule
-            \multicolumn{3}{l}{\textbf{Monitoring System}}                                                                                                           \\[3pt]
-            Time-Series Database        & Prometheus Server 3.3.1                                  & Central metric collector and time-series database.              \\
-            Monitoring Client           & Go 1.24.1                                                & Collects per-node and per-container resource metrics.           \\
+            \multicolumn{3}{l}{\textbf{ (1) Monitoring System}}                                                                                                      \\[3pt]
+            Time-Series Database        & Prometheus Server 3.3.1                                  & Central Time-series database.                                   \\
+            Monitoring Client           & Go 1.24.1                                                & Collects per-container resource metrics.                        \\
 
             \midrule
-            \multicolumn{3}{l}{\textbf{Workload Experiments}}                                                                                                        \\[3pt]
+            \multicolumn{3}{l}{\textbf{(2) Workload Experiments}}                                                                                                    \\[3pt]
             Benchmark Execution         & stress-ng 0.13.12                                        & Generates controlled CPU, memory, and I/O workloads.            \\
             Monitoring                  & Deep-Mon (custom fork) with Python 3.10.12 \& BCC 0.35.0 & Captures resource traces during workload execution.             \\
 
             \midrule
-            \multicolumn{3}{l}{\textbf{Data Analysis}}                                                                                                               \\[3pt]
+            \multicolumn{3}{l}{\textbf{(2,3) Co-location Modelling}}                                                                                                 \\[3pt]
             Feature Engineering         & Jupyter Kernel 6.29.5, Python 3.10.12, Poetry 2.1.2      & Derives and normalizes temporal task signatures.                \\
             Clustering                  & scikit-learn 1.5.2                                       & Groups similar task behaviors into consolidated classes.        \\
             KCCA                        & CCA-Zoo 2.5.0                                            & Learns correlations between performance and energy domains.     \\
@@ -62,7 +63,7 @@ This chapter details the technical implementation of the concepts introduced in 
             Kernel Ridge Regression     & scikit-learn 1.5.2                                       & Baseline model for non-linear regression comparison.            \\
 
             \midrule
-            \multicolumn{3}{l}{\textbf{Simulation Framework}}                                                                                                        \\[3pt]
+            \multicolumn{3}{l}{\textbf{(4) Simulation Framework}}                                                                                                    \\[3pt]
             Workflow Tracing            & Nextflow Tracer (custom fork)                            & Records execution-level metadata for simulation replay.         \\
             Simulation Engine           & WRENCH 2.7 \& C++17                                      & Evaluates scheduling strategies under controlled conditions.    \\
             Clustering API              & FastAPI 0.1.0, Python 3.10.12                            & Provides task grouping via \textit{ShaReComp} integration.      \\
@@ -72,8 +73,8 @@ This chapter details the technical implementation of the concepts introduced in 
         \end{tabular}
     }
     \small
-    \caption{Monitoring features and associated technical components}
-    \label{tab:monitoring_layers}
+    \caption{Technology and Design Choices of the System Architecture}
+    \label{tab:technology}
 \end{table}
 
 
@@ -83,7 +84,7 @@ The extensibility of the overall system is achieved through a decoupled design t
 
 \subsubsection{Configurable Monitoring Client}
 \label{sec:monitoring_client}
-The monitoring client exemplifies this by relying on a flexible configuration-driven architecture. Using the YAML configuration file shown underneath, it dynamically defines which metrics to collect from heterogeneous data sources such as Prometheus exporters, cAdvisor, eBPF probes, or SNMP-based sensors. The configuration specifies not only the metric names and queries but also the identifiers and units, allowing adaptation to different environments or workflow engines. This separation of logic and configuration enables the same client to operate across diverse infrastructures without recompilation. The clients implementation, built on the Prometheus API, abstracts away the complexity of time-range queries and concurrent metric fetching through lightweight threading and synchronization mechanisms. As a result, scientists can extend the monitoring framework simply by adding new data sources or metrics to the configuration file, without altering the underlying collection logic.
+The monitoring client exemplifies this by relying on a flexible configuration-driven architecture. Using the YAML configuration file shown underneath, it dynamically defines which metrics to collect from heterogeneous data sources such as Prometheus exporters, cAdvisor, eBPF probes, or SNMP-based sensors. The configuration specifies not only the metric names and queries but also the identifiers and units, allowing adaptation to different environments or workflow engines. This separation of logic and configuration enables the same client to operate across diverse infrastructures without recompilation. The client's implementation, built on the Prometheus API, abstracts away the complexity of time-range queries and concurrent metric fetching through lightweight threading and synchronization mechanisms. As a result, scientists can extend the monitoring framework simply by adding new data sources or metrics to the configuration file, without altering the underlying collection logic.
 
 % Config File
 % \lstinputlisting[
@@ -92,7 +93,12 @@ The monitoring client exemplifies this by relying on a flexible configuration-dr
 %     label={lst:yaml_config}
 % ]{/home/nfomin3/dev/ThesisDocument/fig/05/05-pcm-config.yml}
 
+% \verbfilenobox[\mbox{\scriptsize\theVerbboxLineNo:}]{fig/05/05-pcm-config.yml}
+
+\begingroup
+\small
 \verbfilenobox[\mbox{\scriptsize\theVerbboxLineNo:}]{fig/05/05-pcm-config.yml}
+\endgroup
 \subsubsection{Enabling Access to Co-location Hints in the Simulator}
 \label{sec:statistical_modeling}
 The statistical modeling component, implemented as a standalone FastAPI service, follows a similar modular design. It exposes a clean, language-agnostic HTTP API that separates the inference logic from data ingestion and model management. The service maintains state for clustering and prediction requests, delegating core computational tasks to dedicated helper functions. This decoupling makes it straightforward to replace or add new predictive models, such as neural architectures or alternative regression approaches, without modifying the API contract. The clustering and prediction endpoints can interact with any external workflow manager or simulator via standardized JSON payloads, ensuring flexibility in integrating new pipelines or retraining procedures. This independence between model serving and data processing pipelines also simplifies scalability, allowing the modeling service to be containerized and deployed independently for distributed or cloud-based setups.
